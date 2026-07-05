@@ -7,30 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          operationName?: string
-          query?: string
-          variables?: Json
-          extensions?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -497,22 +477,22 @@ export type Database = {
           client_id: string
           created_at: string
           currency: string
+          estimated_system_size_kwp: number | null
           expected_close_date: string | null
           id: string
+          installation_target_date: string | null
+          monthly_bill_satang: number | null
           next_follow_up_date: string | null
           notes: string | null
-          monthly_bill_satang: number | null
-          estimated_system_size_kwp: number | null
-          roof_type: string | null
-          province: string | null
-          survey_date: string | null
-          installation_target_date: string | null
-          payback_years: number | null
-          solar_notes: string | null
           org_id: string
           owner: string | null
+          payback_years: number | null
+          province: string | null
+          roof_type: string | null
+          solar_notes: string | null
           source: string | null
           stage: Database["public"]["Enums"]["deal_stage"]
+          survey_date: string | null
           title: string
           updated_at: string
           value_satang: number
@@ -521,22 +501,22 @@ export type Database = {
           client_id: string
           created_at?: string
           currency?: string
+          estimated_system_size_kwp?: number | null
           expected_close_date?: string | null
           id?: string
+          installation_target_date?: string | null
+          monthly_bill_satang?: number | null
           next_follow_up_date?: string | null
           notes?: string | null
-          monthly_bill_satang?: number | null
-          estimated_system_size_kwp?: number | null
-          roof_type?: string | null
-          province?: string | null
-          survey_date?: string | null
-          installation_target_date?: string | null
-          payback_years?: number | null
-          solar_notes?: string | null
           org_id: string
           owner?: string | null
+          payback_years?: number | null
+          province?: string | null
+          roof_type?: string | null
+          solar_notes?: string | null
           source?: string | null
           stage?: Database["public"]["Enums"]["deal_stage"]
+          survey_date?: string | null
           title: string
           updated_at?: string
           value_satang?: number
@@ -545,22 +525,22 @@ export type Database = {
           client_id?: string
           created_at?: string
           currency?: string
+          estimated_system_size_kwp?: number | null
           expected_close_date?: string | null
           id?: string
+          installation_target_date?: string | null
+          monthly_bill_satang?: number | null
           next_follow_up_date?: string | null
           notes?: string | null
-          monthly_bill_satang?: number | null
-          estimated_system_size_kwp?: number | null
-          roof_type?: string | null
-          province?: string | null
-          survey_date?: string | null
-          installation_target_date?: string | null
-          payback_years?: number | null
-          solar_notes?: string | null
           org_id?: string
           owner?: string | null
+          payback_years?: number | null
+          province?: string | null
+          roof_type?: string | null
+          solar_notes?: string | null
           source?: string | null
           stage?: Database["public"]["Enums"]["deal_stage"]
+          survey_date?: string | null
           title?: string
           updated_at?: string
           value_satang?: number
@@ -575,6 +555,110 @@ export type Database = {
           },
           {
             foreignKeyName: "deals_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invitations: {
+        Row: {
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string | null
+          id: string
+          invited_by: string | null
+          org_id: string
+          role: Database["public"]["Enums"]["role_enum"]
+          status: Database["public"]["Enums"]["invitation_status"]
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string | null
+          id?: string
+          invited_by?: string | null
+          org_id: string
+          role?: Database["public"]["Enums"]["role_enum"]
+          status?: Database["public"]["Enums"]["invitation_status"]
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string | null
+          id?: string
+          invited_by?: string | null
+          org_id?: string
+          role?: Database["public"]["Enums"]["role_enum"]
+          status?: Database["public"]["Enums"]["invitation_status"]
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_items: {
+        Row: {
+          amount_satang: number
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          org_id: string
+          position: number
+          quantity: number
+          unit_price_satang: number
+          updated_at: string
+        }
+        Insert: {
+          amount_satang?: number
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          org_id: string
+          position?: number
+          quantity?: number
+          unit_price_satang?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_satang?: number
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          org_id?: string
+          position?: number
+          quantity?: number
+          unit_price_satang?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -922,6 +1006,60 @@ export type Database = {
         }
         Relationships: []
       }
+      project_handover_evidence: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          evidence_url: string | null
+          id: string
+          kind: string
+          note: string | null
+          org_id: string
+          project_id: string
+          signed_at: string | null
+          signed_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          evidence_url?: string | null
+          id?: string
+          kind: string
+          note?: string | null
+          org_id: string
+          project_id: string
+          signed_at?: string | null
+          signed_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          evidence_url?: string | null
+          id?: string
+          kind?: string
+          note?: string | null
+          org_id?: string
+          project_id?: string
+          signed_at?: string | null
+          signed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_handover_evidence_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_handover_evidence_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_tasks: {
         Row: {
           assignee: string | null
@@ -1061,6 +1199,173 @@ export type Database = {
           },
         ]
       }
+      quote_items: {
+        Row: {
+          amount_satang: number
+          created_at: string
+          description: string
+          id: string
+          org_id: string
+          position: number
+          quantity: number
+          quote_id: string
+          unit_price_satang: number
+          updated_at: string
+        }
+        Insert: {
+          amount_satang?: number
+          created_at?: string
+          description: string
+          id?: string
+          org_id: string
+          position?: number
+          quantity?: number
+          quote_id: string
+          unit_price_satang?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_satang?: number
+          created_at?: string
+          description?: string
+          id?: string
+          org_id?: string
+          position?: number
+          quantity?: number
+          quote_id?: string
+          unit_price_satang?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_items_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          battery_option: string | null
+          client_id: string
+          converted_invoice_id: string | null
+          created_at: string
+          discount_satang: number
+          excluded_scope: string | null
+          id: string
+          included_scope: string | null
+          inverter_model: string | null
+          issue_date: string
+          notes: string | null
+          number: string
+          org_id: string
+          owner: string | null
+          panel_model: string | null
+          payback_years: number | null
+          project_id: string | null
+          proposal_assumptions: string | null
+          status: Database["public"]["Enums"]["quote_status"]
+          subtotal_satang: number
+          system_size_kwp: number | null
+          total_satang: number
+          updated_at: string
+          valid_until: string | null
+          warranty_years: number | null
+        }
+        Insert: {
+          battery_option?: string | null
+          client_id: string
+          converted_invoice_id?: string | null
+          created_at?: string
+          discount_satang?: number
+          excluded_scope?: string | null
+          id?: string
+          included_scope?: string | null
+          inverter_model?: string | null
+          issue_date?: string
+          notes?: string | null
+          number: string
+          org_id: string
+          owner?: string | null
+          panel_model?: string | null
+          payback_years?: number | null
+          project_id?: string | null
+          proposal_assumptions?: string | null
+          status?: Database["public"]["Enums"]["quote_status"]
+          subtotal_satang?: number
+          system_size_kwp?: number | null
+          total_satang?: number
+          updated_at?: string
+          valid_until?: string | null
+          warranty_years?: number | null
+        }
+        Update: {
+          battery_option?: string | null
+          client_id?: string
+          converted_invoice_id?: string | null
+          created_at?: string
+          discount_satang?: number
+          excluded_scope?: string | null
+          id?: string
+          included_scope?: string | null
+          inverter_model?: string | null
+          issue_date?: string
+          notes?: string | null
+          number?: string
+          org_id?: string
+          owner?: string | null
+          panel_model?: string | null
+          payback_years?: number | null
+          project_id?: string | null
+          proposal_assumptions?: string | null
+          status?: Database["public"]["Enums"]["quote_status"]
+          subtotal_satang?: number
+          system_size_kwp?: number | null
+          total_satang?: number
+          updated_at?: string
+          valid_until?: string | null
+          warranty_years?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_converted_invoice_id_fkey"
+            columns: ["converted_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reminders: {
         Row: {
           channel: Database["public"]["Enums"]["reminder_channel"]
@@ -1148,379 +1453,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "saved_views_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      template_categories: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          org_id: string
-          slug: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          org_id: string
-          slug: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          org_id?: string
-          slug?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "template_categories_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      quotes: {
-        Row: {
-          client_id: string
-          converted_invoice_id: string | null
-          created_at: string
-          discount_satang: number
-          id: string
-          issue_date: string
-          notes: string | null
-          number: string
-          org_id: string
-          owner: string | null
-          project_id: string | null
-          system_size_kwp: number | null
-          panel_model: string | null
-          inverter_model: string | null
-          battery_option: string | null
-          warranty_years: number | null
-          payback_years: number | null
-          proposal_assumptions: string | null
-          included_scope: string | null
-          excluded_scope: string | null
-          status: Database["public"]["Enums"]["quote_status"]
-          subtotal_satang: number
-          total_satang: number
-          updated_at: string
-          valid_until: string | null
-        }
-        Insert: {
-          client_id: string
-          converted_invoice_id?: string | null
-          created_at?: string
-          discount_satang?: number
-          id?: string
-          issue_date?: string
-          notes?: string | null
-          number: string
-          org_id: string
-          owner?: string | null
-          project_id?: string | null
-          system_size_kwp?: number | null
-          panel_model?: string | null
-          inverter_model?: string | null
-          battery_option?: string | null
-          warranty_years?: number | null
-          payback_years?: number | null
-          proposal_assumptions?: string | null
-          included_scope?: string | null
-          excluded_scope?: string | null
-          status?: Database["public"]["Enums"]["quote_status"]
-          subtotal_satang?: number
-          total_satang?: number
-          updated_at?: string
-          valid_until?: string | null
-        }
-        Update: {
-          client_id?: string
-          converted_invoice_id?: string | null
-          created_at?: string
-          discount_satang?: number
-          id?: string
-          issue_date?: string
-          notes?: string | null
-          number?: string
-          org_id?: string
-          owner?: string | null
-          project_id?: string | null
-          system_size_kwp?: number | null
-          panel_model?: string | null
-          inverter_model?: string | null
-          battery_option?: string | null
-          warranty_years?: number | null
-          payback_years?: number | null
-          proposal_assumptions?: string | null
-          included_scope?: string | null
-          excluded_scope?: string | null
-          status?: Database["public"]["Enums"]["quote_status"]
-          subtotal_satang?: number
-          total_satang?: number
-          updated_at?: string
-          valid_until?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "quotes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quotes_converted_invoice_id_fkey"
-            columns: ["converted_invoice_id"]
-            isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quotes_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quotes_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      quote_items: {
-        Row: {
-          amount_satang: number
-          created_at: string
-          description: string
-          id: string
-          org_id: string
-          position: number
-          quantity: number
-          quote_id: string
-          unit_price_satang: number
-          updated_at: string
-        }
-        Insert: {
-          amount_satang?: number
-          created_at?: string
-          description: string
-          id?: string
-          org_id: string
-          position?: number
-          quantity?: number
-          quote_id: string
-          unit_price_satang?: number
-          updated_at?: string
-        }
-        Update: {
-          amount_satang?: number
-          created_at?: string
-          description?: string
-          id?: string
-          org_id?: string
-          position?: number
-          quantity?: number
-          quote_id?: string
-          unit_price_satang?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "quote_items_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quote_items_quote_id_fkey"
-            columns: ["quote_id"]
-            isOneToOne: false
-            referencedRelation: "quotes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      invoice_items: {
-        Row: {
-          amount_satang: number
-          created_at: string
-          description: string
-          id: string
-          invoice_id: string
-          org_id: string
-          position: number
-          quantity: number
-          unit_price_satang: number
-          updated_at: string
-        }
-        Insert: {
-          amount_satang?: number
-          created_at?: string
-          description: string
-          id?: string
-          invoice_id: string
-          org_id: string
-          position?: number
-          quantity?: number
-          unit_price_satang?: number
-          updated_at?: string
-        }
-        Update: {
-          amount_satang?: number
-          created_at?: string
-          description?: string
-          id?: string
-          invoice_id?: string
-          org_id?: string
-          position?: number
-          quantity?: number
-          unit_price_satang?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "invoice_items_invoice_id_fkey"
-            columns: ["invoice_id"]
-            isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoice_items_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      time_entries: {
-        Row: {
-          billable: boolean
-          created_at: string
-          id: string
-          minutes: number
-          notes: string | null
-          org_id: string
-          project_id: string
-          rate_satang: number | null
-          task_id: string | null
-          updated_at: string
-          user_id: string | null
-          work_date: string
-        }
-        Insert: {
-          billable?: boolean
-          created_at?: string
-          id?: string
-          minutes: number
-          notes?: string | null
-          org_id: string
-          project_id: string
-          rate_satang?: number | null
-          task_id?: string | null
-          updated_at?: string
-          user_id?: string | null
-          work_date?: string
-        }
-        Update: {
-          billable?: boolean
-          created_at?: string
-          id?: string
-          minutes?: number
-          notes?: string | null
-          org_id?: string
-          project_id?: string
-          rate_satang?: number | null
-          task_id?: string | null
-          updated_at?: string
-          user_id?: string | null
-          work_date?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "time_entries_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "time_entries_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "time_entries_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "project_tasks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      invitations: {
-        Row: {
-          accepted_by: string | null
-          created_at: string
-          email: string
-          expires_at: string | null
-          id: string
-          invited_by: string | null
-          org_id: string
-          role: Database["public"]["Enums"]["role_enum"]
-          status: Database["public"]["Enums"]["invitation_status"]
-          token: string
-          updated_at: string
-        }
-        Insert: {
-          accepted_by?: string | null
-          created_at?: string
-          email: string
-          expires_at?: string | null
-          id?: string
-          invited_by?: string | null
-          org_id: string
-          role?: Database["public"]["Enums"]["role_enum"]
-          status?: Database["public"]["Enums"]["invitation_status"]
-          token: string
-          updated_at?: string
-        }
-        Update: {
-          accepted_by?: string | null
-          created_at?: string
-          email?: string
-          expires_at?: string | null
-          id?: string
-          invited_by?: string | null
-          org_id?: string
-          role?: Database["public"]["Enums"]["role_enum"]
-          status?: Database["public"]["Enums"]["invitation_status"]
-          token?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "invitations_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -1689,6 +1621,108 @@ export type Database = {
           },
         ]
       }
+      template_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_categories_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_entries: {
+        Row: {
+          billable: boolean
+          created_at: string
+          id: string
+          minutes: number
+          notes: string | null
+          org_id: string
+          project_id: string
+          rate_satang: number | null
+          task_id: string | null
+          updated_at: string
+          user_id: string | null
+          work_date: string
+        }
+        Insert: {
+          billable?: boolean
+          created_at?: string
+          id?: string
+          minutes: number
+          notes?: string | null
+          org_id: string
+          project_id: string
+          rate_satang?: number | null
+          task_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          work_date?: string
+        }
+        Update: {
+          billable?: boolean
+          created_at?: string
+          id?: string
+          minutes?: number
+          notes?: string | null
+          org_id?: string
+          project_id?: string
+          rate_satang?: number | null
+          task_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          work_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_entries_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "project_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1761,21 +1795,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -1793,14 +1831,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -1816,14 +1856,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -1839,14 +1881,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -1854,22 +1898,21 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       accounting_conn_status: ["disconnected", "connected", "error"],
@@ -1938,4 +1981,3 @@ export const Constants = {
     },
   },
 } as const
-

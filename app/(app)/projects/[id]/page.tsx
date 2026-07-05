@@ -10,6 +10,7 @@ import {
   User,
   Building2,
   Clock,
+  FileSignature,
 } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/server"
@@ -37,6 +38,7 @@ import { TaskToggle, MilestoneToggle } from "../_components/toggle-check"
 import { AddTaskForm } from "../_components/add-task-form"
 import { AddMilestoneForm } from "../_components/add-milestone-form"
 import { LogTimeForm } from "@/app/(app)/timesheets/_components/log-time-form"
+import { HandoverEvidenceSection } from "../_components/handover-evidence-section"
 
 export const dynamic = "force-dynamic"
 
@@ -92,6 +94,7 @@ export default async function ProjectDetailPage({
     { data: invoicesData },
     { data: costsData },
     { data: timeData },
+    { data: handoverData },
   ] = await Promise.all([
     supabase
       .from("project_tasks")
@@ -117,6 +120,11 @@ export default async function ProjectDetailPage({
       .from("time_entries")
       .select("project_id, minutes, billable, rate_satang")
       .eq("project_id", id),
+    supabase
+      .from("project_handover_evidence")
+      .select("id, kind, note, evidence_url, signed_by, signed_at, created_by, created_at")
+      .eq("project_id", id)
+      .order("created_at", { ascending: false }),
   ])
 
   const tasks = (tasksData ?? []) as Array<{
@@ -143,6 +151,16 @@ export default async function ProjectDetailPage({
     minutes: number
     billable: boolean
     rate_satang: number | null
+  }>
+  const handover = (handoverData ?? []) as Array<{
+    id: string
+    kind: "handover" | "warranty" | "commissioning" | "after_sale"
+    note: string | null
+    evidence_url: string | null
+    signed_by: string | null
+    signed_at: string | null
+    created_by: string | null
+    created_at: string
   }>
 
   const loggedMinutes = totalMinutes(timeEntries)
@@ -379,6 +397,18 @@ export default async function ProjectDetailPage({
             defaultWorkDate={todayISO()}
             lockProject
           />
+        </CardContent>
+      </Card>
+
+      {/* Handover / warranty evidence */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileSignature className="size-4" /> Handover & warranty evidence
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <HandoverEvidenceSection projectId={p.id} items={handover} />
         </CardContent>
       </Card>
     </div>

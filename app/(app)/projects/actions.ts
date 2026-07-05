@@ -301,3 +301,125 @@ export async function toggleMilestone(
   revalidatePath(`/projects/${projectId}`)
   return {}
 }
+
+// ── Handover evidence (audit-trail for project handover / warranty) ─────────
+
+const HandoverKind = z.enum(["handover", "warranty", "commissioning", "after_sale"])
+
+const AddHandoverEvidenceInput = z.object({
+  projectId: z.string().min(1),
+  kind: HandoverKind,
+  note: optionalText,
+  evidenceUrl: optionalText,
+  signedBy: optionalText,
+  signedAt: optionalText,
+})
+
+export async function addHandoverEvidence(
+  input: z.input<typeof AddHandoverEvidenceInput>
+): Promise<{ error?: string }> {
+  const ctx = await requireOrgContext()
+  const parsed = AddHandoverEvidenceInput.safeParse(input)
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" }
+  }
+  const { projectId, kind, note, evidenceUrl, signedBy, signedAt } = parsed.data
+
+  // Verify the project belongs to this org before writing audit-trail data.
+  const supabase = await createSupabaseClient()
+  const { data: project, error: projectErr } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("id", projectId)
+    .eq("org_id", ctx.orgId)
+    .maybeSingle()
+  if (projectErr) return { error: projectErr.message }
+  if (!project) return { error: "Project not found" }
+
+  const { error } = await supabase.from("project_handover_evidence").insert({
+    org_id: ctx.orgId,
+    project_id: projectId,
+    kind,
+    note: note ?? null,
+    evidence_url: evidenceUrl ?? null,
+    signed_by: signedBy ?? null,
+    signed_at: signedAt ?? null,
+    created_by: ctx.userId ?? null,
+  })
+
+  if (error) return { error: error.message }
+
+  // Mirror the canonical handover / warranty booleans so the project header
+  // reflects what the evidence actually records.
+  if (kind === "handover" || kind === "warranty") {
+    const { data: existing } = await supabase
+      .from("project_handover_evidence")
+      .select("kind")
+      .eq("project_id", projectId)
+      .eq("org_id", ctx.orgId)
+    const kinds = new Set((existing ?? []).map((r) => r.kind as string))
+    kinds.add(kind)
+    await supabase
+      .from("projects")
+      .update({
+        handover_completed: kinds.has("handover"),
+        warranty_registered: kinds.has("warranty"),
+      })
+      .eq("id", projectId)
+      .eq("org_id", ctx.orgId)
+  }
+
+  revalidatePath(`/projects/${projectId}`)
+  return {}
+}
+
+const RemoveHandoverEvidenceInput = z.object({
+  id: z.string().min(1),
+  projectId: z.string().min(1),
+})
+
+export async function removeHandoverEvidence(
+  input: z.input<typeof RemoveHandoverEvidenceInput>
+): Promise<{ error?: string }> {
+  const ctx = await requireOrgContext()
+  const parsed = RemoveHandoverEvidenceInput.safeParse(input)
+  if (!parsed.success) return { error: "Invalid input" }
+  const { id, projectId } = parsed.data
+
+  const supabase = await createSupabaseClient()
+  // Read kind before delete so we can re-evaluate the booleans afterwards.
+  const { data: existing } = await supabase
+    .from("project_handover_evidence")
+    .select("kind")
+    .eq("id", id)
+    .eq("org_id", ctx.orgId)
+    .maybeSingle()
+  if (!existing) return { error: "Evidence not found" }
+
+  const { error } = await supabase
+    .from("project_handover_evidence")
+    .delete()
+    .eq("id", id)
+    .eq("org_id", ctx.orgId)
+  if (error) return { error: error.message }
+
+  if (existing.kind === "handover" || existing.kind === "warranty") {
+    const { data: remaining } = await supabase
+      .from("project_handover_evidence")
+      .select("kind")
+      .eq("project_id", projectId)
+      .eq("org_id", ctx.orgId)
+    const kinds = new Set((remaining ?? []).map((r) => r.kind as string))
+    await supabase
+      .from("projects")
+      .update({
+        handover_completed: kinds.has("handover"),
+        warranty_registered: kinds.has("warranty"),
+      })
+      .eq("id", projectId)
+      .eq("org_id", ctx.orgId)
+  }
+
+  revalidatePath(`/projects/${projectId}`)
+  return {}
+}
