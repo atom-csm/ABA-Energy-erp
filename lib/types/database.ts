@@ -1064,10 +1064,13 @@ export type Database = {
         Row: {
           assignee: string | null
           created_at: string
+          depends_on: string[]
           done: boolean
           due_date: string | null
+          estimate_hours: number | null
           id: string
           org_id: string
+          phase_name: string | null
           project_id: string
           status: Database["public"]["Enums"]["task_status"]
           title: string
@@ -1076,10 +1079,13 @@ export type Database = {
         Insert: {
           assignee?: string | null
           created_at?: string
+          depends_on?: string[]
           done?: boolean
           due_date?: string | null
+          estimate_hours?: number | null
           id?: string
           org_id: string
+          phase_name?: string | null
           project_id: string
           status?: Database["public"]["Enums"]["task_status"]
           title: string
@@ -1088,10 +1094,13 @@ export type Database = {
         Update: {
           assignee?: string | null
           created_at?: string
+          depends_on?: string[]
           done?: boolean
           due_date?: string | null
+          estimate_hours?: number | null
           id?: string
           org_id?: string
+          phase_name?: string | null
           project_id?: string
           status?: Database["public"]["Enums"]["task_status"]
           title?: string

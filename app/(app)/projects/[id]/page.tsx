@@ -35,7 +35,7 @@ import type { Enums } from "@/lib/types/database"
 import { deadlineMeta, formatDate } from "../_lib/dates"
 import { StatusSelect } from "../_components/status-select"
 import { TaskToggle, MilestoneToggle } from "../_components/toggle-check"
-import { AddTaskForm } from "../_components/add-task-form"
+import { AddTaskForm, AiWorkBreakdownPanel } from "../_components/add-task-form"
 import { AddMilestoneForm } from "../_components/add-milestone-form"
 import { LogTimeForm } from "@/app/(app)/timesheets/_components/log-time-form"
 import { HandoverEvidenceSection } from "../_components/handover-evidence-section"
@@ -274,6 +274,11 @@ export default async function ProjectDetailPage({
         </CardHeader>
         <CardContent className="space-y-4">
           <AddTaskForm projectId={p.id} />
+          <AiWorkBreakdownPanel
+            projectId={p.id}
+            projectDeadline={p.deadline}
+            team={[]}
+          />
           {tasks.length === 0 ? (
             <EmptyState
               icon={ListChecks}
