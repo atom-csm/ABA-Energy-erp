@@ -48,6 +48,14 @@ const Schema = z.object({
     "lost",
   ]),
   valueBaht: z.coerce.number().min(0, "Value can't be negative"),
+  monthlyBillBaht: z.coerce.number().min(0, "Monthly bill can't be negative").optional(),
+  estimatedSystemSizeKwp: z.coerce.number().min(0, "System size can't be negative").optional(),
+  roofType: z.string().optional(),
+  province: z.string().optional(),
+  surveyDate: z.string().optional(),
+  installationTargetDate: z.string().optional(),
+  paybackYears: z.coerce.number().min(0, "Payback can't be negative").optional(),
+  solarNotes: z.string().optional(),
   expectedCloseDate: z.string().optional(),
   nextFollowUpDate: z.string().optional(),
   source: z.string().optional(),
@@ -75,6 +83,14 @@ export function DealForm({
       title: "",
       stage: "lead",
       valueBaht: 0,
+      monthlyBillBaht: 0,
+      estimatedSystemSizeKwp: 0,
+      roofType: "",
+      province: "",
+      surveyDate: "",
+      installationTargetDate: "",
+      paybackYears: 0,
+      solarNotes: "",
       expectedCloseDate: "",
       nextFollowUpDate: "",
       source: "",
@@ -196,6 +212,163 @@ export function DealForm({
             )}
           />
         </div>
+
+        <section className="space-y-4 rounded-lg border p-4">
+          <div>
+            <h2 className="text-sm font-semibold">Solar qualification</h2>
+            <p className="text-muted-foreground text-xs">
+              Capture survey, sizing, and payback assumptions for rooftop solar deals.
+            </p>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="monthlyBillBaht"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Monthly bill (THB)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step="0.01"
+                      name={field.name}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      value={(field.value ?? "") as number | string}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="estimatedSystemSizeKwp"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estimated system size (kWp)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step="0.01"
+                      name={field.name}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      value={(field.value ?? "") as number | string}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="roofType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Roof type</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Metal sheet, tile, flat roof…" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="province"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Province</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Khon Kaen" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="surveyDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Survey date</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="installationTargetDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Installation target</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="paybackYears"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estimated payback (years)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step="0.01"
+                    name={field.name}
+                    ref={field.ref}
+                    onBlur={field.onBlur}
+                    value={(field.value ?? "") as number | string}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="solarNotes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Solar notes</FormLabel>
+                <FormControl>
+                  <Textarea rows={3} placeholder="Meter type, shading, roof notes, proposal assumptions…" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </section>
 
         <div className="grid gap-5 sm:grid-cols-2">
           <FormField

@@ -501,6 +501,14 @@ export type Database = {
           id: string
           next_follow_up_date: string | null
           notes: string | null
+          monthly_bill_satang: number | null
+          estimated_system_size_kwp: number | null
+          roof_type: string | null
+          province: string | null
+          survey_date: string | null
+          installation_target_date: string | null
+          payback_years: number | null
+          solar_notes: string | null
           org_id: string
           owner: string | null
           source: string | null
@@ -517,6 +525,14 @@ export type Database = {
           id?: string
           next_follow_up_date?: string | null
           notes?: string | null
+          monthly_bill_satang?: number | null
+          estimated_system_size_kwp?: number | null
+          roof_type?: string | null
+          province?: string | null
+          survey_date?: string | null
+          installation_target_date?: string | null
+          payback_years?: number | null
+          solar_notes?: string | null
           org_id: string
           owner?: string | null
           source?: string | null
@@ -533,6 +549,14 @@ export type Database = {
           id?: string
           next_follow_up_date?: string | null
           notes?: string | null
+          monthly_bill_satang?: number | null
+          estimated_system_size_kwp?: number | null
+          roof_type?: string | null
+          province?: string | null
+          survey_date?: string | null
+          installation_target_date?: string | null
+          payback_years?: number | null
+          solar_notes?: string | null
           org_id?: string
           owner?: string | null
           source?: string | null

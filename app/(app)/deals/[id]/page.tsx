@@ -28,7 +28,7 @@ export default async function DealDetailPage({
   const { data: deal } = await supabase
     .from("deals")
     .select(
-      "id,client_id,title,stage,value_satang,expected_close_date,next_follow_up_date,source,notes,created_at"
+      "id,client_id,title,stage,value_satang,monthly_bill_satang,estimated_system_size_kwp,roof_type,province,survey_date,installation_target_date,payback_years,solar_notes,expected_close_date,next_follow_up_date,source,notes,created_at"
     )
     .eq("id", id)
     .maybeSingle()
@@ -102,6 +102,31 @@ export default async function DealDetailPage({
               <Field label="Change stage">
                 <ChangeStageSelect dealId={deal.id} stage={deal.stage} />
               </Field>
+              <Field label="Monthly bill">
+                {deal.monthly_bill_satang
+                  ? formatTHB(deal.monthly_bill_satang)
+                  : "—"}
+              </Field>
+              <Field label="System size">
+                {deal.estimated_system_size_kwp
+                  ? `${deal.estimated_system_size_kwp} kWp`
+                  : "—"}
+              </Field>
+              <Field label="Roof / province">
+                {[deal.roof_type, deal.province].filter(Boolean).join(" · ") || "—"}
+              </Field>
+              <Field label="Survey date">{deal.survey_date ?? "—"}</Field>
+              <Field label="Install target">
+                {deal.installation_target_date ?? "—"}
+              </Field>
+              <Field label="Payback estimate">
+                {deal.payback_years ? `${deal.payback_years} years` : "—"}
+              </Field>
+              {deal.solar_notes ? (
+                <Field label="Solar notes">
+                  <p className="whitespace-pre-wrap">{deal.solar_notes}</p>
+                </Field>
+              ) : null}
               <Field label="Expected close">
                 {deal.expected_close_date ?? "—"}
               </Field>

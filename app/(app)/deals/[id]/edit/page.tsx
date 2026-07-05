@@ -22,7 +22,7 @@ export default async function EditDealPage({
     supabase
       .from("deals")
       .select(
-        "id,client_id,title,stage,value_satang,expected_close_date,next_follow_up_date,source,notes"
+        "id,client_id,title,stage,value_satang,monthly_bill_satang,estimated_system_size_kwp,roof_type,province,survey_date,installation_target_date,payback_years,solar_notes,expected_close_date,next_follow_up_date,source,notes"
       )
       .eq("id", id)
       .maybeSingle(),
@@ -36,6 +36,16 @@ export default async function EditDealPage({
     title: deal.title,
     stage: deal.stage,
     valueBaht: satangToBaht(deal.value_satang),
+    monthlyBillBaht: deal.monthly_bill_satang
+      ? satangToBaht(deal.monthly_bill_satang)
+      : 0,
+    estimatedSystemSizeKwp: deal.estimated_system_size_kwp ?? 0,
+    roofType: deal.roof_type ?? "",
+    province: deal.province ?? "",
+    surveyDate: deal.survey_date ?? "",
+    installationTargetDate: deal.installation_target_date ?? "",
+    paybackYears: deal.payback_years ?? 0,
+    solarNotes: deal.solar_notes ?? "",
     expectedCloseDate: deal.expected_close_date ?? "",
     nextFollowUpDate: deal.next_follow_up_date ?? "",
     source: deal.source ?? "",

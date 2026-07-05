@@ -66,7 +66,7 @@ export default async function DealsPage({
     supabase
       .from("deals")
       .select(
-        "id,title,stage,value_satang,client_id,next_follow_up_date,created_at"
+        "id,title,stage,value_satang,monthly_bill_satang,estimated_system_size_kwp,province,survey_date,client_id,next_follow_up_date,created_at"
       )
       .order("created_at", { ascending: false }),
     supabase.from("clients").select("id,name"),
@@ -190,6 +190,10 @@ export default async function DealsPage({
                           title={d.title}
                           client={clientName.get(d.client_id) ?? "—"}
                           valueSatang={d.value_satang}
+                          monthlyBillSatang={d.monthly_bill_satang}
+                          systemSizeKwp={d.estimated_system_size_kwp}
+                          province={d.province}
+                          surveyDate={d.survey_date}
                           followUp={d.next_follow_up_date}
                           today={today}
                         />
@@ -211,6 +215,10 @@ function DealCard({
   title,
   client,
   valueSatang,
+  monthlyBillSatang,
+  systemSizeKwp,
+  province,
+  surveyDate,
   followUp,
   today,
 }: {
@@ -218,6 +226,10 @@ function DealCard({
   title: string
   client: string
   valueSatang: number
+  monthlyBillSatang: number | null
+  systemSizeKwp: number | null
+  province: string | null
+  surveyDate: string | null
   followUp: string | null
   today: string
 }) {
@@ -232,6 +244,16 @@ function DealCard({
           <div className="text-muted-foreground text-xs">{client}</div>
           <div className="flex items-center justify-between gap-2 pt-0.5">
             <span className="text-sm font-semibold">{formatTHB(valueSatang)}</span>
+            {systemSizeKwp ? (
+              <span className="text-muted-foreground text-xs">{systemSizeKwp} kWp</span>
+            ) : null}
+          </div>
+          <div className="text-muted-foreground flex flex-wrap gap-x-2 gap-y-1 text-xs">
+            {monthlyBillSatang ? <span>Bill {formatTHB(monthlyBillSatang)}/mo</span> : null}
+            {province ? <span>{province}</span> : null}
+            {surveyDate ? <span>Survey {surveyDate}</span> : null}
+          </div>
+          <div className="flex items-center justify-end gap-2 pt-0.5">
             {followUp ? (
               <span
                 className={cn(
