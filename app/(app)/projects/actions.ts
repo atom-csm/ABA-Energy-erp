@@ -560,6 +560,7 @@ function workBreakdownPrompt(args: {
     "Return ONLY strict JSON. No markdown, no prose, no code fences.",
     "Break the user's goal into realistic phases and tasks.",
     "Use only team member ids provided in team[].id for suggestedAssignee, or null.",
+    "Design the work breakdown for real team execution: concise titles, clear phase boundaries, realistic estimates, and dependencies that reduce rework.",
     "dependsOn must be an array of exact task titles that appear earlier in the JSON.",
     "estimateHours must be a positive number. dueDate must be YYYY-MM-DD.",
     "Do not invent team members, ids, or private data.",

@@ -225,7 +225,7 @@ export function AiWorkBreakdownPanel({
   function setPhaseSelection(phaseName: string, selected: boolean) {
     setPhases((current) =>
       current.map((phase) =>
-        phase.name === phaseName
+        phaseName === "*" || phase.name === phaseName
           ? {
               ...phase,
               tasks: phase.tasks.map((task) => ({ ...task, selected })),
@@ -294,8 +294,8 @@ export function AiWorkBreakdownPanel({
   return (
     <div
       className={cn(
-        "rounded-xl border bg-card/40 p-3 transition-colors",
-        open ? "border-primary/30" : "border-dashed"
+        "rounded-xl border bg-white p-4 shadow-xs transition-colors dark:bg-card",
+        open ? "border-border" : "border-border/80"
       )}
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -309,7 +309,7 @@ export function AiWorkBreakdownPanel({
               <StatusBadge state={panelState} />
             </div>
             <p className="text-muted-foreground text-xs">
-              ใส่เป้าหมาย + เดดไลน์ → Claude แตกเป็น phase/tasks → ติ๊กเลือกเฉพาะที่อยากได้
+              ใส่เป้าหมาย + เดดไลน์ → OpenRouter/Claude แตกเป็น phase/tasks → ติ๊กเลือกเฉพาะที่อยากได้
             </p>
           </div>
         </div>
@@ -326,7 +326,7 @@ export function AiWorkBreakdownPanel({
 
       {open ? (
         <div className="mt-3 space-y-4">
-          <div className="bg-background/60 rounded-lg border p-3">
+          <div className="rounded-xl border bg-white p-3 shadow-xs dark:bg-card">
             <div className="grid gap-3 lg:grid-cols-[1fr_220px_auto] lg:items-end">
               <div className="space-y-1.5">
                 <label className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
@@ -480,8 +480,8 @@ function StatusBadge({ state }: { state: AiPanelState }) {
   }
   if (state === "needs_key") {
     return (
-      <Badge variant="outline" className="border-amber-500/40 text-amber-700 dark:text-amber-300 font-normal">
-        <KeyRound className="size-3" /> needs key
+      <Badge variant="outline" className="border-slate-300 bg-white text-slate-700 font-normal dark:bg-card">
+        <KeyRound className="size-3" /> needs OpenRouter key
       </Badge>
     )
   }
@@ -494,23 +494,24 @@ function StatusBadge({ state }: { state: AiPanelState }) {
 
 function NeedsKeyCallout() {
   return (
-    <div className="rounded-lg border border-amber-500/30 bg-amber-50/60 p-3 text-sm dark:bg-amber-500/5">
-      <div className="flex items-start gap-2">
-        <div className="bg-amber-500/15 text-amber-700 dark:text-amber-300 flex size-8 shrink-0 items-center justify-center rounded-md">
+    <div className="rounded-xl border bg-white p-3 text-sm shadow-xs dark:bg-card">
+      <div className="flex items-start gap-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-slate-50 text-slate-700 dark:bg-muted/40">
           <KeyRound className="size-4" />
         </div>
         <div className="space-y-1.5">
-          <div className="text-amber-900 dark:text-amber-200 font-medium">
-            AI ยังไม่ได้ตั้งค่า
+          <div className="font-medium text-foreground">
+            ยังไม่ได้เปิด OpenRouter สำหรับ AI
           </div>
-          <p className="text-amber-800/80 dark:text-amber-200/70 text-xs">
-            เพิ่ม <code className="bg-amber-500/10 rounded px-1 py-0.5 text-[11px]">ANTHROPIC_API_KEY</code>{" "}
-            เป็น Vercel Preview env แล้ว redeploy หนึ่งรอบ — เอวาจะใช้ Claude Sonnet 4.5 แตกงานให้ทันที
+          <p className="text-muted-foreground text-xs">
+            เพิ่ม <code className="rounded border bg-slate-50 px-1 py-0.5 text-[11px] dark:bg-muted">OPENROUTER_API_KEY</code>{" "}
+            เป็น Vercel Preview env แล้ว redeploy หนึ่งรอบ — ระบบจะเรียก Claude ผ่าน OpenRouter เพื่อแตกงานให้ทีมทันที
           </p>
-          <ol className="text-amber-800/80 dark:text-amber-200/70 list-decimal space-y-0.5 pl-4 text-xs">
+          <ol className="text-muted-foreground list-decimal space-y-0.5 pl-4 text-xs">
             <li>Vercel → Project <code>aba-energy-os</code> → Settings → Environment Variables</li>
-            <li>Add <code>ANTHROPIC_API_KEY</code> · scope: <strong>Preview</strong></li>
-            <li>แจ้งเอวาให้ redeploy preview แล้วลองใหม่</li>
+            <li>Add <code>OPENROUTER_API_KEY</code> · scope: <strong>Preview</strong></li>
+            <li>Optional: set <code>OPENROUTER_MODEL</code> เช่น <code>anthropic/claude-sonnet-4.5</code></li>
+            <li>แจ้งเอวาให้ redeploy preview แล้วทดสอบ real flow</li>
           </ol>
         </div>
       </div>
