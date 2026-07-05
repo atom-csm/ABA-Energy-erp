@@ -5,7 +5,23 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
-import { AlertCircle, Plus, Sparkles, Wand2 } from "lucide-react"
+import {
+  AlertCircle,
+  ArrowRight,
+  CalendarClock,
+  Check,
+  CheckCheck,
+  ChevronDown,
+  ChevronUp,
+  CircleDashed,
+  KeyRound,
+  Layers3,
+  ListChecks,
+  Plus,
+  Sparkles,
+  TimerReset,
+  Wand2,
+} from "lucide-react"
 
 import {
   Form,
@@ -21,6 +37,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Select,
   SelectContent,
@@ -63,6 +81,12 @@ function flatten(phases: AiWorkBreakdownPhase[]): AiWorkBreakdownTask[] {
 
 function taskLabelById(phases: AiWorkBreakdownPhase[]): Map<string, string> {
   return new Map(flatten(phases).map((task) => [task.clientId, task.title]))
+}
+
+function humanHours(hours: number): string {
+  if (hours <= 0) return "0h"
+  if (Number.isInteger(hours)) return `${hours}h`
+  return `${hours.toFixed(2).replace(/\.?0+$/, "")}h`
 }
 
 export function AddTaskForm({ projectId }: { projectId: string }) {
@@ -140,6 +164,8 @@ export function AddTaskForm({ projectId }: { projectId: string }) {
   )
 }
 
+type AiPanelState = "idle" | "loading" | "ready" | "needs_key" | "error"
+
 export function AiWorkBreakdownPanel({
   projectId,
   projectDeadline,
@@ -154,19 +180,28 @@ export function AiWorkBreakdownPanel({
   const [deadline, setDeadline] = useState(projectDeadline ?? "")
   const [phases, setPhases] = useState<AiWorkBreakdownPhase[]>([])
   const [teamState, setTeamState] = useState<AiWorkBreakdownTeamMember[]>(team)
-  const [notConfigured, setNotConfigured] = useState(false)
+  const [panelState, setPanelState] = useState<AiPanelState>("idle")
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const [creating, startCreating] = useTransition()
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
 
   const teamById = useMemo(
     () => new Map(teamState.map((member) => [member.id, member])),
     [teamState]
   )
   const dependencyLabels = useMemo(() => taskLabelById(phases), [phases])
-  const selectedCount = useMemo(
-    () => flatten(phases).filter((task) => task.selected).length,
+
+  const selectedTasks = useMemo(
+    () => flatten(phases).filter((task) => task.selected),
     [phases]
   )
+  const selectedCount = selectedTasks.length
+  const totalSelectedHours = useMemo(
+    () => selectedTasks.reduce((sum, task) => sum + (task.estimateHours || 0), 0),
+    [selectedTasks]
+  )
+  const allTasks = useMemo(() => flatten(phases), [phases])
 
   function updateTask(
     clientId: string,
@@ -187,200 +222,600 @@ export function AiWorkBreakdownPanel({
     )
   }
 
+  function setPhaseSelection(phaseName: string, selected: boolean) {
+    setPhases((current) =>
+      current.map((phase) =>
+        phase.name === phaseName
+          ? {
+              ...phase,
+              tasks: phase.tasks.map((task) => ({ ...task, selected })),
+            }
+          : phase
+      )
+    )
+  }
+
   function generate() {
     if (!goal.trim()) return toast.error("Please enter a goal first.")
     if (!deadline) return toast.error("Please choose the overall deadline.")
-    setNotConfigured(false)
+    setErrorMessage(null)
+    setPanelState("loading")
+    setPhases([])
     startTransition(async () => {
       const res = await generateAiWorkBreakdown({ projectId, goal, deadline })
       if ("error" in res) {
-        toast.error(res.error)
+        setPanelState("error")
+        setErrorMessage(res.error)
         return
       }
       if ("notConfigured" in res) {
-        setNotConfigured(true)
+        setPanelState("needs_key")
         return
       }
       setTeamState(res.team)
       setPhases(res.phases)
+      setCollapsed({})
+      setPanelState("ready")
       toast.success("AI breakdown ready for review")
     })
   }
 
   function createTasks() {
-    const tasks = flatten(phases)
-    if (tasks.filter((task) => task.selected).length === 0) {
+    if (selectedTasks.length === 0) {
       return toast.error("Select at least one task to create.")
     }
     startCreating(async () => {
-      const res = await createAiWorkBreakdownTasks({ projectId, deadline, tasks })
+      const res = await createAiWorkBreakdownTasks({
+        projectId,
+        deadline,
+        tasks: selectedTasks,
+      })
       if (res.error) {
-        toast.error(res.error)
+        setErrorMessage(res.error)
+        setPanelState("error")
         return
       }
       toast.success(`${res.created ?? 0} tasks created on board`)
       setPhases([])
       setGoal("")
+      setPanelState("idle")
       setOpen(false)
     })
   }
 
+  function resetPanel() {
+    setPhases([])
+    setErrorMessage(null)
+    setPanelState("idle")
+  }
+
+  const isBusy = pending || creating
+
   return (
-    <div className="space-y-3 rounded-lg border border-dashed p-3">
+    <div
+      className={cn(
+        "rounded-xl border bg-card/40 p-3 transition-colors",
+        open ? "border-primary/30" : "border-dashed"
+      )}
+    >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Sparkles className="text-primary size-4" /> AI work breakdown
+        <div className="flex items-start gap-3">
+          <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+            <Sparkles className="size-4" />
           </div>
-          <p className="text-muted-foreground text-xs">
-            Chat goal + deadline → preview phases/tasks → create only confirmed tasks.
-          </p>
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">AI work breakdown</span>
+              <StatusBadge state={panelState} />
+            </div>
+            <p className="text-muted-foreground text-xs">
+              ใส่เป้าหมาย + เดดไลน์ → Claude แตกเป็น phase/tasks → ติ๊กเลือกเฉพาะที่อยากได้
+            </p>
+          </div>
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={() => setOpen((v) => !v)}>
-          <Wand2 className="size-3.5" /> แตกงานด้วย AI
+        <Button
+          type="button"
+          variant={open ? "secondary" : "outline"}
+          size="sm"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <Wand2 className="size-3.5" />
+          {open ? "ซ่อนแชต" : "แตกงานด้วย AI"}
         </Button>
       </div>
 
       {open ? (
-        <div className="space-y-4">
-          <div className="grid gap-3 lg:grid-cols-[1fr_180px_auto] lg:items-end">
-            <div className="space-y-1.5">
-              <label className="text-muted-foreground text-xs font-medium">Goal</label>
-              <Textarea
-                value={goal}
-                onChange={(e) => setGoal(e.target.value)}
-                placeholder="เช่น เปิดเว็บร้านใหม่ใน 6 สัปดาห์"
-                className="min-h-24"
-              />
+        <div className="mt-3 space-y-4">
+          <div className="bg-background/60 rounded-lg border p-3">
+            <div className="grid gap-3 lg:grid-cols-[1fr_220px_auto] lg:items-end">
+              <div className="space-y-1.5">
+                <label className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+                  <ListChecks className="size-3.5" /> เป้าหมาย
+                </label>
+                <Textarea
+                  value={goal}
+                  onChange={(e) => setGoal(e.target.value)}
+                  placeholder="เช่น เปิดเว็บร้านใหม่ใน 6 สัปดาห์"
+                  className="min-h-20"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+                  <CalendarClock className="size-3.5" /> เดดไลน์รวม
+                </label>
+                <Input
+                  type="date"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                />
+              </div>
+              <Button
+                type="button"
+                disabled={isBusy}
+                onClick={generate}
+                className="self-stretch lg:self-auto"
+              >
+                {pending ? (
+                  <>
+                    <CircleDashed className="size-3.5 animate-spin" />
+                    Breaking down…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="size-3.5" />
+                    Generate preview
+                  </>
+                )}
+              </Button>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-muted-foreground text-xs font-medium">Overall deadline</label>
-              <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
-            </div>
-            <Button type="button" disabled={pending || creating} onClick={generate}>
-              <Sparkles className="size-3.5" />
-              {pending ? "Breaking down…" : "Generate preview"}
-            </Button>
           </div>
 
-          {notConfigured ? (
-            <div className="text-muted-foreground flex items-start gap-2 rounded-lg border border-dashed p-3 text-sm">
+          {panelState === "loading" ? <PreviewSkeleton /> : null}
+          {panelState === "needs_key" ? <NeedsKeyCallout /> : null}
+          {panelState === "error" ? (
+            <div className="border-destructive/30 bg-destructive/5 text-destructive flex items-start gap-2 rounded-lg border p-3 text-sm">
               <AlertCircle className="mt-0.5 size-4" />
-              <span>AI is not configured — add ANTHROPIC_API_KEY to enable.</span>
+              <div className="space-y-0.5">
+                <div className="font-medium">AI breakdown ล้มเหลว</div>
+                <div className="text-destructive/80 text-xs">
+                  {errorMessage ?? "โปรดลองอีกครั้ง"}
+                </div>
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="outline"
+                  className="mt-1"
+                  onClick={resetPanel}
+                >
+                  <TimerReset className="size-3" /> ลองใหม่
+                </Button>
+              </div>
             </div>
           ) : null}
 
-          {phases.length > 0 ? (
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="text-sm font-medium">Preview ({selectedCount} selected)</div>
-                <Button type="button" disabled={creating || pending} onClick={createTasks}>
-                  <Plus className="size-3.5" />
-                  {creating ? "Creating…" : "สร้างลงบอร์ด"}
-                </Button>
-              </div>
-
-              {phases.map((phase) => (
-                <Card key={phase.name} className="overflow-hidden">
-                  <CardContent className="space-y-3 p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="font-medium">{phase.name}</div>
-                      <Badge variant="secondary" className="font-normal">
-                        {phase.tasks.filter((task) => task.selected).length}/{phase.tasks.length} tasks
-                      </Badge>
-                    </div>
-                    <div className="space-y-2">
-                      {phase.tasks.map((task) => {
-                        const assignee = task.suggestedAssignee
-                          ? teamById.get(task.suggestedAssignee)
-                          : null
-                        return (
-                          <div
-                            key={task.clientId}
-                            className={cn(
-                              "grid gap-2 rounded-md border p-3 lg:grid-cols-[auto_1fr_96px_180px_120px] lg:items-start",
-                              !task.selected && "bg-muted/40 opacity-70"
-                            )}
-                          >
-                            <Checkbox
-                              checked={task.selected}
-                              onCheckedChange={(value) =>
-                                updateTask(task.clientId, { selected: value === true })
-                              }
-                              aria-label={`Select ${task.title}`}
-                              className="mt-2"
-                            />
-                            <div className="space-y-1.5">
-                              <Input
-                                value={task.title}
-                                onChange={(e) => updateTask(task.clientId, { title: e.target.value })}
-                                aria-label="Task title"
-                              />
-                              {task.dependsOn.length > 0 ? (
-                                <p className="text-muted-foreground text-xs">
-                                  Depends on:{" "}
-                                  {task.dependsOn
-                                    .map((id) => dependencyLabels.get(id) ?? id)
-                                    .join(", ")}
-                                </p>
-                              ) : (
-                                <p className="text-muted-foreground text-xs">No dependencies</p>
-                              )}
-                            </div>
-                            <Input
-                              type="number"
-                              min="1"
-                              step="0.25"
-                              value={task.estimateHours}
-                              onChange={(e) =>
-                                updateTask(task.clientId, {
-                                  estimateHours: Number(e.target.value || 1),
-                                })
-                              }
-                              aria-label="Estimate hours"
-                            />
-                            <Select
-                              value={task.suggestedAssignee ?? "none"}
-                              onValueChange={(value) =>
-                                updateTask(task.clientId, {
-                                  suggestedAssignee: value === "none" ? null : value,
-                                })
-                              }
-                            >
-                              <SelectTrigger className="w-full" aria-label="Suggested assignee">
-                                <SelectValue>
-                                  {(value: string) => {
-                                    if (value === "none") return "Unassigned"
-                                    const member = teamById.get(value)
-                                    if (!member) return "Unknown teammate"
-                                    return `${member.name} · ${member.openEstimateHours}h open`
-                                  }}
-                                </SelectValue>
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="none">Unassigned</SelectItem>
-                                {teamState.map((member) => (
-                                  <SelectItem key={member.id} value={member.id}>
-                                    {member.name} · {member.skills.join("/")} · {member.openEstimateHours}h open
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <div className="text-muted-foreground text-xs lg:text-right">
-                              <div className="font-medium text-foreground">{task.dueDate}</div>
-                              <div>{assignee ? assignee.name : "Unassigned"}</div>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          {panelState === "ready" && phases.length > 0 ? (
+            <PreviewBody
+              phases={phases}
+              teamById={teamById}
+              team={teamState}
+              dependencyLabels={dependencyLabels}
+              collapsed={collapsed}
+              setCollapsed={setCollapsed}
+              onUpdateTask={updateTask}
+              onPhaseSelection={setPhaseSelection}
+            />
           ) : null}
         </div>
       ) : null}
+
+      {open && panelState === "ready" ? (
+        <div className="bg-background/80 sticky bottom-0 -mx-3 mt-4 rounded-b-xl border-t px-3 py-2 backdrop-blur">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              <span className="text-foreground text-sm font-medium">
+                {selectedCount}/{allTasks.length} งาน
+              </span>
+              <span>·</span>
+              <span>{humanHours(totalSelectedHours)} รวม</span>
+              <span>·</span>
+              <span>เดดไลน์ {deadline || "—"}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={resetPanel}
+                disabled={creating}
+              >
+                <TimerReset className="size-3.5" /> รีเซ็ต
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                disabled={creating || selectedCount === 0}
+                onClick={createTasks}
+              >
+                {creating ? (
+                  <>
+                    <CircleDashed className="size-3.5 animate-spin" />
+                    Creating…
+                  </>
+                ) : (
+                  <>
+                    <CheckCheck className="size-3.5" />
+                    สร้างลงบอร์ด ({selectedCount})
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function StatusBadge({ state }: { state: AiPanelState }) {
+  if (state === "idle") {
+    return (
+      <Badge variant="outline" className="text-muted-foreground font-normal">
+        idle
+      </Badge>
+    )
+  }
+  if (state === "loading") {
+    return (
+      <Badge variant="secondary" className="font-normal">
+        <CircleDashed className="size-3 animate-spin" /> thinking
+      </Badge>
+    )
+  }
+  if (state === "ready") {
+    return (
+      <Badge variant="default" className="font-normal">
+        <Check className="size-3" /> ready
+      </Badge>
+    )
+  }
+  if (state === "needs_key") {
+    return (
+      <Badge variant="outline" className="border-amber-500/40 text-amber-700 dark:text-amber-300 font-normal">
+        <KeyRound className="size-3" /> needs key
+      </Badge>
+    )
+  }
+  return (
+    <Badge variant="destructive" className="font-normal">
+      <AlertCircle className="size-3" /> error
+    </Badge>
+  )
+}
+
+function NeedsKeyCallout() {
+  return (
+    <div className="rounded-lg border border-amber-500/30 bg-amber-50/60 p-3 text-sm dark:bg-amber-500/5">
+      <div className="flex items-start gap-2">
+        <div className="bg-amber-500/15 text-amber-700 dark:text-amber-300 flex size-8 shrink-0 items-center justify-center rounded-md">
+          <KeyRound className="size-4" />
+        </div>
+        <div className="space-y-1.5">
+          <div className="text-amber-900 dark:text-amber-200 font-medium">
+            AI ยังไม่ได้ตั้งค่า
+          </div>
+          <p className="text-amber-800/80 dark:text-amber-200/70 text-xs">
+            เพิ่ม <code className="bg-amber-500/10 rounded px-1 py-0.5 text-[11px]">ANTHROPIC_API_KEY</code>{" "}
+            เป็น Vercel Preview env แล้ว redeploy หนึ่งรอบ — เอวาจะใช้ Claude Sonnet 4.5 แตกงานให้ทันที
+          </p>
+          <ol className="text-amber-800/80 dark:text-amber-200/70 list-decimal space-y-0.5 pl-4 text-xs">
+            <li>Vercel → Project <code>aba-energy-os</code> → Settings → Environment Variables</li>
+            <li>Add <code>ANTHROPIC_API_KEY</code> · scope: <strong>Preview</strong></li>
+            <li>แจ้งเอวาให้ redeploy preview แล้วลองใหม่</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PreviewSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[0, 1].map((i) => (
+        <div key={i} className="rounded-lg border p-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+          <div className="mt-3 space-y-2">
+            {[0, 1, 2].map((j) => (
+              <div key={j} className="flex items-center gap-3">
+                <Skeleton className="size-4" />
+                <Skeleton className="h-4 flex-1" />
+                <Skeleton className="h-4 w-12" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function PreviewBody({
+  phases,
+  teamById,
+  team,
+  dependencyLabels,
+  collapsed,
+  setCollapsed,
+  onUpdateTask,
+  onPhaseSelection,
+}: {
+  phases: AiWorkBreakdownPhase[]
+  teamById: Map<string, AiWorkBreakdownTeamMember>
+  team: AiWorkBreakdownTeamMember[]
+  dependencyLabels: Map<string, string>
+  collapsed: Record<string, boolean>
+  setCollapsed: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
+  onUpdateTask: (
+    clientId: string,
+    patch: Partial<
+      Pick<
+        AiWorkBreakdownTask,
+        "selected" | "title" | "estimateHours" | "suggestedAssignee"
+      >
+    >
+  ) => void
+  onPhaseSelection: (phaseName: string, selected: boolean) => void
+}) {
+  const total = flatten(phases).length
+  const selected = flatten(phases).filter((task) => task.selected).length
+  return (
+    <div className="space-y-3">
+      <div className="text-muted-foreground flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <Layers3 className="size-3.5" />
+          <span>
+            Preview · {selected}/{total} selected
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Button
+            type="button"
+            size="xs"
+            variant="ghost"
+            onClick={() => onPhaseSelection("*", true)}
+          >
+            <CheckCheck className="size-3" /> Select all
+          </Button>
+          <Button
+            type="button"
+            size="xs"
+            variant="ghost"
+            onClick={() => onPhaseSelection("*", false)}
+          >
+            <TimerReset className="size-3" /> Deselect all
+          </Button>
+        </div>
+      </div>
+      {phases.map((phase) => {
+        const isCollapsed = collapsed[phase.name] ?? false
+        const phaseSelected = phase.tasks.filter((t) => t.selected).length
+        const phaseAll = phase.tasks.every((t) => t.selected)
+        const phaseNone = phase.tasks.every((t) => !t.selected)
+        const phaseHours = phase.tasks.reduce(
+          (sum, t) => sum + (t.estimateHours || 0),
+          0
+        )
+        return (
+          <Card key={phase.name} className="overflow-hidden">
+            <button
+              type="button"
+              onClick={() =>
+                setCollapsed((c) => ({ ...c, [phase.name]: !isCollapsed }))
+              }
+              className="hover:bg-muted/40 flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                {isCollapsed ? (
+                  <ChevronDown className="size-4" />
+                ) : (
+                  <ChevronUp className="size-4" />
+                )}
+                <span className="text-sm font-semibold">{phase.name}</span>
+                <Badge variant="secondary" className="font-normal">
+                  {phaseSelected}/{phase.tasks.length}
+                </Badge>
+              </div>
+              <div className="text-muted-foreground flex items-center gap-3 text-xs">
+                <span>{humanHours(phaseHours)}</span>
+                <ProgressBar
+                  value={phaseSelected}
+                  total={phase.tasks.length}
+                />
+              </div>
+            </button>
+            {!isCollapsed ? (
+              <CardContent className="space-y-2 p-3 pt-0">
+                <div className="flex items-center justify-between">
+                  <Separator />
+                  <div className="text-muted-foreground flex shrink-0 items-center gap-1 pl-2 text-[11px]">
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="ghost"
+                      disabled={phaseAll}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onPhaseSelection(phase.name, true)
+                      }}
+                    >
+                      Select phase
+                    </Button>
+                    <span>·</span>
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="ghost"
+                      disabled={phaseNone}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onPhaseSelection(phase.name, false)
+                      }}
+                    >
+                      Clear phase
+                    </Button>
+                  </div>
+                </div>
+                {phase.tasks.map((task) => {
+                  const assignee = task.suggestedAssignee
+                    ? teamById.get(task.suggestedAssignee)
+                    : null
+                  return (
+                    <div
+                      key={task.clientId}
+                      className={cn(
+                        "rounded-md border p-3 transition-colors",
+                        !task.selected && "bg-muted/30 opacity-70"
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <Checkbox
+                          checked={task.selected}
+                          onCheckedChange={(value) =>
+                            onUpdateTask(task.clientId, {
+                              selected: value === true,
+                            })
+                          }
+                          aria-label={`Select ${task.title}`}
+                          className="mt-0.5"
+                        />
+                        <div className="flex-1 space-y-1.5">
+                          <Input
+                            value={task.title}
+                            onChange={(e) =>
+                              onUpdateTask(task.clientId, {
+                                title: e.target.value,
+                              })
+                            }
+                            aria-label="Task title"
+                            className="h-8"
+                          />
+                          <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+                            {task.dependsOn.length > 0 ? (
+                              <span className="flex items-center gap-1">
+                                <ArrowRight className="size-3" />
+                                depends on:{" "}
+                                {task.dependsOn
+                                  .map(
+                                    (id) => dependencyLabels.get(id) ?? id
+                                  )
+                                  .join(", ")}
+                              </span>
+                            ) : (
+                              <span>no deps</span>
+                            )}
+                            <span>·</span>
+                            <span>due {task.dueDate}</span>
+                          </div>
+                        </div>
+                        <div className="flex w-full flex-col gap-2 sm:w-56">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-0.5">
+                              <label className="text-muted-foreground text-[10px] uppercase tracking-wide">
+                                hours
+                              </label>
+                              <Input
+                                type="number"
+                                min="0.25"
+                                step="0.25"
+                                value={task.estimateHours}
+                                onChange={(e) =>
+                                  onUpdateTask(task.clientId, {
+                                    estimateHours: Number(
+                                      e.target.value || 0
+                                    ),
+                                  })
+                                }
+                                aria-label="Estimate hours"
+                                className="h-8"
+                              />
+                            </div>
+                            <div className="space-y-0.5">
+                              <label className="text-muted-foreground text-[10px] uppercase tracking-wide">
+                                assignee
+                              </label>
+                              <Select
+                                value={task.suggestedAssignee ?? "none"}
+                                onValueChange={(value) =>
+                                  onUpdateTask(task.clientId, {
+                                    suggestedAssignee:
+                                      value === "none" ? null : value,
+                                  })
+                                }
+                              >
+                                <SelectTrigger
+                                  className="h-8 w-full"
+                                  aria-label="Suggested assignee"
+                                >
+                                  <SelectValue>
+                                    {(value: string) => {
+                                      if (value === "none")
+                                        return "Unassigned"
+                                      const member = teamById.get(value)
+                                      if (!member) return "Unknown"
+                                      return `${member.name} · ${member.openEstimateHours}h`
+                                    }}
+                                  </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">
+                                    Unassigned
+                                  </SelectItem>
+                                  {team.map((member) => (
+                                    <SelectItem
+                                      key={member.id}
+                                      value={member.id}
+                                    >
+                                      {member.name} ·{" "}
+                                      {member.skills.join("/")} ·{" "}
+                                      {member.openEstimateHours}h open
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="text-muted-foreground flex items-center justify-between text-[11px]">
+                            <span>{assignee ? assignee.name : "Unassigned"}</span>
+                            <span className="font-medium text-foreground">
+                              {task.dueDate}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </CardContent>
+            ) : null}
+          </Card>
+        )
+      })}
+    </div>
+  )
+}
+
+function ProgressBar({ value, total }: { value: number; total: number }) {
+  const pct = total > 0 ? Math.round((value / total) * 100) : 0
+  return (
+    <div className="bg-muted relative h-1.5 w-24 overflow-hidden rounded-full">
+      <div
+        className="bg-primary h-full transition-all"
+        style={{ width: `${pct}%` }}
+      />
     </div>
   )
 }
