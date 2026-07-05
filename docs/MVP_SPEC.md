@@ -1,4 +1,4 @@
-# MVP Spec — BoomBigNose Company OS
+# MVP Spec — ABA Energy OS
 
 > AI-native **Company OS** for CRM, project delivery, finance visibility,
 > automation, and management dashboards. This is the **operational layer** — not
@@ -7,7 +7,7 @@
 
 ## Product goal
 
-Give a founder-led AI studio (founder + 2 junior devs) one place to see and run
+Give a founder-led solar rooftop operator (founder-led solar operations team) one place to see and run
 the business: clients and deals, project delivery, money in/out, a reusable
 automation-template library, and a dashboard showing cash, burn, revenue,
 pipeline, and runway. Useful internally first; structured so it can later ship as

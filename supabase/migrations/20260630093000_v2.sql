@@ -1,4 +1,4 @@
--- BoomBigNose Company OS — V2 Batch 1 schema
+-- ABA Energy OS — V2 Batch 1 schema
 -- New tables: audit_log, saved_views, reminders, outbound_events.
 -- Conventions match init_schema: bigint satang (n/a here), org_id on every table,
 -- id uuid / created_at / updated_at, RLS enabled + forced, org-scoped policies via

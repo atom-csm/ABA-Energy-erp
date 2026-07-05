@@ -1,7 +1,7 @@
-# BoomBigNose Company OS vs Odoo — feature comparison & gap plan
+# ABA Energy OS vs Odoo — feature comparison & gap plan
 
-> Odoo is a full modular ERP suite (40+ apps). BoomBigNose Company OS is a
-> deliberately **lightweight, AI-native operational layer** — it hands accounting,
+> Odoo is a full modular ERP suite (40+ apps). ABA Energy OS is a
+> deliberately **lightweight, solar-operations layer** — it hands accounting,
 > tax, inventory, and payroll to FlowAccount / PEAK / Xero (see
 > [`ROADMAP.md`](./ROADMAP.md) non-goals). The goal below is **not** to match Odoo
 > app-for-app, but to close the real gaps *within our chosen scope*.

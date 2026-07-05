@@ -1,4 +1,4 @@
--- BoomBigNose Company OS — V3 Batch 2: team invitations (multi-org UX).
+-- ABA Energy OS — V3 Batch 2: team invitations (multi-org UX).
 -- The data model is already multi-tenant (org_id everywhere); this adds the
 -- invitation flow so an owner/admin can invite teammates by email, and the
 -- invitee accepts by token to gain a membership. Conventions match the rest:

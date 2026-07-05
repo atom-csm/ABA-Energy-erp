@@ -29,7 +29,7 @@
 - ✅ Defense-in-depth: server actions re-derive `org_id` from `requireOrgContext()`
   and never trust a client-supplied org id.
 - ✅ Auth via `@supabase/ssr` httpOnly cookies (no tokens in localStorage).
-- ✅ Demo data is provably fake: `@boombignose.org` / `example.com`, fictional Thai
+- ✅ Demo data is provably fake: `@aba-energy.org` / `example.com`, fictional Thai
   company names, placeholder phone numbers, no tax IDs.
 - ✅ Webhook secret compared in constant-time (`lib/webhooks/verify.ts`); reject on
   missing/mismatch.

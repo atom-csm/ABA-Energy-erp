@@ -1,4 +1,4 @@
-# Open-Core & License Strategy — BoomBigNose Company OS
+# Open-Core & License Strategy — ABA Energy OS
 
 > **Status:** Draft recommendation for review. The founder makes the final call.
 > **Context:** Internal-first AI-native Company OS / lightweight ERP. Possible future open-core play: free **Community Edition** + paid **Pro Edition** (hosted SaaS, advanced AI agents, automation packs, multi-tenant admin, advanced permissions, client portal, FlowAccount/PEAK integration, white-label, support/SLA).
@@ -24,7 +24,7 @@
 
 **Primary strategy: dual-license the Community Edition under AGPLv3, with a commercial license available; keep the Pro Edition proprietary in a separate repo.** (often written **"AGPLv3 OR Commercial"**.)
 
-**Why this fits BoomBigNose's situation:**
+**Why this fits ABA Energy's situation:**
 - **Community adoption with a moat.** AGPL is *genuine* open source, so it earns trust, GitHub stars, and contributors — but the §13 network clause means a cloud provider can't quietly wrap the Community Edition into a competing hosted service without open-sourcing their changes and offering source to users. That neutralizes the "AWS-clones-your-product" risk that pure Apache/MIT leaves wide open.
 - **Built-in upgrade path to revenue.** The companies who *can't* live with AGPL's reciprocity (agencies, white-label resellers, anyone embedding it in a closed product) are exactly your commercial-license / Pro buyers. The license does the qualifying for you.
 - **Small-team friendly.** AGPL is off-the-shelf, well-understood, and needs no custom legal drafting — unlike BUSL's Additional Use Grant, which you'd have to write, defend, and explain. Lower legal-maintenance burden matters with a small team.
@@ -67,7 +67,7 @@
   - **DCO** (`Signed-off-by` per commit): lightweight, no rights transfer; fine for a *single*-license project, but **does not** by itself give you the right to relicense contributions into the commercial half of a dual license.
   - **CLA** (contributors grant you a broad license / copyright assignment): heavier process, but **required** to safely run the dual-license / commercial-exception model, because you must hold sufficient rights to relicense. **For the recommended AGPL-OR-commercial strategy, use a CLA.**
   - Adopt whichever you choose **from the first public commit** — retrofitting consent from past contributors is painful or impossible.
-- **Trademark — separate the code license from the name.** Open-sourcing the code does **not** open-source the **"BoomBigNose"** name or logo. State explicitly that the trademark is **not** licensed under the AGPL, that forks must be **renamed/rebranded** and may not imply endorsement, and reserve "BoomBigNose" for official builds. **Register the BoomBigNose word mark** (and logo) in Thailand, and in any other target market, before a public launch. Apache-2.0 already disclaims trademark grants; with AGPL, add an explicit `TRADEMARK.md` / `NOTICE` to make the same point.
+- **Trademark — separate the code license from the name.** Open-sourcing the code does **not** open-source the **"ABA Energy"** name or logo. State explicitly that the trademark is **not** licensed under the AGPL, that forks must be **renamed/rebranded** and may not imply endorsement, and reserve "ABA Energy" for official builds. **Register the ABA Energy word mark** (and logo) in Thailand, and in any other target market, before a public launch. Apache-2.0 already disclaims trademark grants; with AGPL, add an explicit `TRADEMARK.md` / `NOTICE` to make the same point.
 - **Make the edition split legible.** Ship a top-level `LICENSE` (AGPL) + `LICENSE.commercial` (or a "Commercial license available — contact …" note), a short `COMMUNITY-vs-PRO.md`, and per-directory license headers so contributors and users always know which terms apply to the file in front of them.
 
 ---

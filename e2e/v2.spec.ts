@@ -57,7 +57,7 @@ test("signup enforces the password policy and gates submit", async ({ page }) =>
   await expect(submit).toBeDisabled()
   await expect(page.locator("ul.text-destructive li").first()).toBeVisible()
 
-  await page.getByLabel("Password").fill("BoomDemo123!")
+  await page.getByLabel("Password").fill("AbaDemo123!")
   await expect(submit).toBeEnabled()
 })
 

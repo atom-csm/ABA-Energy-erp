@@ -1,4 +1,4 @@
--- BoomBigNose Company OS — V2 Batch 2 schema
+-- ABA Energy OS — V2 Batch 2 schema
 -- New tables: ai_outputs (cached AI artifacts), accounting_connections +
 -- accounting_sync_map (external book-of-record sync scaffold: FlowAccount/PEAK/Xero).
 -- Conventions match init_schema: org_id everywhere, RLS enabled + forced,

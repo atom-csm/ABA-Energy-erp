@@ -1,4 +1,4 @@
--- BoomBigNose Company OS — initial schema
+-- ABA Energy OS — initial schema
 -- Conventions: money is bigint satang; org_id on every business table;
 -- id uuid / created_at / updated_at on every table (two id exceptions noted).
 

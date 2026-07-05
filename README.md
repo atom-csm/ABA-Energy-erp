@@ -145,9 +145,9 @@ pnpm dev                 # http://localhost:3000
 
 | อีเมล | รหัสผ่าน | บทบาท |
 |---|---|---|
-| `demo@boombignose.org` | `BoomDemo123!` | owner |
-| `nattapong@boombignose.org` | `BoomDemo123!` | member |
-| `praewa@boombignose.org` | `BoomDemo123!` | member |
+| `demo@aba-energy.local` | `AbaDemo123!` | owner |
+| `sales@aba-energy.local` | `AbaDemo123!` | member |
+| `ops@aba-energy.local` | `AbaDemo123!` | member |
 
 > หน้า login มีปุ่ม **"Use demo account"** กดครั้งเดียวเข้าได้เลย
 

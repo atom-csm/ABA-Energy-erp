@@ -1,6 +1,6 @@
-# Database Schema — BoomBigNose Company OS
+# Database Schema — ABA Energy OS
 
-Implementation-ready schema for Supabase Postgres. Internal operational layer for a Thai AI studio: CRM, project delivery, finance visibility, and reusable templates/automation. Internal-first, multi-tenant-ready.
+Implementation-ready schema for Supabase Postgres. Internal operational layer for a Thai solar rooftop operator: CRM, project delivery, finance visibility, and reusable templates/automation. Internal-first, multi-tenant-ready.
 
 ## Locked conventions
 
@@ -217,11 +217,11 @@ create policy invoices_delete on invoices
 RLS would block ordinary seed inserts, so **seed with the service role** (`service_role` bypasses RLS) and use **deterministic, hardcoded UUID literals** so the script re-runs idempotently and every child row points at the same org/user.
 
 1. **Demo org** — insert `organizations` with a fixed literal, e.g. `'00000000-0000-0000-0000-000000000001'`.
-2. **Demo auth user** — create via the Auth Admin API / service role (`auth.admin.createUser`, or `supabase auth` in seed), with a fixed id `'00000000-0000-0000-0000-0000000000aa'` and a known email/password (e.g. `demo@boombignose.org`). The `profiles` row (same id) is created by an `on auth.users` trigger or inserted explicitly.
+2. **Demo auth user** — create via the Auth Admin API / service role (`auth.admin.createUser`, or `supabase auth` in seed), with a fixed id `'00000000-0000-0000-0000-0000000000aa'` and a known email/password (e.g. `demo@aba-energy.local`). The `profiles` row (same id) is created by an `on auth.users` trigger or inserted explicitly.
 3. **Membership** — insert `memberships(user_id = demo user, org_id = demo org, role = 'owner')`. **This single row is what maps the demo login to the demo org** — without it, RLS returns zero rows and the dashboard renders empty even though data exists.
 4. **All demo data** (clients, deals, projects, invoices, templates, …) inserted with the **same `org_id`**, using service role so inserts bypass RLS.
 
-Use `insert … on conflict (id) do nothing` (and `on conflict (user_id, org_id)` for memberships) so the seed is safe to re-run. When QA logs in as `demo@boombignose.org`, their `auth.uid()` resolves through that membership to the demo org and the dashboard populates.
+Use `insert … on conflict (id) do nothing` (and `on conflict (user_id, org_id)` for memberships) so the seed is safe to re-run. When QA logs in as `demo@aba-energy.local`, their `auth.uid()` resolves through that membership to the demo org and the dashboard populates.
 
 ---
 
