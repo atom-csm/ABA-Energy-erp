@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🐘 BoomBigNose Company OS
+# ☀️ ABA Energy OS
 
-### ระบบปฏิบัติการธุรกิจ (Company OS) สำหรับสตูดิโอสาย AI — CRM · ดีล · โปรเจกต์ · การเงิน · ระบบอัตโนมัติ · แดชบอร์ดผู้ก่อตั้ง
+### ระบบปฏิบัติการธุรกิจ (CRM + ERP) สำหรับงานโซลาร์รูฟท็อป — ลูกค้ามุ่งหวัง · สำรวจ · ใบเสนอราคา · ติดตั้ง · ส่งมอบ · บริการหลังการขาย
 
-*"ชั้นปฏิบัติการ" ของการทำธุรกิจ — ไม่ใช่ระบบบัญชี/ภาษี แต่เป็นที่เดียวที่มองเห็นและสั่งงานทั้งบริษัทได้จริง*
+*"ชั้นปฏิบัติการ" ของบริษัทติดตั้งโซลาร์ — ไม่ใช่ระบบบัญชี/ภาษี แต่เป็นที่เดียวที่มองเห็นและสั่งงานทั้งบริษัทได้จริง ตั้งแต่ลูกค้ามุ่งหวังจนถึงหลังติดตั้ง*
 
 <br/>
 
@@ -16,18 +16,18 @@
 [![Tests](https://img.shields.io/badge/tests-125%20passing-brightgreen)](#-คำสั่งที่ใช้บ่อย-scripts)
 [![Status](https://img.shields.io/badge/status-internal%20MVP-blue)](#-สถานะโปรเจกต์)
 [![License](https://img.shields.io/badge/license-proprietary%20·%20open--core%20planned-orange)](./LICENSE.md)
-![Made in Thailand](https://img.shields.io/badge/made%20in-Bangkok%20🇹🇭-ED1C24)
+![Made in Thailand](https://img.shields.io/badge/made%20in-Khon%20Kaen%20🇹🇭-ED1C24)
 
 <br/>
 
-[**โรดแมป**](#-โรดแมป-roadmap) · [**เอกสาร**](./docs) · [**รายงานบั๊ก**](https://github.com/Boom-Vitt/boombignose-erp/issues) · [**ขอฟีเจอร์**](https://github.com/Boom-Vitt/boombignose-erp/issues/new)
+[**โรดแมป**](#-โรดแมป-roadmap) · [**เอกสาร**](./docs) · [**รายงานบั๊ก**](https://github.com/atom-csm/ABA-Energy-erp/issues) · [**ขอฟีเจอร์**](https://github.com/atom-csm/ABA-Energy-erp/issues/new)
 
 </div>
 
 <!-- แนะนำ: ใส่ภาพหน้าจอแดชบอร์ดตรงนี้ (เช่น docs/cover.png) เพื่อให้หน้า repo ดูสมบูรณ์ -->
 
 > [!NOTE]
-> BoomBigNose Company OS คือ **"ระบบปฏิบัติการของบริษัท"** ไม่ใช่ระบบบัญชี/ใบกำกับภาษีตามกฎหมาย
+> ABA Energy OS คือ **"ระบบปฏิบัติการของบริษัทติดตั้งโซลาร์"** ไม่ใช่ระบบบัญชี/ใบกำกับภาษีตามกฎหมาย
 > เรื่องบัญชียังคงอยู่กับ **FlowAccount / PEAK / Xero** (จะเชื่อมต่อในภายหลัง) — โปรดักต์นี้คือ *ชั้นปฏิบัติการ* ไม่ใช่ *สมุดบัญชีหลัก*
 
 ---
@@ -52,13 +52,15 @@
 
 ## 🎯 เกี่ยวกับโปรเจกต์ (About)
 
-BoomBigNose Company OS เป็น **Company OS / ERP แบบเบา ที่ออกแบบมาแนว AI-native** สำหรับสตูดิโอสาย AI education + workflow automation ในไทย (ผู้ก่อตั้ง + ทีมเล็ก) ให้ทุกอย่างของธุรกิจอยู่ในที่เดียว: ลูกค้าและดีล, การส่งมอบโปรเจกต์, เงินเข้า–ออก, คลังเทมเพลตระบบอัตโนมัติที่นำกลับมาใช้ซ้ำได้ และแดชบอร์ดที่แสดง เงินสด / burn / รายได้ / pipeline / runway
+ABA Energy OS เป็น **CRM + ERP แบบเบา** สำหรับ **ABA Energy** บริษัทติดตั้งโซลาร์รูฟท็อปในขอนแก่น / ภาคอีสาน ให้ทุกอย่างของธุรกิจอยู่ในที่เดียว: ลูกค้ามุ่งหวังและดีลขาย, การส่งมอบงานติดตั้ง, เงินเข้า–ออก (มัดจำ/งวดงาน), คลังเทมเพลต/เวิร์กโฟลว์อัตโนมัติที่นำกลับมาใช้ซ้ำได้ และแดชบอร์ดที่แสดง เงินสด / burn / รายได้ / pipeline / runway
+
+**ขั้นตอนงานหลัก (Core flow):** ลูกค้ามุ่งหวัง (Lead) → คัดกรอง (Qualification) → สำรวจหน้างาน (Survey) → ใบเสนอราคา (Proposal) → ติดตาม (Follow-up) → มัดจำ (Deposit) → ติดตั้ง (Installation) → ส่งมอบ (Handover) → บริการหลังการขาย (After-sale)
 
 ออกแบบให้ **ใช้ภายในบริษัทก่อน (dogfooding)** แต่วางรากฐานให้สะอาด (`org_id` ทุกตาราง, ขอบเขตโมดูลชัดเจน) เพื่อให้ต่อยอดเป็นสินค้า **open-core (Community + Pro)** ได้โดยไม่ต้องเขียนใหม่
 
 **สร้างมาเพื่อใคร**
-- 👑 **ผู้ก่อตั้ง–ผู้บริหาร** (หลัก): แดชบอร์ดเดียวเห็นทั้ง pipeline, การส่งมอบงาน และกระแสเงินสด
-- 🛠️ **จูเนียร์เดฟ**: หน้า "งานของฉัน" + ยิงเทมเพลตอัตโนมัติที่นำกลับมาใช้ซ้ำได้
+- 👑 **ผู้บริหาร–เจ้าของบริษัท** (หลัก): แดชบอร์ดเดียวเห็นทั้ง pipeline งานขาย, สถานะติดตั้ง และกระแสเงินสด
+- 🛠️ **ทีมขาย–ทีมหน้างาน**: หน้า "งานของฉัน" + ยิงเทมเพลตอัตโนมัติ (นัดสำรวจ, ติดตามลูกค้า, แจ้งเตือนติดตั้ง)
 
 ---
 
@@ -115,8 +117,8 @@ BoomBigNose Company OS เป็น **Company OS / ERP แบบเบา ที
 
 ```bash
 # 1) โคลนโปรเจกต์
-git clone https://github.com/Boom-Vitt/boombignose-erp.git
-cd boombignose-erp
+git clone https://github.com/atom-csm/ABA-Energy-erp.git
+cd ABA-Energy-erp
 
 # 2) ติดตั้ง dependencies
 pnpm install
@@ -236,7 +238,7 @@ docs/                 MVP_SPEC, ROADMAP, OPEN_CORE_STRATEGY, PDPA_SECURITY_NOTES
 
 ยินดีรับ issue และข้อเสนอแนะ! เนื่องจาก **ยังไม่ได้เลือกสัญญาอนุญาตอย่างเป็นทางการ** (ดูด้านล่าง) เราจะเปิดรับ pull request จากภายนอกหลังจากตั้งค่าไลเซนส์ + CLA เรียบร้อยแล้ว ระหว่างนี้:
 
-1. เปิด [issue](https://github.com/Boom-Vitt/boombignose-erp/issues) เพื่อคุยเรื่องบั๊กหรือฟีเจอร์ก่อน
+1. เปิด [issue](https://github.com/atom-csm/ABA-Energy-erp/issues) เพื่อคุยเรื่องบั๊กหรือฟีเจอร์ก่อน
 2. ให้ `pnpm lint && pnpm typecheck && pnpm test && pnpm build` ผ่านทั้งหมด
 3. เขียนโค้ดให้เข้ากับสไตล์เดิม และคง business logic ที่ต้องเทสต์ให้อยู่ใน `lib/` แบบ pure
 
@@ -257,9 +259,9 @@ docs/                 MVP_SPEC, ROADMAP, OPEN_CORE_STRATEGY, PDPA_SECURITY_NOTES
 
 ทิศทางที่วางไว้คือ open-core แบบ **dual license (AGPLv3 หรือ Commercial)** — รายละเอียดที่ [`LICENSE.md`](./LICENSE.md) และ [`docs/OPEN_CORE_STRATEGY.md`](./docs/OPEN_CORE_STRATEGY.md)
 
-Copyright © 2026 BoomBigNose AI Co., Ltd.
+Copyright © 2026 ABA Energy Co., Ltd.
 
 <div align="center">
 <br/>
-สร้างด้วย ❤️ ที่กรุงเทพฯ — โดยทีม <b>BoomBigNose</b>
+สร้างด้วย ❤️ ที่ขอนแก่น — โดยทีม <b>ABA Energy</b>
 </div>

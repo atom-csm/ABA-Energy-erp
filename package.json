@@ -1,7 +1,8 @@
 {
-  "name": "boombignose-company-os",
+  "name": "aba-energy-os",
   "version": "0.1.0",
   "private": true,
+  "description": "CRM + ERP operating system for solar rooftop operations (ABA Energy, Khon Kaen / Northeast Thailand).",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

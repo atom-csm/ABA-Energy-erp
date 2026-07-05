@@ -14,7 +14,7 @@ const doc: PrintableDocument = {
   kind: "Invoice",
   number: "INV-2026-001",
   status: "sent",
-  orgName: "BoomBigNose",
+  orgName: "ABA Energy",
   clientName: "Acme Co",
   issueDate: "2026-07-01",
   dueDate: "2026-07-31",

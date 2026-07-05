@@ -14,7 +14,7 @@
 const RESEND_ENDPOINT = "https://api.resend.com/emails"
 
 /** Sensible default from-address; overridable via EMAIL_FROM. */
-export const DEFAULT_EMAIL_FROM = "BoomBigNose <onboarding@resend.dev>"
+export const DEFAULT_EMAIL_FROM = "ABA Energy <onboarding@resend.dev>"
 
 export type SendEmailInput = {
   to: string
