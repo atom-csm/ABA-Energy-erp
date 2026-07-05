@@ -74,7 +74,7 @@ export default async function ProjectDetailPage({
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, name, status, deadline, budget_satang, owner, client_id, client:clients(name)"
+      "id, name, status, deadline, budget_satang, owner, client_id, installation_start_date, installation_end_date, installation_crew, deposit_received, handover_completed, warranty_registered, installation_checklist, client:clients(name)"
     )
     .eq("id", id)
     .maybeSingle()
@@ -205,6 +205,21 @@ export default async function ProjectDetailPage({
             </Field>
             <Field icon={User} label="Owner">
               {p.owner ?? "—"}
+            </Field>
+          </div>
+          <Separator />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Field icon={CalendarClock} label="Install window">
+              {[p.installation_start_date, p.installation_end_date].filter(Boolean).join(" → ") || "—"}
+            </Field>
+            <Field icon={User} label="Crew">
+              {p.installation_crew ?? "—"}
+            </Field>
+            <Field icon={Wallet} label="Deposit">
+              {p.deposit_received ? "Received" : "Pending"}
+            </Field>
+            <Field icon={Flag} label="Handover / warranty">
+              {[p.handover_completed ? "Handover done" : "Handover pending", p.warranty_registered ? "Warranty registered" : "Warranty pending"].join(" · ")}
             </Field>
           </div>
         </CardContent>

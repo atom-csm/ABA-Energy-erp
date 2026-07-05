@@ -58,6 +58,12 @@ const FormSchema = z.object({
   deadline: z.string(),
   budgetBaht: z.coerce.number().min(0, "Budget cannot be negative"),
   owner: z.string(),
+  installationStartDate: z.string(),
+  installationEndDate: z.string(),
+  installationCrew: z.string(),
+  depositReceived: z.boolean(),
+  handoverCompleted: z.boolean(),
+  warrantyRegistered: z.boolean(),
 })
 
 type FormInput = z.input<typeof FormSchema>
@@ -85,6 +91,12 @@ export function ProjectForm({
       deadline: "",
       budgetBaht: 0,
       owner: "",
+      installationStartDate: "",
+      installationEndDate: "",
+      installationCrew: "",
+      depositReceived: false,
+      handoverCompleted: false,
+      warrantyRegistered: false,
       ...defaultValues,
     },
   })
@@ -232,6 +244,23 @@ export function ProjectForm({
             </FormItem>
           )}
         />
+
+        <section className="space-y-4 rounded-lg border p-4">
+          <div>
+            <h2 className="text-sm font-semibold">Installation tracker</h2>
+            <p className="text-muted-foreground text-xs">Track crew, install dates, deposit, handover, and warranty readiness.</p>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FormField control={form.control} name="installationStartDate" render={({ field }) => (<FormItem><FormLabel>Install start</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="installationEndDate" render={({ field }) => (<FormItem><FormLabel>Install end</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
+          </div>
+          <FormField control={form.control} name="installationCrew" render={({ field }) => (<FormItem><FormLabel>Crew / contractor</FormLabel><FormControl><Input placeholder="ABA install team / contractor" {...field} /></FormControl><FormMessage /></FormItem>)} />
+          <div className="grid gap-5 sm:grid-cols-3">
+            <FormField control={form.control} name="depositReceived" render={({ field }) => (<FormItem><FormLabel>Deposit received</FormLabel><Select value={field.value ? "yes" : "no"} onValueChange={(v)=>field.onChange(v === "yes")}><FormControl><SelectTrigger className="w-full"><SelectValue /></SelectTrigger></FormControl><SelectContent><SelectItem value="no">No</SelectItem><SelectItem value="yes">Yes</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="handoverCompleted" render={({ field }) => (<FormItem><FormLabel>Handover done</FormLabel><Select value={field.value ? "yes" : "no"} onValueChange={(v)=>field.onChange(v === "yes")}><FormControl><SelectTrigger className="w-full"><SelectValue /></SelectTrigger></FormControl><SelectContent><SelectItem value="no">No</SelectItem><SelectItem value="yes">Yes</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="warrantyRegistered" render={({ field }) => (<FormItem><FormLabel>Warranty registered</FormLabel><Select value={field.value ? "yes" : "no"} onValueChange={(v)=>field.onChange(v === "yes")}><FormControl><SelectTrigger className="w-full"><SelectValue /></SelectTrigger></FormControl><SelectContent><SelectItem value="no">No</SelectItem><SelectItem value="yes">Yes</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
+          </div>
+        </section>
 
         <div className="flex gap-2">
           <Button type="submit" disabled={form.formState.isSubmitting}>

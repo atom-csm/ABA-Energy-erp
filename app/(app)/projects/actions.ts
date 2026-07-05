@@ -39,6 +39,12 @@ const ProjectInput = z.object({
   budgetBaht: z.coerce.number().min(0, "Budget cannot be negative").optional(),
   owner: optionalText,
   dealId: optionalId,
+  installationStartDate: optionalDate,
+  installationEndDate: optionalDate,
+  installationCrew: optionalText,
+  depositReceived: z.boolean().optional(),
+  handoverCompleted: z.boolean().optional(),
+  warrantyRegistered: z.boolean().optional(),
 })
 
 export async function createProject(
@@ -49,8 +55,21 @@ export async function createProject(
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" }
   }
-  const { name, clientId, status, deadline, budgetBaht, owner, dealId } =
-    parsed.data
+  const {
+    name,
+    clientId,
+    status,
+    deadline,
+    budgetBaht,
+    owner,
+    dealId,
+    installationStartDate,
+    installationEndDate,
+    installationCrew,
+    depositReceived,
+    handoverCompleted,
+    warrantyRegistered,
+  } = parsed.data
 
   const supabase = await createSupabaseClient()
   const { data, error } = await supabase
@@ -65,6 +84,12 @@ export async function createProject(
         budgetBaht !== undefined ? bahtToSatang(budgetBaht) : null,
       owner: owner ?? null,
       deal_id: dealId,
+      installation_start_date: installationStartDate,
+      installation_end_date: installationEndDate,
+      installation_crew: installationCrew ?? null,
+      deposit_received: depositReceived ?? false,
+      handover_completed: handoverCompleted ?? false,
+      warranty_registered: warrantyRegistered ?? false,
     })
     .select("id")
     .single()
@@ -87,8 +112,21 @@ export async function updateProject(
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" }
   }
-  const { id, name, clientId, status, deadline, budgetBaht, owner } =
-    parsed.data
+  const {
+    id,
+    name,
+    clientId,
+    status,
+    deadline,
+    budgetBaht,
+    owner,
+    installationStartDate,
+    installationEndDate,
+    installationCrew,
+    depositReceived,
+    handoverCompleted,
+    warrantyRegistered,
+  } = parsed.data
 
   const supabase = await createSupabaseClient()
   const { error } = await supabase
@@ -101,6 +139,12 @@ export async function updateProject(
       budget_satang:
         budgetBaht !== undefined ? bahtToSatang(budgetBaht) : null,
       owner: owner ?? null,
+      installation_start_date: installationStartDate,
+      installation_end_date: installationEndDate,
+      installation_crew: installationCrew ?? null,
+      deposit_received: depositReceived ?? false,
+      handover_completed: handoverCompleted ?? false,
+      warranty_registered: warrantyRegistered ?? false,
     })
     .eq("id", id)
     .eq("org_id", ctx.orgId)

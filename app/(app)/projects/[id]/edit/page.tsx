@@ -28,7 +28,7 @@ export default async function EditProjectPage({
 
   const { data: project } = await supabase
     .from("projects")
-    .select("id, name, client_id, status, deadline, budget_satang, owner")
+    .select("id, name, client_id, status, deadline, budget_satang, owner, installation_start_date, installation_end_date, installation_crew, deposit_received, handover_completed, warranty_registered")
     .eq("id", id)
     .maybeSingle()
 
@@ -48,6 +48,12 @@ export default async function EditProjectPage({
     budgetBaht:
       project.budget_satang != null ? satangToBaht(project.budget_satang) : 0,
     owner: project.owner ?? "",
+    installationStartDate: project.installation_start_date ?? "",
+    installationEndDate: project.installation_end_date ?? "",
+    installationCrew: project.installation_crew ?? "",
+    depositReceived: project.deposit_received ?? false,
+    handoverCompleted: project.handover_completed ?? false,
+    warrantyRegistered: project.warranty_registered ?? false,
   }
 
   async function action(values: ProjectFormValues) {

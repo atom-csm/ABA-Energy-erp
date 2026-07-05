@@ -983,12 +983,19 @@ export type Database = {
           created_at: string
           deadline: string | null
           deal_id: string | null
+          deposit_received: boolean
+          handover_completed: boolean
           id: string
+          installation_checklist: Json
+          installation_crew: string | null
+          installation_end_date: string | null
+          installation_start_date: string | null
           name: string
           org_id: string
           owner: string | null
           status: Database["public"]["Enums"]["project_status"]
           updated_at: string
+          warranty_registered: boolean
         }
         Insert: {
           budget_satang?: number | null
@@ -996,12 +1003,19 @@ export type Database = {
           created_at?: string
           deadline?: string | null
           deal_id?: string | null
+          deposit_received?: boolean
+          handover_completed?: boolean
           id?: string
+          installation_checklist?: Json
+          installation_crew?: string | null
+          installation_end_date?: string | null
+          installation_start_date?: string | null
           name: string
           org_id: string
           owner?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           updated_at?: string
+          warranty_registered?: boolean
         }
         Update: {
           budget_satang?: number | null
@@ -1009,12 +1023,19 @@ export type Database = {
           created_at?: string
           deadline?: string | null
           deal_id?: string | null
+          deposit_received?: boolean
+          handover_completed?: boolean
           id?: string
+          installation_checklist?: Json
+          installation_crew?: string | null
+          installation_end_date?: string | null
+          installation_start_date?: string | null
           name?: string
           org_id?: string
           owner?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           updated_at?: string
+          warranty_registered?: boolean
         }
         Relationships: [
           {
@@ -1182,6 +1203,15 @@ export type Database = {
           org_id: string
           owner: string | null
           project_id: string | null
+          system_size_kwp: number | null
+          panel_model: string | null
+          inverter_model: string | null
+          battery_option: string | null
+          warranty_years: number | null
+          payback_years: number | null
+          proposal_assumptions: string | null
+          included_scope: string | null
+          excluded_scope: string | null
           status: Database["public"]["Enums"]["quote_status"]
           subtotal_satang: number
           total_satang: number
@@ -1200,6 +1230,15 @@ export type Database = {
           org_id: string
           owner?: string | null
           project_id?: string | null
+          system_size_kwp?: number | null
+          panel_model?: string | null
+          inverter_model?: string | null
+          battery_option?: string | null
+          warranty_years?: number | null
+          payback_years?: number | null
+          proposal_assumptions?: string | null
+          included_scope?: string | null
+          excluded_scope?: string | null
           status?: Database["public"]["Enums"]["quote_status"]
           subtotal_satang?: number
           total_satang?: number
@@ -1218,6 +1257,15 @@ export type Database = {
           org_id?: string
           owner?: string | null
           project_id?: string | null
+          system_size_kwp?: number | null
+          panel_model?: string | null
+          inverter_model?: string | null
+          battery_option?: string | null
+          warranty_years?: number | null
+          payback_years?: number | null
+          proposal_assumptions?: string | null
+          included_scope?: string | null
+          excluded_scope?: string | null
           status?: Database["public"]["Enums"]["quote_status"]
           subtotal_satang?: number
           total_satang?: number
@@ -1476,6 +1524,91 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solar_surveys: {
+        Row: {
+          completed_date: string | null
+          created_at: string
+          deal_id: string | null
+          id: string
+          main_breaker_amp: number | null
+          meter_phase: string | null
+          org_id: string
+          photo_folder_url: string | null
+          project_id: string | null
+          result_summary: string | null
+          roof_area_sqm: number | null
+          roof_type: string | null
+          scheduled_date: string | null
+          shading_notes: string | null
+          status: string
+          structural_notes: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_date?: string | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          main_breaker_amp?: number | null
+          meter_phase?: string | null
+          org_id: string
+          photo_folder_url?: string | null
+          project_id?: string | null
+          result_summary?: string | null
+          roof_area_sqm?: number | null
+          roof_type?: string | null
+          scheduled_date?: string | null
+          shading_notes?: string | null
+          status?: string
+          structural_notes?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_date?: string | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          main_breaker_amp?: number | null
+          meter_phase?: string | null
+          org_id?: string
+          photo_folder_url?: string | null
+          project_id?: string | null
+          result_summary?: string | null
+          roof_area_sqm?: number | null
+          roof_type?: string | null
+          scheduled_date?: string | null
+          shading_notes?: string | null
+          status?: string
+          structural_notes?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solar_surveys_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solar_surveys_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solar_surveys_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]

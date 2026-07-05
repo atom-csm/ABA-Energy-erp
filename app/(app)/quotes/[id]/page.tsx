@@ -57,7 +57,7 @@ export default async function QuoteDetailPage({
     supabase
       .from("quotes")
       .select(
-        "id, number, status, issue_date, valid_until, subtotal_satang, discount_satang, total_satang, notes, client_id, project_id, converted_invoice_id, clients(name), projects(name)"
+        "id, number, status, issue_date, valid_until, subtotal_satang, discount_satang, total_satang, system_size_kwp, panel_model, inverter_model, battery_option, warranty_years, payback_years, proposal_assumptions, included_scope, excluded_scope, notes, client_id, project_id, converted_invoice_id, clients(name), projects(name)"
       )
       .eq("id", id)
       .maybeSingle(),
@@ -94,6 +94,15 @@ export default async function QuoteDetailPage({
     issue_date: quote.issue_date ?? "",
     valid_until: quote.valid_until ?? "",
     discountBaht: satangToBaht(quote.discount_satang),
+    systemSizeKwp: quote.system_size_kwp ?? 0,
+    panelModel: quote.panel_model ?? "",
+    inverterModel: quote.inverter_model ?? "",
+    batteryOption: quote.battery_option ?? "",
+    warrantyYears: quote.warranty_years ?? 0,
+    paybackYears: quote.payback_years ?? 0,
+    proposalAssumptions: quote.proposal_assumptions ?? "",
+    includedScope: quote.included_scope ?? "",
+    excludedScope: quote.excluded_scope ?? "",
     notes: quote.notes ?? "",
   }
 
@@ -142,6 +151,12 @@ export default async function QuoteDetailPage({
             <Field label="Valid until" value={quote.valid_until ?? "—"} />
             <Field label="Client" value={quote.clients?.name ?? "—"} />
             <Field label="Project" value={quote.projects?.name ?? "—"} />
+            <Field label="System size" value={quote.system_size_kwp ? `${quote.system_size_kwp} kWp` : "—"} />
+            <Field label="Panel" value={quote.panel_model ?? "—"} />
+            <Field label="Inverter" value={quote.inverter_model ?? "—"} />
+            <Field label="Battery / EV" value={quote.battery_option ?? "—"} />
+            <Field label="Warranty" value={quote.warranty_years ? `${quote.warranty_years} years` : "—"} />
+            <Field label="Payback" value={quote.payback_years ? `${quote.payback_years} years` : "—"} />
             {quote.converted_invoice_id ? (
               <Field
                 label="Converted invoice"
