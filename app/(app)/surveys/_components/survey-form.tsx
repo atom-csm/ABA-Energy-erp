@@ -53,22 +53,6 @@ const Schema = z.object({
 export type SurveyFormValues = z.output<typeof Schema>
 export type Option = { id: string; label: string }
 
-function NumberInput({ field }: { field: { name: string; value: unknown; onChange: (...event: unknown[]) => void; onBlur: () => void; ref: React.Ref<HTMLInputElement> } }) {
-  return (
-    <Input
-      type="number"
-      inputMode="decimal"
-      min={0}
-      step="0.01"
-      name={field.name}
-      ref={field.ref}
-      onBlur={field.onBlur}
-      value={(field.value ?? "") as number | string}
-      onChange={field.onChange}
-    />
-  )
-}
-
 export function SurveyForm({
   action,
   deals,
@@ -137,9 +121,9 @@ export function SurveyForm({
 
         <div className="grid gap-5 sm:grid-cols-2">
           <FormField control={form.control} name="roofType" render={({ field }) => (<FormItem><FormLabel>Roof type</FormLabel><FormControl><Input placeholder="Metal sheet, tile, flat roof…" {...field} /></FormControl><FormMessage /></FormItem>)} />
-          <FormField control={form.control} name="roofAreaSqm" render={({ field }) => (<FormItem><FormLabel>Roof area (sqm)</FormLabel><FormControl><NumberInput field={field} /></FormControl><FormMessage /></FormItem>)} />
+          <FormField control={form.control} name="roofAreaSqm" render={({ field: { value, ...field } }) => (<FormItem><FormLabel>Roof area (sqm)</FormLabel><FormControl><Input type="number" inputMode="decimal" min={0} step="0.01" {...field} value={(value ?? "") as string | number} /></FormControl><FormMessage /></FormItem>)} />
           <FormField control={form.control} name="meterPhase" render={({ field }) => (<FormItem><FormLabel>Meter phase</FormLabel><FormControl><Input placeholder="1-phase / 3-phase" {...field} /></FormControl><FormMessage /></FormItem>)} />
-          <FormField control={form.control} name="mainBreakerAmp" render={({ field }) => (<FormItem><FormLabel>Main breaker (A)</FormLabel><FormControl><NumberInput field={field} /></FormControl><FormMessage /></FormItem>)} />
+          <FormField control={form.control} name="mainBreakerAmp" render={({ field: { value, ...field } }) => (<FormItem><FormLabel>Main breaker (A)</FormLabel><FormControl><Input type="number" inputMode="numeric" min={0} step="1" {...field} value={(value ?? "") as string | number} /></FormControl><FormMessage /></FormItem>)} />
         </div>
 
         <FormField control={form.control} name="photoFolderUrl" render={({ field }) => (<FormItem><FormLabel>Photo folder URL</FormLabel><FormControl><Input placeholder="Google Drive / Supabase Storage URL" {...field} /></FormControl><FormMessage /></FormItem>)} />
