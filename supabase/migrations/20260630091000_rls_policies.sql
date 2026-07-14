@@ -1,4 +1,4 @@
--- BoomBigNose Company OS — RLS policies, membership helpers, new-user trigger.
+-- ABA Energy OS — RLS policies, membership helpers, new-user trigger.
 -- Isolation is enforced HERE (not in app code). Every table: enable + force RLS.
 
 -- ── Membership helpers (SECURITY DEFINER → recursion-safe) ──────────────────

@@ -16,9 +16,9 @@ const fontMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "BoomBigNose Company OS",
+  title: "ABA Energy OS",
   description:
-    "AI-native Company OS — CRM, project delivery, finance visibility, automation, and management dashboards.",
+    "CRM + ERP operating system for solar rooftop operations — leads, surveys, proposals, installation, handover, and after-sale.",
 }
 
 export default function RootLayout({

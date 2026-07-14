@@ -1,4 +1,4 @@
--- BoomBigNose Company OS — V3 Batch 3: client portal share tokens.
+-- ABA Energy OS — V3 Batch 3: client portal share tokens.
 -- A per-client, opt-in, unguessable token grants a read-only portal at
 -- /portal/[token] where the client can see their quotes, invoices, and projects
 -- and take a couple of actions (accept a quote, mark an invoice paid). The portal

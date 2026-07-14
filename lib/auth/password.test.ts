@@ -4,7 +4,7 @@ import { validatePassword, PASSWORD_MIN_LENGTH } from "@/lib/auth/password"
 
 describe("validatePassword", () => {
   it("accepts a strong password", () => {
-    const result = validatePassword("BoomDemo123!")
+    const result = validatePassword("AbaDemo123!")
     expect(result.ok).toBe(true)
     expect(result.issues).toEqual([])
   })

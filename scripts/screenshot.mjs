@@ -1,6 +1,6 @@
 import { chromium } from "@playwright/test"
 
-const OUT = process.env.SHOT_DIR || "/private/tmp/claude-501/-Users-boomvitt-Desktop-boombignose-erp/d41c5d4c-7aae-402c-804b-a062a1a825c9/scratchpad"
+const OUT = process.env.SHOT_DIR || "/tmp/aba-energy-os-screenshots"
 const base = "http://localhost:3000"
 
 const browser = await chromium.launch()

@@ -1,4 +1,4 @@
-# Security & PDPA Notes — BoomBigNose Company OS
+# Security & PDPA Notes — ABA Energy OS
 
 **Scope & framing.** This is a *guardrails-for-the-V1-build* document, not an audit of existing code — the repo is currently a skeleton (no `package.json`, no migrations, no `.env.example`, empty `supabase/`). The one real artifact, `.gitignore`, already ignores `.env*` and tracks `.env.example` correctly — but `.env.example` itself doesn't exist yet, so creating it is a real task.
 

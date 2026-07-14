@@ -40,6 +40,15 @@ export default async function NewQuotePage() {
     issue_date: todayISO(),
     valid_until: "",
     discountBaht: 0,
+    systemSizeKwp: 0,
+    panelModel: "",
+    inverterModel: "",
+    batteryOption: "",
+    warrantyYears: 0,
+    paybackYears: 0,
+    proposalAssumptions: "",
+    includedScope: "",
+    excludedScope: "",
     notes: "",
   }
 

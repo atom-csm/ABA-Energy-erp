@@ -44,7 +44,7 @@ wrong secret returns `401 { "error": "unauthorized" }`.
 curl -X POST http://localhost:3000/api/webhooks/n8n/followup \
   -H "Content-Type: application/json" \
   -H "X-Webhook-Secret: $N8N_WEBHOOK_SECRET" \
-  -d '{"orgSlug":"boombignose"}'
+  -d '{"orgSlug":"aba-energy"}'
 # → 200 { "ok": true, "event": "followup", ... }
 ```
 

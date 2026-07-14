@@ -1,4 +1,4 @@
--- BoomBigNose Company OS — V3 Batch 1 schema (Odoo feature-gap closers)
+-- ABA Energy OS — V3 Batch 1 schema (Odoo feature-gap closers)
 -- New: quotations/sales-orders (quotes + quote_items), invoice line items
 -- (invoice_items), timesheets (time_entries), and recurring billing
 -- (subscriptions). Conventions match init_schema: money is bigint satang,

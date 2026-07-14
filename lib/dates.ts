@@ -31,3 +31,13 @@ export function daysUntil(dateISO: string, todayISOStr: string): number {
   const target = Date.parse(`${dateISO}T00:00:00Z`)
   return Math.round((target - today) / 86_400_000)
 }
+
+/**
+ * Deterministic, locale-stable datetime string for SSR/CSR use.
+ * 'YYYY-MM-DD HH:mm' in the app timezone. Avoids the React hydration mismatch
+ * that happens when server and client render `toLocaleString()` with
+ * different default locales / timezones.
+ */
+export function formatDateTime(instant: string | Date, tz: string = APP_TZ): string {
+  return formatInTimeZone(instant, tz, "yyyy-MM-dd HH:mm")
+}

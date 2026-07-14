@@ -10,6 +10,7 @@ import {
   User,
   Building2,
   Clock,
+  FileSignature,
 } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/server"
@@ -34,9 +35,10 @@ import type { Enums } from "@/lib/types/database"
 import { deadlineMeta, formatDate } from "../_lib/dates"
 import { StatusSelect } from "../_components/status-select"
 import { TaskToggle, MilestoneToggle } from "../_components/toggle-check"
-import { AddTaskForm } from "../_components/add-task-form"
+import { AddTaskForm, AiWorkBreakdownPanel } from "../_components/add-task-form"
 import { AddMilestoneForm } from "../_components/add-milestone-form"
 import { LogTimeForm } from "@/app/(app)/timesheets/_components/log-time-form"
+import { HandoverEvidenceSection } from "../_components/handover-evidence-section"
 
 export const dynamic = "force-dynamic"
 
@@ -74,7 +76,7 @@ export default async function ProjectDetailPage({
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, name, status, deadline, budget_satang, owner, client_id, client:clients(name)"
+      "id, name, status, deadline, budget_satang, owner, client_id, installation_start_date, installation_end_date, installation_crew, deposit_received, handover_completed, warranty_registered, installation_checklist, client:clients(name)"
     )
     .eq("id", id)
     .maybeSingle()
@@ -92,6 +94,7 @@ export default async function ProjectDetailPage({
     { data: invoicesData },
     { data: costsData },
     { data: timeData },
+    { data: handoverData },
   ] = await Promise.all([
     supabase
       .from("project_tasks")
@@ -117,6 +120,11 @@ export default async function ProjectDetailPage({
       .from("time_entries")
       .select("project_id, minutes, billable, rate_satang")
       .eq("project_id", id),
+    supabase
+      .from("project_handover_evidence")
+      .select("id, kind, note, evidence_url, signed_by, signed_at, created_by, created_at")
+      .eq("project_id", id)
+      .order("created_at", { ascending: false }),
   ])
 
   const tasks = (tasksData ?? []) as Array<{
@@ -143,6 +151,16 @@ export default async function ProjectDetailPage({
     minutes: number
     billable: boolean
     rate_satang: number | null
+  }>
+  const handover = (handoverData ?? []) as Array<{
+    id: string
+    kind: "handover" | "warranty" | "commissioning" | "after_sale"
+    note: string | null
+    evidence_url: string | null
+    signed_by: string | null
+    signed_at: string | null
+    created_by: string | null
+    created_at: string
   }>
 
   const loggedMinutes = totalMinutes(timeEntries)
@@ -207,6 +225,21 @@ export default async function ProjectDetailPage({
               {p.owner ?? "—"}
             </Field>
           </div>
+          <Separator />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Field icon={CalendarClock} label="Install window">
+              {[p.installation_start_date, p.installation_end_date].filter(Boolean).join(" → ") || "—"}
+            </Field>
+            <Field icon={User} label="Crew">
+              {p.installation_crew ?? "—"}
+            </Field>
+            <Field icon={Wallet} label="Deposit">
+              {p.deposit_received ? "Received" : "Pending"}
+            </Field>
+            <Field icon={Flag} label="Handover / warranty">
+              {[p.handover_completed ? "Handover done" : "Handover pending", p.warranty_registered ? "Warranty registered" : "Warranty pending"].join(" · ")}
+            </Field>
+          </div>
         </CardContent>
       </Card>
 
@@ -241,6 +274,11 @@ export default async function ProjectDetailPage({
         </CardHeader>
         <CardContent className="space-y-4">
           <AddTaskForm projectId={p.id} />
+          <AiWorkBreakdownPanel
+            projectId={p.id}
+            projectDeadline={p.deadline}
+            team={[]}
+          />
           {tasks.length === 0 ? (
             <EmptyState
               icon={ListChecks}
@@ -364,6 +402,18 @@ export default async function ProjectDetailPage({
             defaultWorkDate={todayISO()}
             lockProject
           />
+        </CardContent>
+      </Card>
+
+      {/* Handover / warranty evidence */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileSignature className="size-4" /> Handover & warranty evidence
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <HandoverEvidenceSection projectId={p.id} items={handover} />
         </CardContent>
       </Card>
     </div>

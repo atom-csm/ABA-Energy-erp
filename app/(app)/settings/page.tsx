@@ -243,7 +243,7 @@ export default async function SettingsPage() {
         <CardHeader>
           <CardTitle className="text-base">Integrations</CardTitle>
           <CardDescription>
-            Connect BoomBigNose to the tools you already use.
+            Connect ABA Energy OS to the tools you already use.
           </CardDescription>
         </CardHeader>
         <CardContent>

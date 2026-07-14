@@ -72,7 +72,7 @@ export default async function InvitePage({
           </CardTitle>
           <CardDescription>
             {isValid
-              ? `You've been invited to join ${orgName} as ${invite!.role} on BoomBigNose Company OS.`
+              ? `You've been invited to join ${orgName} as ${invite!.role} on ABA Energy OS.`
               : "This invitation link is invalid, already used, revoked, or expired."}
           </CardDescription>
         </CardHeader>

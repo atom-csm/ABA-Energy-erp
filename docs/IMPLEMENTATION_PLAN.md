@@ -1,4 +1,4 @@
-# Implementation Plan — BoomBigNose Company OS
+# Implementation Plan — ABA Energy OS
 
 Bite-sized, TDD-first tasks. Strict TDD applies to the **pure-function core**
 (runway, dashboard metrics, invoice status, pipeline, project profit, webhook
@@ -75,5 +75,5 @@ supabase start && supabase db reset      # local DB + migrations + seed
 node scripts/verify-seed.mjs             # login + RLS proof
 pnpm test                                # unit tests (no DB needed)
 pnpm typecheck && pnpm lint && pnpm build
-pnpm dev                                 # http://localhost:3000  (demo@boombignose.org / BoomDemo123!)
+pnpm dev                                 # http://localhost:3000  (demo@aba-energy.local / AbaDemo123!)
 ```

@@ -94,6 +94,15 @@ const CreateQuote = z.object({
   issue_date: optionalDate,
   valid_until: optionalDate,
   discountBaht: z.coerce.number().min(0, "Discount must be 0 or more").default(0),
+  systemSizeKwp: z.coerce.number().min(0).optional(),
+  panelModel: optionalString,
+  inverterModel: optionalString,
+  batteryOption: optionalString,
+  warrantyYears: z.coerce.number().min(0).optional(),
+  paybackYears: z.coerce.number().min(0).optional(),
+  proposalAssumptions: optionalString,
+  includedScope: optionalString,
+  excludedScope: optionalString,
   notes: optionalString,
 })
 
@@ -138,6 +147,15 @@ export async function createQuote(
       discount_satang: bahtToSatang(d.discountBaht),
       subtotal_satang: 0,
       total_satang: 0,
+      system_size_kwp: d.systemSizeKwp ?? null,
+      panel_model: d.panelModel,
+      inverter_model: d.inverterModel,
+      battery_option: d.batteryOption,
+      warranty_years: d.warrantyYears ?? null,
+      payback_years: d.paybackYears ?? null,
+      proposal_assumptions: d.proposalAssumptions,
+      included_scope: d.includedScope,
+      excluded_scope: d.excludedScope,
       notes: d.notes,
     })
     .select("id")
@@ -166,6 +184,15 @@ const UpdateQuote = z.object({
   issue_date: optionalDate,
   valid_until: optionalDate,
   discountBaht: z.coerce.number().min(0, "Discount must be 0 or more"),
+  systemSizeKwp: z.coerce.number().min(0).optional(),
+  panelModel: optionalString,
+  inverterModel: optionalString,
+  batteryOption: optionalString,
+  warrantyYears: z.coerce.number().min(0).optional(),
+  paybackYears: z.coerce.number().min(0).optional(),
+  proposalAssumptions: optionalString,
+  includedScope: optionalString,
+  excludedScope: optionalString,
   notes: optionalString,
 })
 
@@ -187,6 +214,15 @@ export async function updateQuote(
       issue_date: d.issue_date ?? undefined,
       valid_until: d.valid_until,
       discount_satang: bahtToSatang(d.discountBaht),
+      system_size_kwp: d.systemSizeKwp ?? null,
+      panel_model: d.panelModel,
+      inverter_model: d.inverterModel,
+      battery_option: d.batteryOption,
+      warranty_years: d.warrantyYears ?? null,
+      payback_years: d.paybackYears ?? null,
+      proposal_assumptions: d.proposalAssumptions,
+      included_scope: d.includedScope,
+      excluded_scope: d.excludedScope,
       notes: d.notes,
     })
     .eq("id", d.id)

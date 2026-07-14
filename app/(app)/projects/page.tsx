@@ -42,7 +42,7 @@ export default async function ProjectsPage() {
 
   const { data: projects } = await supabase
     .from("projects")
-    .select("id, name, status, deadline, owner, client:clients(name)")
+    .select("id, name, status, deadline, owner, installation_start_date, installation_end_date, deposit_received, handover_completed, warranty_registered, client:clients(name)")
     .order("deadline", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
 
@@ -52,6 +52,11 @@ export default async function ProjectsPage() {
     status: ProjectStatus
     deadline: string | null
     owner: string | null
+    installation_start_date: string | null
+    installation_end_date: string | null
+    deposit_received: boolean
+    handover_completed: boolean
+    warranty_registered: boolean
     client: { name: string } | null
   }>
 
@@ -99,6 +104,7 @@ export default async function ProjectsPage() {
                         <TableHead>Project</TableHead>
                         <TableHead>Client</TableHead>
                         <TableHead>Deadline</TableHead>
+                        <TableHead>Install</TableHead>
                         <TableHead>Owner</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -148,6 +154,43 @@ export default async function ProjectsPage() {
                               ) : (
                                 <span className="text-muted-foreground">—</span>
                               )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="text-sm">
+                                  {[p.installation_start_date, p.installation_end_date]
+                                    .filter(Boolean)
+                                    .join(" → ") || "—"}
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                  <Badge
+                                    variant="outline"
+                                    className={cn(
+                                      p.deposit_received &&
+                                        "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300"
+                                    )}
+                                  >
+                                    {p.deposit_received ? "Deposit" : "No deposit"}
+                                  </Badge>
+                                  <Badge
+                                    variant="outline"
+                                    className={cn(
+                                      p.handover_completed &&
+                                        "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300"
+                                    )}
+                                  >
+                                    {p.handover_completed ? "Handover" : "Handover pending"}
+                                  </Badge>
+                                  {p.warranty_registered ? (
+                                    <Badge
+                                      variant="outline"
+                                      className="border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950 dark:text-violet-300"
+                                    >
+                                      Warranty
+                                    </Badge>
+                                  ) : null}
+                                </div>
+                              </div>
                             </TableCell>
                             <TableCell className="text-muted-foreground">
                               {p.owner ?? "—"}

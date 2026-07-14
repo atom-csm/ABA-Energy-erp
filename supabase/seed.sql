@@ -1,13 +1,13 @@
 -- ════════════════════════════════════════════════════════════════════════════
--- BoomBigNose Company OS — demo seed (FAKE data only).
+-- ABA Energy OS — demo seed (FAKE data only).
 --
 -- Runs via the service role / superuser (bypasses RLS). Idempotent.
--- Demo logins (LOCAL ONLY):  password for all = BoomDemo123!
---   demo@boombignose.org       (owner / founder)
---   nattapong@boombignose.org  (member / junior dev)
---   praewa@boombignose.org     (member / junior dev)
+-- Demo logins (LOCAL ONLY):  password for all = AbaDemo123!
+--   demo@aba-energy.local   (owner)
+--   sales@aba-energy.local  (member / sales)
+--   ops@aba-energy.local    (member / ops)
 --
--- All names, emails (@boombignose.org / example.com), and phone numbers are
+-- All names, emails (@aba-energy.local / example.com), and phone numbers are
 -- fictional. No real personal data.
 -- ════════════════════════════════════════════════════════════════════════════
 
@@ -21,27 +21,27 @@ insert into auth.users (
   raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
   confirmation_token, recovery_token, email_change_token_new, email_change
 ) values
-  ('00000000-0000-0000-0000-000000000000','b0000000-0000-0000-0000-000000000001','authenticated','authenticated','demo@boombignose.org',      crypt('BoomDemo123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}','{"full_name":"Boom (Founder)"}',          now(), now(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000','b0000000-0000-0000-0000-000000000002','authenticated','authenticated','nattapong@boombignose.org', crypt('BoomDemo123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}','{"full_name":"Nattapong (Junior Dev)"}',  now(), now(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000','b0000000-0000-0000-0000-000000000003','authenticated','authenticated','praewa@boombignose.org',    crypt('BoomDemo123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}','{"full_name":"Praewa (Junior Dev)"}',     now(), now(), '', '', '', '')
+  ('00000000-0000-0000-0000-000000000000','b0000000-0000-0000-0000-000000000001','authenticated','authenticated','demo@aba-energy.local',  crypt('AbaDemo123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}','{"full_name":"ABA Owner (Demo)"}',  now(), now(), '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000','b0000000-0000-0000-0000-000000000002','authenticated','authenticated','sales@aba-energy.local', crypt('AbaDemo123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}','{"full_name":"Sales Rep (Demo)"}',  now(), now(), '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000','b0000000-0000-0000-0000-000000000003','authenticated','authenticated','ops@aba-energy.local',   crypt('AbaDemo123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}','{"full_name":"Ops Lead (Demo)"}',   now(), now(), '', '', '', '')
 on conflict (id) do nothing;
 
 insert into auth.identities (id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at) values
-  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000001','{"sub":"b0000000-0000-0000-0000-000000000001","email":"demo@boombignose.org","email_verified":true}',     'email', now(), now(), now()),
-  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000002','b0000000-0000-0000-0000-000000000002','{"sub":"b0000000-0000-0000-0000-000000000002","email":"nattapong@boombignose.org","email_verified":true}','email', now(), now(), now()),
-  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000003','b0000000-0000-0000-0000-000000000003','{"sub":"b0000000-0000-0000-0000-000000000003","email":"praewa@boombignose.org","email_verified":true}',   'email', now(), now(), now())
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000001','{"sub":"b0000000-0000-0000-0000-000000000001","email":"demo@aba-energy.local","email_verified":true}',     'email', now(), now(), now()),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000002','b0000000-0000-0000-0000-000000000002','{"sub":"b0000000-0000-0000-0000-000000000002","email":"sales@aba-energy.local","email_verified":true}','email', now(), now(), now()),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000003','b0000000-0000-0000-0000-000000000003','{"sub":"b0000000-0000-0000-0000-000000000003","email":"ops@aba-energy.local","email_verified":true}',   'email', now(), now(), now())
 on conflict (provider_id, provider) do nothing;
 
 -- Profiles (belt-and-braces; the on_auth_user_created trigger also creates these)
 insert into public.profiles (id, full_name, locale) values
-  ('b0000000-0000-0000-0000-000000000001','Boom (Founder)','th'),
-  ('b0000000-0000-0000-0000-000000000002','Nattapong (Junior Dev)','th'),
-  ('b0000000-0000-0000-0000-000000000003','Praewa (Junior Dev)','th')
+  ('b0000000-0000-0000-0000-000000000001','ABA Owner (Demo)','th'),
+  ('b0000000-0000-0000-0000-000000000002','Sales Rep (Demo)','th'),
+  ('b0000000-0000-0000-0000-000000000003','Ops Lead (Demo)','th')
 on conflict (id) do update set full_name = excluded.full_name;
 
 -- ── Organization + settings + memberships ───────────────────────────────────
 insert into organizations (id, name, slug) values
-  ('a0000000-0000-0000-0000-000000000001','BoomBigNose AI','boombignose')
+  ('a0000000-0000-0000-0000-000000000001','ABA Energy','aba-energy')
 on conflict (id) do nothing;
 
 insert into org_settings (org_id, cash_balance_satang, monthly_burn_satang) values
@@ -56,11 +56,11 @@ on conflict (user_id, org_id) do nothing;
 
 -- ── CRM: clients ────────────────────────────────────────────────────────────
 insert into clients (id, org_id, name, industry, source, notes, owner) values
-  ('c0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','Doi Chang Origin Coffee','F&B / Retail','Referral','SME coffee roaster, 4 branches in Chiang Mai. Wants a LINE sales-support bot.','b0000000-0000-0000-0000-000000000001'),
-  ('c0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','Krua Thai Delight Co.','Restaurant Chain','LINE OA','8-branch Thai restaurant group. Manual order follow-up is a mess.','b0000000-0000-0000-0000-000000000001'),
-  ('c0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','Lanna EdTech Academy','Education','Webinar','Online course business. Needs student onboarding + community automation.','b0000000-0000-0000-0000-000000000002'),
-  ('c0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','Siam Property Hub','Real Estate','Cold outreach','Property agency. Drowning in lead follow-ups and overdue invoices.','b0000000-0000-0000-0000-000000000001'),
-  ('c0000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','GreenLeaf Organic','Agriculture / E-commerce','Referral','Organic farm with a Shopify store. Wants meeting summaries + ops automation.','b0000000-0000-0000-0000-000000000003')
+  ('c0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','Chaiyasawat Motorbike - Kranuan','Motorcycle Dealership','Referral','SME showroom in Khon Kaen evaluating rooftop solar to reduce electricity costs and track clean-energy impact.','b0000000-0000-0000-0000-000000000001'),
+  ('c0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','Khon Kaen Cold Storage','Cold Storage / SME','LINE OA','High-electricity SME site interested in solar survey, proposal, and energy-yield dashboard.','b0000000-0000-0000-0000-000000000001'),
+  ('c0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','Isan Food Processing','Food Processing','Expo Lead','Factory lead requesting rooftop survey and savings estimate.','b0000000-0000-0000-0000-000000000002'),
+  ('c0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','Home Solar Pilot - Khon Kaen','Residential','Website','Homeowner lead interested in lease-to-own solar package.','b0000000-0000-0000-0000-000000000001'),
+  ('c0000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','Municipal Learning Center','Public / Education','Partner','Potential public-sector pilot for clean-energy dashboard and MRV-readiness reporting.','b0000000-0000-0000-0000-000000000003')
 on conflict (id) do nothing;
 
 -- ── CRM: contacts ───────────────────────────────────────────────────────────
@@ -74,15 +74,15 @@ insert into contacts (org_id, client_id, name, email, phone, role) values
 on conflict do nothing;
 
 -- ── CRM: deals (mix of stages) ──────────────────────────────────────────────
-insert into deals (id, org_id, client_id, title, stage, value_satang, expected_close_date, next_follow_up_date, source, notes, owner) values
-  ('d0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','LINE Sales-Support Bot',          'won',        18000000, current_date - 20, null,               'Referral','Closed. Moving to delivery.','b0000000-0000-0000-0000-000000000001'),
-  ('d0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','n8n CRM Follow-up Automation',    'won',        25000000, current_date - 10, null,               'LINE OA','Closed. Kickoff next week.','b0000000-0000-0000-0000-000000000001'),
-  ('d0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','Course Onboarding Workflow',      'won',        15000000, current_date - 35, null,               'Webinar','Closed last month. In support.','b0000000-0000-0000-0000-000000000002'),
-  ('d0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','Invoice Overdue Reminder System', 'proposal',   22000000, current_date + 14, current_date,       'Cold outreach','Proposal sent. Follow up today.','b0000000-0000-0000-0000-000000000001'),
-  ('d0000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000005','Meeting Summary + Ops Bot',       'negotiation',32000000, current_date + 7,  current_date - 2,   'Referral','Negotiating scope. Follow-up overdue!','b0000000-0000-0000-0000-000000000003'),
-  ('d0000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','AI Tutor Add-on',                 'discovery',  12000000, current_date + 30, current_date + 3,   'Webinar','Exploring an AI tutor module.','b0000000-0000-0000-0000-000000000002'),
-  ('d0000000-0000-0000-0000-000000000007','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','Loyalty Campaign Automation',     'lead',        8000000, current_date + 45, current_date + 5,   'LINE OA','New lead from existing client.','b0000000-0000-0000-0000-000000000001'),
-  ('d0000000-0000-0000-0000-000000000008','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','Website Chatbot (lost)',          'lost',        9000000, current_date - 5,  null,               'Cold outreach','Lost to in-house build.','b0000000-0000-0000-0000-000000000001')
+insert into deals (id, org_id, client_id, title, stage, value_satang, monthly_bill_satang, estimated_system_size_kwp, roof_type, province, survey_date, installation_target_date, payback_years, solar_notes, expected_close_date, next_follow_up_date, source, notes, owner) values
+  ('d0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','Solar Rooftop 20.8 kWp — Kranuan',          'won',        18000000, 1650000, 20.80, 'metal sheet', 'Khon Kaen', current_date - 28, current_date + 10, 4.70, 'Surveyed showroom roof; proposal should emphasize self-consumption and after-sale monitoring.', current_date - 20, null,               'Referral','Deposit received. Moving to installation planning.','b0000000-0000-0000-0000-000000000001'),
+  ('d0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','Solar Rooftop 41.6 kWp — Khon Kaen',    'won',        25000000, 4200000, 41.60, 'metal sheet', 'Khon Kaen', current_date - 18, current_date + 14, 3.90, 'High daytime load; include clean-energy dashboard pilot as optional add-on.', current_date - 10, null,               'LINE OA','Approved. Site survey and installation schedule next week.','b0000000-0000-0000-0000-000000000001'),
+  ('d0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','Factory Solar Survey + Proposal',      'won',        15000000, 2800000, 30.00, 'factory roof', 'Khon Kaen', current_date - 12, current_date + 25, 4.20, 'Factory wants revised layout and ROI sensitivity before signing.', current_date - 35, null,               'Webinar','Survey completed. Preparing revised proposal.','b0000000-0000-0000-0000-000000000002'),
+  ('d0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','Home Solar Lease-to-Own Proposal', 'proposal',   22000000, 650000, 8.50, 'tile roof', 'Khon Kaen', current_date + 2, null, 5.10, 'Lease-to-own candidate; verify roof structure and financing terms.', current_date + 14, current_date,       'Cold outreach','Proposal sent. Follow up on roof layout and payment terms today.','b0000000-0000-0000-0000-000000000001'),
+  ('d0000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000005','Clean Energy Dashboard Pilot',       'negotiation',32000000, 1900000, 25.00, 'flat roof', 'Khon Kaen', current_date - 5, current_date + 35, 4.80, 'Potential Solar Mining pilot; needs LOI and MRV-readiness report scope.', current_date + 7,  current_date - 2,   'Referral','Negotiating monitoring scope and pilot terms. Follow-up overdue!','b0000000-0000-0000-0000-000000000003'),
+  ('d0000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','Battery / EV Charger Add-on',                 'discovery',  12000000, 2800000, 30.00, 'factory roof', 'Khon Kaen', null, null, null, 'Discovery only; size after load profile review.', current_date + 30, current_date + 3,   'Webinar','Exploring battery and EV charger add-on sizing.','b0000000-0000-0000-0000-000000000002'),
+  ('d0000000-0000-0000-0000-000000000007','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','After-sale Monitoring Package',     'lead',        8000000, 4200000, 41.60, 'metal sheet', 'Khon Kaen', null, null, null, 'Existing customer; qualify monitoring subscription and service SLA.', current_date + 45, current_date + 5,   'LINE OA','New after-sale monitoring upsell from existing client.','b0000000-0000-0000-0000-000000000001'),
+  ('d0000000-0000-0000-0000-000000000008','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','Solar Quote (lost)',          'lost',        9000000, 700000, 7.00, 'tile roof', 'Khon Kaen', current_date - 25, null, 5.60, 'Lost on price; keep for competitor intel and future follow-up.', current_date - 5,  null,               'Cold outreach','Lost to lower-price installer.','b0000000-0000-0000-0000-000000000001')
 on conflict (id) do nothing;
 
 -- ── CRM: activities / follow-ups ────────────────────────────────────────────
@@ -95,20 +95,107 @@ insert into activities (org_id, client_id, deal_id, type, due_date, done, body, 
 on conflict do nothing;
 
 -- ── Projects (from won deals) ───────────────────────────────────────────────
-insert into projects (id, org_id, deal_id, client_id, name, status, deadline, budget_satang, owner) values
-  ('e0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','LINE Sales-Support Bot — Doi Chang','in_progress', current_date + 12, 12000000,'b0000000-0000-0000-0000-000000000002'),
-  ('e0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000002','c0000000-0000-0000-0000-000000000002','CRM Automation — Krua Thai','not_started', current_date + 30, 16000000,'b0000000-0000-0000-0000-000000000003'),
-  ('e0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000003','c0000000-0000-0000-0000-000000000003','Course Onboarding — Lanna EdTech','support', current_date - 10, 10000000,'b0000000-0000-0000-0000-000000000002'),
-  ('e0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001',null,'c0000000-0000-0000-0000-000000000005','Internal: Ops Automation Pilot','review', current_date + 5, 5000000,'b0000000-0000-0000-0000-000000000001')
-on conflict (id) do nothing;
+insert into projects (
+  id, org_id, deal_id, client_id, name, status, deadline, budget_satang,
+  installation_start_date, installation_end_date, installation_crew,
+  deposit_received, handover_completed, warranty_registered, installation_checklist,
+  owner
+) values
+  (
+    'e0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','Solar Install — Kranuan Showroom','in_progress', current_date + 12, 12000000,
+    current_date + 3, current_date + 6, 'Team A / Khon Kaen electrician partner',
+    true, false, false,
+    '{"survey_confirmed":true,"equipment_ready":true,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb,
+    'b0000000-0000-0000-0000-000000000002'
+  ),
+  (
+    'e0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000002','c0000000-0000-0000-0000-000000000002','Solar Install — Khon Kaen Site','not_started', current_date + 30, 16000000,
+    current_date + 14, current_date + 18, 'Team B / Cold storage safety crew',
+    false, false, false,
+    '{"survey_confirmed":true,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb,
+    'b0000000-0000-0000-0000-000000000003'
+  ),
+  (
+    'e0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000003','c0000000-0000-0000-0000-000000000003','Survey + Proposal — Food Processing','support', current_date - 10, 10000000,
+    current_date - 20, current_date - 18, 'Service / monitoring team',
+    true, true, true,
+    '{"survey_confirmed":true,"equipment_ready":true,"safety_briefed":true,"installed":true,"tested":true,"handover_signed":true}'::jsonb,
+    'b0000000-0000-0000-0000-000000000002'
+  ),
+  (
+    'e0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001',null,'c0000000-0000-0000-0000-000000000005','Internal: Solar Mining Pilot','review', current_date + 5, 5000000,
+    null, null, 'Ava + ABA engineering review',
+    false, false, false,
+    '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb,
+    'b0000000-0000-0000-0000-000000000001'
+  )
+on conflict (id) do update set
+  name = excluded.name,
+  status = excluded.status,
+  deadline = excluded.deadline,
+  budget_satang = excluded.budget_satang,
+  installation_start_date = excluded.installation_start_date,
+  installation_end_date = excluded.installation_end_date,
+  installation_crew = excluded.installation_crew,
+  deposit_received = excluded.deposit_received,
+  handover_completed = excluded.handover_completed,
+  warranty_registered = excluded.warranty_registered,
+  installation_checklist = excluded.installation_checklist,
+  owner = excluded.owner;
+
+-- ── Solar surveys (demo: site data feeding quote/project decisions) ─────────
+insert into solar_surveys (
+  id, org_id, deal_id, project_id, title, status, scheduled_date, completed_date,
+  roof_type, roof_area_sqm, meter_phase, main_breaker_amp,
+  shading_notes, structural_notes, photo_folder_url, result_summary
+) values
+  (
+    '70000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','Kranuan showroom roof survey','completed', current_date - 28, current_date - 28,
+    'metal sheet', 168.00, '3-phase', 100,
+    'Minor morning shade from signage; layout keeps inverter string away from shaded edge.',
+    'Roof frame visually acceptable; final structure sign-off required before installation.',
+    'https://drive.google.com/drive/folders/demo-kranuan-survey',
+    'Fit for ~20.8 kWp rooftop package. Proposal should emphasize self-consumption and after-sale monitoring.'
+  ),
+  (
+    '70000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000002','e0000000-0000-0000-0000-000000000002','Khon Kaen cold storage survey','needs_engineer', current_date - 18, current_date - 17,
+    'metal sheet', 320.00, '3-phase', 250,
+    'Open roof area with limited shade; verify cable routing around cold-room compressor area.',
+    'Engineer to confirm roof loading and maintenance walkway before final BOQ.',
+    'https://drive.google.com/drive/folders/demo-cold-storage-survey',
+    'Potential ~41.6 kWp system. Add monitoring dashboard as optional package after engineering sign-off.'
+  ),
+  (
+    '70000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000004',null,'Home solar lease-to-own pre-survey','scheduled', current_date + 2, null,
+    'tile roof', null, '1-phase', 50,
+    'Need drone/photo check for afternoon shade from neighboring building.',
+    'Pending attic/roof access approval from homeowner.',
+    null,
+    'Confirm roof structure, usable area, and finance assumptions before final lease-to-own proposal.'
+  )
+on conflict (id) do update set
+  deal_id = excluded.deal_id,
+  project_id = excluded.project_id,
+  title = excluded.title,
+  status = excluded.status,
+  scheduled_date = excluded.scheduled_date,
+  completed_date = excluded.completed_date,
+  roof_type = excluded.roof_type,
+  roof_area_sqm = excluded.roof_area_sqm,
+  meter_phase = excluded.meter_phase,
+  main_breaker_amp = excluded.main_breaker_amp,
+  shading_notes = excluded.shading_notes,
+  structural_notes = excluded.structural_notes,
+  photo_folder_url = excluded.photo_folder_url,
+  result_summary = excluded.result_summary;
 
 -- ── Project tasks ───────────────────────────────────────────────────────────
 insert into project_tasks (org_id, project_id, title, status, assignee, due_date, done) values
-  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','Design conversation flow','done','b0000000-0000-0000-0000-000000000002', current_date - 5, true),
-  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','Build LINE webhook + n8n flow','in_progress','b0000000-0000-0000-0000-000000000002', current_date + 3, false),
-  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','UAT with Doi Chang staff','todo','b0000000-0000-0000-0000-000000000003', current_date + 9, false),
-  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000002','Kickoff + requirements','todo','b0000000-0000-0000-0000-000000000003', current_date + 7, false),
-  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000003','Monthly support check-in','todo','b0000000-0000-0000-0000-000000000002', current_date + 2, false)
+  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','Confirm panel layout and equipment list','done','b0000000-0000-0000-0000-000000000002', current_date - 5, true),
+  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','Prepare installation checklist and work order','in_progress','b0000000-0000-0000-0000-000000000002', current_date + 3, false),
+  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','Customer handover and monitoring walkthrough','todo','b0000000-0000-0000-0000-000000000003', current_date + 9, false),
+  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000002','Site survey + requirements','todo','b0000000-0000-0000-0000-000000000003', current_date + 7, false),
+  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000003','Monthly solar performance check-in','todo','b0000000-0000-0000-0000-000000000002', current_date + 2, false)
 on conflict do nothing;
 
 -- ── Milestones / checklist ──────────────────────────────────────────────────
@@ -121,13 +208,18 @@ on conflict do nothing;
 
 -- ── Finance: invoices (varied statuses) ─────────────────────────────────────
 insert into invoices (id, org_id, client_id, project_id, number, status, issue_date, due_date, amount_satang, is_recurring, recurring_interval, notes) values
-  ('f0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','INV-2026-001','paid',          current_date - 25, current_date - 10,  9000000, false, null,     'Deposit 50% — LINE bot project'),
-  ('f0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','e0000000-0000-0000-0000-000000000002','INV-2026-002','sent',          current_date - 8,  current_date + 7,  12500000, false, null,     'Deposit — CRM automation'),
-  ('f0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004',null,                                   'INV-2026-003','overdue',       current_date - 30, current_date - 8,   5500000, false, null,     'Discovery workshop — Siam Property'),
-  ('f0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','e0000000-0000-0000-0000-000000000003','INV-2026-004','partially_paid',current_date - 15, current_date + 5,   8000000, false, null,     'Course onboarding — milestone 2'),
-  ('f0000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003',null,                                   'INV-2026-005','sent',          current_date - 3,  current_date + 27,  3500000, true,  'monthly','Lanna EdTech — monthly support retainer'),
-  ('f0000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002',null,                                   'INV-2026-006','draft',         current_date,      current_date + 30,  4000000, true,  'monthly','Krua Thai — monthly automation retainer (draft)')
-on conflict (id) do nothing;
+  ('f0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','INV-2026-001','paid',          current_date - 25, current_date - 10,  9000000, false, null,     'Deposit 50% — Kranuan showroom solar installation'),
+  ('f0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','e0000000-0000-0000-0000-000000000002','INV-2026-002','sent',          current_date - 8,  current_date + 7,  12500000, false, null,     'Deposit — Khon Kaen cold-storage solar project'),
+  ('f0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004',null,                                   'INV-2026-003','overdue',       current_date - 30, current_date - 8,   5500000, false, null,     'Solar pre-survey and feasibility workshop — Siam Property'),
+  ('f0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','e0000000-0000-0000-0000-000000000003','INV-2026-004','partially_paid',current_date - 15, current_date + 5,   8000000, false, null,     'Factory solar proposal revision — milestone 2'),
+  ('f0000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003',null,                                   'INV-2026-005','sent',          current_date - 3,  current_date + 27,  3500000, true,  'monthly','Lanna EdTech — solar monitoring monthly support'),
+  ('f0000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002',null,                                   'INV-2026-006','draft',         current_date,      current_date + 30,  4000000, true,  'monthly','Krua Thai — after-sale monitoring retainer (draft)')
+on conflict (id) do update set
+  status = excluded.status,
+  issue_date = excluded.issue_date,
+  due_date = excluded.due_date,
+  amount_satang = excluded.amount_satang,
+  notes = excluded.notes;
 
 -- ── Finance: payments ───────────────────────────────────────────────────────
 insert into payments (org_id, invoice_id, amount_satang, paid_at, method, notes) values
@@ -153,38 +245,89 @@ insert into template_categories (id, org_id, name, slug) values
 on conflict (id) do nothing;
 
 insert into automation_templates (org_id, category_id, name, description, internal_value_satang, price_satang, reusable_notes, implementation_checklist, tags) values
-  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000001','LINE Sales-Support Bot','LINE OA bot that answers FAQs, captures leads, and routes to a human.', 18000000, 25000000, 'Reusable n8n + LINE Messaging API flow. Swap the FAQ knowledge base per client.', '["Connect LINE OA channel","Import n8n flow","Load FAQ knowledge base","Set human-handoff keyword","Test on staging"]'::jsonb, array['line','bot','sales','n8n']),
-  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000002','n8n CRM Follow-up','Auto-creates follow-up tasks and reminders when a deal stage changes.', 12000000, 18000000, 'Webhook from CRM -> n8n -> LINE/email reminder. Map stages to cadences.', '["Expose deal webhook","Build n8n schedule","Configure reminder channel","Map stage -> cadence"]'::jsonb, array['crm','n8n','follow-up']),
-  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000002','Invoice Overdue Reminder','Watches invoice due dates and nudges clients before/after due.', 9000000, 15000000, 'Cron + invoices table -> templated reminders at -3/0/+3/+7 days.', '["Connect invoice source","Set reminder schedule","Write message templates","Add escalation to owner"]'::jsonb, array['finance','invoice','reminder']),
-  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000001','Meeting Summary Workflow','Transcribes a call and posts an AI summary + action items to LINE.', 8000000, 12000000, 'Whisper -> LLM summary -> LINE/Notion. Great upsell after a bot project.', '["Capture recording","Transcribe","Summarize + extract actions","Post to channel"]'::jsonb, array['ai','meeting','summary']),
-  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000003','Course & Community Onboarding','Onboards new students: welcome, drip content, and community invite.', 15000000, 20000000, 'Payment webhook -> enrol -> drip sequence -> community auto-invite.', '["Hook payment provider","Build welcome sequence","Schedule drip content","Auto-invite to community"]'::jsonb, array['education','onboarding','community'])
+  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000001','Solar Rooftop 20.8 kWp — Kranuan','Standard rooftop-solar package with survey, proposal, installation handoff, and monitoring-ready documentation.', 18000000, 25000000, 'Reusable survey → quote → project checklist. Swap panel/inverter models and assumptions per site.', '["Confirm survey result","Prepare BOQ and proposal assumptions","Schedule installation crew","Collect deposit","Register warranty and handover pack"]'::jsonb, array['solar','survey','proposal','installation']),
+  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000002','Solar Lead Follow-up Cadence','Auto-creates follow-up tasks and reminders when a solar lead stage changes.', 12000000, 18000000, 'Webhook from CRM -> reminders. Map Lead→Survey→Proposal→Deposit cadences.', '["Expose deal webhook","Build follow-up schedule","Configure reminder channel","Map stage -> cadence"]'::jsonb, array['solar','crm','follow-up']),
+  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000002','Deposit / Final Payment Reminder','Watches solar invoice due dates and nudges clients before/after due.', 9000000, 15000000, 'Cron + invoices table -> templated reminders at -3/0/+3/+7 days.', '["Connect invoice source","Set reminder schedule","Write message templates","Add escalation to owner"]'::jsonb, array['finance','deposit','invoice','reminder']),
+  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000001','Site Survey Summary Workflow','Turns survey photos/notes into a structured engineering summary and customer-ready follow-up.', 8000000, 12000000, 'Survey notes -> AI summary -> Drive/Lark task. Great for reducing survey-to-proposal delay.', '["Collect survey notes","Summarize constraints","Extract engineering actions","Post to project"]'::jsonb, array['ai','survey','summary']),
+  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000003','After-sale Monitoring Onboarding','Onboards customers after handover: warranty registration, monitoring access, and referral ask.', 15000000, 20000000, 'Handover checklist -> warranty record -> monitoring invite -> referral follow-up.', '["Register warranty","Create monitoring access","Send handover guide","Schedule after-sale check-in"]'::jsonb, array['after-sale','handover','monitoring'])
 on conflict do nothing;
 
 -- ── V3: Quotations + line items ─────────────────────────────────────────────
-insert into quotes (id, org_id, client_id, project_id, number, status, issue_date, valid_until, subtotal_satang, discount_satang, total_satang, notes, owner) values
-  ('90000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','e0000000-0000-0000-0000-000000000002','QUO-2026-001','sent',    current_date - 4, current_date + 26, 17000000, 1000000, 16000000, 'CRM automation proposal — build + training', 'b0000000-0000-0000-0000-000000000001'),
-  ('90000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','QUO-2026-002','accepted',current_date - 9, current_date + 14,  8000000,       0,  8000000, 'LINE bot — phase 2 scope', 'b0000000-0000-0000-0000-000000000002')
-on conflict (id) do nothing;
+insert into quotes (
+  id, org_id, client_id, project_id, number, status, issue_date, valid_until,
+  subtotal_satang, discount_satang, total_satang,
+  system_size_kwp, panel_model, inverter_model, battery_option, warranty_years, payback_years,
+  proposal_assumptions, included_scope, excluded_scope, notes, owner
+) values
+  (
+    '90000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','e0000000-0000-0000-0000-000000000002','QUO-2026-001','sent', current_date - 4, current_date + 26,
+    17000000, 1000000, 16000000,
+    41.60, 'Tier-1 mono PERC 550W class', 'Huawei / Sungrow 3-phase inverter', 'No battery in base offer', 10, 3.90,
+    'Demo assumptions only: daytime load profile and yield/payback must be validated against real bill + site survey before customer use.',
+    'Panels, inverter, mounting, standard DC/AC protection, installation, commissioning, handover checklist, monitoring setup.',
+    'PEA application fees, structural reinforcement, non-standard cable routing, battery/EV charger add-ons unless quoted separately.',
+    'Solar rooftop proposal for cold-storage SME with monitoring dashboard option.',
+    'b0000000-0000-0000-0000-000000000001'
+  ),
+  (
+    '90000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','QUO-2026-002','accepted', current_date - 9, current_date + 14,
+    8000000, 0, 8000000,
+    20.80, 'Tier-1 mono PERC 550W class', 'Huawei / Sungrow 3-phase inverter', 'No battery in base offer', 10, 4.70,
+    'Demo assumptions only: showroom daytime consumption and roof area are illustrative for UAT.',
+    'Survey, BOQ, equipment supply, rooftop installation, testing, warranty registration, and customer handover pack.',
+    'Grid upgrade, roof repair, monitoring subscription beyond included setup, and optional insurance.',
+    'Accepted solar rooftop scope for Kranuan showroom installation planning.',
+    'b0000000-0000-0000-0000-000000000002'
+  )
+on conflict (id) do update set
+  project_id = excluded.project_id,
+  status = excluded.status,
+  issue_date = excluded.issue_date,
+  valid_until = excluded.valid_until,
+  subtotal_satang = excluded.subtotal_satang,
+  discount_satang = excluded.discount_satang,
+  total_satang = excluded.total_satang,
+  system_size_kwp = excluded.system_size_kwp,
+  panel_model = excluded.panel_model,
+  inverter_model = excluded.inverter_model,
+  battery_option = excluded.battery_option,
+  warranty_years = excluded.warranty_years,
+  payback_years = excluded.payback_years,
+  proposal_assumptions = excluded.proposal_assumptions,
+  included_scope = excluded.included_scope,
+  excluded_scope = excluded.excluded_scope,
+  notes = excluded.notes,
+  owner = excluded.owner;
 
-insert into quote_items (org_id, quote_id, description, quantity, unit_price_satang, amount_satang, position) values
-  ('a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-000000000001','CRM automation build (n8n + CRM)', 1, 15000000, 15000000, 0),
-  ('a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-000000000001','Team training session',            2,  1000000,  2000000, 1),
-  ('a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-000000000002','LINE bot — phase 2 build',         1,  8000000,  8000000, 0)
-on conflict do nothing;
+delete from quote_items where quote_id in (
+  '90000000-0000-0000-0000-000000000001',
+  '90000000-0000-0000-0000-000000000002'
+);
+
+insert into quote_items (id, org_id, quote_id, description, quantity, unit_price_satang, amount_satang, position) values
+  ('91000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-000000000001','Solar PV system 41.60 kWp — panels, inverter, protection, mounting', 1, 15000000, 15000000, 0),
+  ('91000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-000000000001','Monitoring dashboard setup + handover training',                 1,  2000000,  2000000, 1),
+  ('91000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-000000000002','Solar PV system 20.80 kWp — equipment supply and installation',  1,  8000000,  8000000, 0)
+on conflict (id) do update set
+  description = excluded.description,
+  quantity = excluded.quantity,
+  unit_price_satang = excluded.unit_price_satang,
+  amount_satang = excluded.amount_satang,
+  position = excluded.position;
 
 -- ── V3: Invoice line items (sum to the invoice amount) ──────────────────────
 insert into invoice_items (org_id, invoice_id, description, quantity, unit_price_satang, amount_satang, position) values
-  ('a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','Discovery & conversation-flow design', 1, 4000000, 4000000, 0),
-  ('a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','LINE bot build (50% deposit)',         1, 5000000, 5000000, 1),
-  ('a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000002','CRM automation — deposit',             1, 12500000, 12500000, 0)
+  ('a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','Survey, BOQ, and installation planning deposit', 1, 4000000, 4000000, 0),
+  ('a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','Solar rooftop installation 20.8 kWp — 50% deposit', 1, 5000000, 5000000, 1),
+  ('a0000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000002','Solar rooftop installation 41.6 kWp — deposit', 1, 12500000, 12500000, 0)
 on conflict do nothing;
 
 -- ── V3: Timesheets ──────────────────────────────────────────────────────────
 insert into time_entries (org_id, project_id, task_id, user_id, work_date, minutes, billable, rate_satang, notes) values
-  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001',null,'b0000000-0000-0000-0000-000000000002', current_date - 5, 240, true, 100000, 'Conversation flow design'),
-  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001',null,'b0000000-0000-0000-0000-000000000002', current_date - 3, 180, true, 100000, 'n8n webhook wiring'),
-  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001',null,'b0000000-0000-0000-0000-000000000003', current_date - 1, 300, true,  80000, 'LINE integration + tests'),
-  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000003',null,'b0000000-0000-0000-0000-000000000002', current_date - 2, 120, false,   null, 'Monthly support check-in (non-billable)')
+  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001',null,'b0000000-0000-0000-0000-000000000002', current_date - 5, 240, true, 100000, 'Survey review and BOQ preparation'),
+  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001',null,'b0000000-0000-0000-0000-000000000002', current_date - 3, 180, true, 100000, 'Installation checklist and crew coordination'),
+  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001',null,'b0000000-0000-0000-0000-000000000003', current_date - 1, 300, true,  80000, 'Monitoring setup and handover testing'),
+  ('a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000003',null,'b0000000-0000-0000-0000-000000000002', current_date - 2, 120, false,   null, 'Monthly solar performance check-in (non-billable)')
 on conflict do nothing;
 
 -- ── V3: Subscriptions (recurring billing → feeds MRR) ───────────────────────

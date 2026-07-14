@@ -84,7 +84,7 @@ export function SettingsForm({
             <FormItem>
               <FormLabel>Workspace name</FormLabel>
               <FormControl>
-                <Input placeholder="BoomBigNose" {...field} />
+                <Input placeholder="ABA Energy" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

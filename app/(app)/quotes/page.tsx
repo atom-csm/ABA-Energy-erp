@@ -8,6 +8,7 @@ import { formatTHB } from "@/lib/money"
 import { PageHeader } from "@/components/page-header"
 import { EmptyState } from "@/components/empty-state"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Table,
@@ -29,7 +30,7 @@ export default async function QuotesPage() {
   const { data } = await supabase
     .from("quotes")
     .select(
-      "id, number, status, total_satang, valid_until, issue_date, clients(name)"
+      "id, number, status, total_satang, valid_until, issue_date, system_size_kwp, panel_model, payback_years, clients(name)"
     )
     .order("issue_date", { ascending: false })
 
@@ -69,6 +70,7 @@ export default async function QuotesPage() {
                 <TableRow>
                   <TableHead>Number</TableHead>
                   <TableHead>Client</TableHead>
+                  <TableHead>Solar spec</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Total</TableHead>
                   <TableHead>Valid until</TableHead>
@@ -86,6 +88,20 @@ export default async function QuotesPage() {
                       </Link>
                     </TableCell>
                     <TableCell>{q.clients?.name ?? "—"}</TableCell>
+                    <TableCell>
+                      {q.system_size_kwp ? (
+                        <div className="space-y-1">
+                          <Badge variant="outline">{Number(q.system_size_kwp).toFixed(2)} kWp</Badge>
+                          <div className="text-muted-foreground max-w-[18rem] truncate text-xs">
+                            {[q.panel_model, q.payback_years ? `${q.payback_years} yr payback` : null]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <QuoteStatusBadge status={q.status} />
                     </TableCell>

@@ -28,6 +28,15 @@ const Schema = z.object({
   issue_date: z.string().optional(),
   valid_until: z.string().optional(),
   discountBaht: z.coerce.number().min(0, "Discount must be 0 or more"),
+  systemSizeKwp: z.coerce.number().min(0).optional(),
+  panelModel: z.string().optional(),
+  inverterModel: z.string().optional(),
+  batteryOption: z.string().optional(),
+  warrantyYears: z.coerce.number().min(0).optional(),
+  paybackYears: z.coerce.number().min(0).optional(),
+  proposalAssumptions: z.string().optional(),
+  includedScope: z.string().optional(),
+  excludedScope: z.string().optional(),
   notes: z.string().optional(),
 })
 
@@ -42,6 +51,15 @@ export type QuoteFormValues = {
   issue_date: string
   valid_until: string
   discountBaht: number
+  systemSizeKwp: number
+  panelModel: string
+  inverterModel: string
+  batteryOption: string
+  warrantyYears: number
+  paybackYears: number
+  proposalAssumptions: string
+  includedScope: string
+  excludedScope: string
   notes: string
 }
 
@@ -168,6 +186,24 @@ export function QuoteForm({
             )}
           />
         </div>
+
+        <section className="space-y-4 rounded-lg border p-4">
+          <div>
+            <h2 className="text-sm font-semibold">Solar proposal spec</h2>
+            <p className="text-muted-foreground text-xs">Capture technical scope and assumptions for the customer proposal/PDF.</p>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FormField control={form.control} name="systemSizeKwp" render={({ field }) => (<FormItem><FormLabel>System size (kWp)</FormLabel><FormControl><Input type="number" min={0} step="0.01" inputMode="decimal" name={field.name} ref={field.ref} onBlur={field.onBlur} value={(field.value ?? "") as number | string} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="paybackYears" render={({ field }) => (<FormItem><FormLabel>Payback (years)</FormLabel><FormControl><Input type="number" min={0} step="0.01" inputMode="decimal" name={field.name} ref={field.ref} onBlur={field.onBlur} value={(field.value ?? "") as number | string} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="panelModel" render={({ field }) => (<FormItem><FormLabel>Panel model</FormLabel><FormControl><Input placeholder="Panel brand/model" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="inverterModel" render={({ field }) => (<FormItem><FormLabel>Inverter model</FormLabel><FormControl><Input placeholder="Inverter brand/model" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="batteryOption" render={({ field }) => (<FormItem><FormLabel>Battery / EV option</FormLabel><FormControl><Input placeholder="Optional battery / EV charger scope" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="warrantyYears" render={({ field }) => (<FormItem><FormLabel>Warranty (years)</FormLabel><FormControl><Input type="number" min={0} step="0.01" inputMode="decimal" name={field.name} ref={field.ref} onBlur={field.onBlur} value={(field.value ?? "") as number | string} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
+          </div>
+          <FormField control={form.control} name="includedScope" render={({ field }) => (<FormItem><FormLabel>Included scope</FormLabel><FormControl><Textarea rows={3} placeholder="Equipment, installation, monitoring, handover…" {...field} /></FormControl><FormMessage /></FormItem>)} />
+          <FormField control={form.control} name="excludedScope" render={({ field }) => (<FormItem><FormLabel>Excluded scope</FormLabel><FormControl><Textarea rows={3} placeholder="Civil work, meter upgrade, permits, optional add-ons…" {...field} /></FormControl><FormMessage /></FormItem>)} />
+          <FormField control={form.control} name="proposalAssumptions" render={({ field }) => (<FormItem><FormLabel>Proposal assumptions</FormLabel><FormControl><Textarea rows={3} placeholder="Yield/payback assumptions; avoid guaranteed claims." {...field} /></FormControl><FormMessage /></FormItem>)} />
+        </section>
 
         <FormField
           control={form.control}

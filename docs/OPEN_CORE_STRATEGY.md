@@ -50,5 +50,5 @@ do this) so the split is repackaging, not a rewrite.
   package with its own license).
 - Adopt a **CLA from day one** — a DCO alone can't support relicensing for the
   dual-license model.
-- Treat **"BoomBigNose" as an unlicensed trademark**: register the word mark in
+- Treat **"ABA Energy" as an unlicensed trademark**: register the word mark in
   Thailand and require forks to rebrand.

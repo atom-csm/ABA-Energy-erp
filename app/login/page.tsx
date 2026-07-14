@@ -44,7 +44,7 @@ function LoginForm() {
     <div className="flex min-h-svh items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-xl">BoomBigNose Company OS</CardTitle>
+          <CardTitle className="text-xl">ABA Energy OS</CardTitle>
           <CardDescription>Sign in to your workspace.</CardDescription>
         </CardHeader>
         <form
@@ -88,15 +88,15 @@ function LoginForm() {
               className="w-full"
               disabled={loading}
               onClick={() => {
-                setEmail("demo@boombignose.org")
-                setPassword("BoomDemo123!")
-                void signIn("demo@boombignose.org", "BoomDemo123!")
+                setEmail("demo@aba-energy.local")
+                setPassword("AbaDemo123!")
+                void signIn("demo@aba-energy.local", "AbaDemo123!")
               }}
             >
               Use demo account
             </Button>
             <p className="text-muted-foreground text-center text-xs">
-              Demo: demo@boombignose.org · BoomDemo123!
+              Demo: demo@aba-energy.local · AbaDemo123!
             </p>
           </CardFooter>
         </form>
