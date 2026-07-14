@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest"
 import {
   STAGES,
   getStageRequirements,
+  decideStageAdvance,
   type ProjectPipelineState,
 } from "@/lib/pipeline/stages"
 import { Constants } from "@/lib/types/database"
@@ -211,5 +212,68 @@ describe("getStageRequirements", () => {
   it("returns the stage it was asked about, unchanged", () => {
     const result = getStageRequirements({ ...emptyState, stage: "payment", invoiceCount: 2 })
     expect(result.stage).toBe("payment")
+  })
+})
+
+describe("decideStageAdvance — CR-001 ST-4 soft-gate decision", () => {
+  it("proceeds with an empty auditMeta when every requirement is already met", () => {
+    const result = getStageRequirements({
+      ...emptyState,
+      stage: "payment",
+      invoiceCount: 1,
+    })
+    const decision = decideStageAdvance(result)
+    expect(decision).toEqual({ proceed: true, auditMeta: {} })
+  })
+
+  it("does not proceed when a requirement is unmet and no override is given", () => {
+    const result = getStageRequirements({
+      ...emptyState,
+      stage: "payment",
+      invoiceCount: 0,
+    })
+    const decision = decideStageAdvance(result)
+    expect(decision.proceed).toBe(false)
+    if (decision.proceed) throw new Error("expected proceed: false")
+    expect(decision.unmetRequirements).toEqual([
+      { label: "At least one invoice created", met: false },
+    ])
+  })
+
+  it("does not proceed when override is given but overrideReason is empty/whitespace", () => {
+    const result = getStageRequirements({
+      ...emptyState,
+      stage: "payment",
+      invoiceCount: 0,
+    })
+    expect(decideStageAdvance(result, { overrideReason: "" }).proceed).toBe(false)
+    expect(decideStageAdvance(result, { overrideReason: "   " }).proceed).toBe(false)
+  })
+
+  it("proceeds when override is given with a non-empty reason, recording the override + unmet requirements in auditMeta", () => {
+    const result = getStageRequirements({
+      ...emptyState,
+      stage: "payment",
+      invoiceCount: 0,
+    })
+    const decision = decideStageAdvance(result, {
+      overrideReason: "  Customer paid cash, invoice pending  ",
+    })
+    expect(decision.proceed).toBe(true)
+    if (!decision.proceed) throw new Error("expected proceed: true")
+    expect(decision.auditMeta).toEqual({
+      override: true,
+      overrideReason: "Customer paid cash, invoice pending",
+      unmetRequirements: ["At least one invoice created"],
+    })
+  })
+
+  it("ignores an override when the stage already had no unmet requirements (no bypass actually happened)", () => {
+    const result = getStageRequirements({
+      ...emptyState,
+      stage: "negotiation_and_followup",
+    })
+    const decision = decideStageAdvance(result, { overrideReason: "just in case" })
+    expect(decision).toEqual({ proceed: true, auditMeta: {} })
   })
 })

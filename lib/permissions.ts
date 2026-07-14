@@ -21,6 +21,7 @@ export type Capability =
   | "cost:delete"
   | "subscription:manage" // generate-now / delete a subscription
   | "audit:view" // view the audit log
+  | "project:stage_override" // advance a project stage past an unmet soft-gate requirement
 
 const ALL_STAFF: Role[] = ["owner", "admin"]
 
@@ -41,6 +42,7 @@ export const CAPABILITY_ROLES: Record<Capability, Role[]> = {
   "cost:delete": ALL_STAFF,
   "subscription:manage": ALL_STAFF,
   "audit:view": ALL_STAFF,
+  "project:stage_override": ALL_STAFF,
 }
 
 /** True when `role` holds `capability`. */

@@ -145,3 +145,52 @@ export function getStageRequirements(
     canAdvance: met,
   }
 }
+
+/**
+ * CR-001 ST-4 — "soft gate" decision: given the result of
+ * `getStageRequirements()` for a project's *current* stage, and an optional
+ * override the caller supplied, decide whether the caller-requested stage
+ * change should actually proceed, and (when it does) what should be recorded
+ * in the audit-log entry's `meta`.
+ *
+ * An override only "counts" — i.e. only gets recorded as a bypass — when
+ * there was actually something unmet to bypass. Passing an override on a
+ * stage that already satisfies its requirements is a no-op override: the
+ * change proceeds because it would have anyway, with an empty `auditMeta`,
+ * not a misleading "override" audit entry for a bypass that never happened.
+ *
+ * A non-empty, non-whitespace `overrideReason` is required for the override
+ * to take effect — an override with a blank reason is treated the same as no
+ * override at all (`proceed: false`), per CR-001's decision #2 (soft gate:
+ * warn, but allow an override *with a reason*).
+ */
+export type StageOverride = { overrideReason: string }
+
+export type StageAdvanceDecision =
+  | { proceed: true; auditMeta: Record<string, unknown> }
+  | { proceed: false; unmetRequirements: StageRequirement[] }
+
+export function decideStageAdvance(
+  result: StageRequirementsResult,
+  override?: StageOverride
+): StageAdvanceDecision {
+  if (result.canAdvance) {
+    return { proceed: true, auditMeta: {} }
+  }
+
+  const unmetRequirements = result.requirements.filter((r) => !r.met)
+  const reason = override?.overrideReason.trim()
+
+  if (reason) {
+    return {
+      proceed: true,
+      auditMeta: {
+        override: true,
+        overrideReason: reason,
+        unmetRequirements: unmetRequirements.map((r) => r.label),
+      },
+    }
+  }
+
+  return { proceed: false, unmetRequirements }
+}

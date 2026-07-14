@@ -50,8 +50,25 @@ export function StageSelect({
             id: projectId,
             stage: v as ProjectStage,
           })
-          if (res?.error) toast.error(res.error)
-          else toast.success("Stage updated")
+          if (res?.error) {
+            toast.error(res.error)
+          } else if (res?.warning) {
+            // Soft gate (CR-001 ST-4): the stage did NOT change. The real
+            // "confirm override" checklist UI is ST-7 — for now, surface the
+            // unmet requirement(s) as a no-op toast, same convention as
+            // other action errors in this app.
+            const unmet = res.warning.requirements
+              .filter((r) => !r.met)
+              .map((r) => r.label)
+              .join(", ")
+            toast.error(
+              unmet
+                ? `Can't advance yet: ${unmet}`
+                : "Can't advance yet: requirements not met"
+            )
+          } else {
+            toast.success("Stage updated")
+          }
         })
       }}
     >

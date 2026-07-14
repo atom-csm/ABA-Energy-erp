@@ -5,10 +5,16 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 
 import { createClient as createSupabaseClient } from "@/lib/supabase/server"
-import { requireOrgContext } from "@/lib/auth"
+import { requireOrgContext, requireCapability } from "@/lib/auth"
 import { bahtToSatang } from "@/lib/money"
 import { writeAudit } from "@/lib/audit"
 import { Constants } from "@/lib/types/database"
+import {
+  getStageRequirements,
+  decideStageAdvance,
+  type ProjectPipelineState,
+  type StageRequirement,
+} from "@/lib/pipeline/stages"
 import {
   generateText,
   isAIConfigured,
@@ -159,47 +165,174 @@ export async function updateProject(
   redirect(`/projects/${id}`)
 }
 
-const UpdateStageInput = z.object({
-  id: z.string().min(1),
-  stage: z.enum(PROJECT_STAGE),
-})
+const UpdateStageInput = z
+  .object({
+    id: z.string().min(1),
+    stage: z.enum(PROJECT_STAGE),
+    /**
+     * Soft-gate override (CR-001 ST-4 / decision #2 in
+     * docs/PROJECT_PIPELINE_REDESIGN.md): when `getStageRequirements()`
+     * reports the project's current stage isn't ready to leave, the caller
+     * must explicitly pass `override: true` plus a non-empty
+     * `overrideReason` to proceed anyway. Omitting the override (or leaving
+     * the reason blank) turns an unmet-requirement stage change into a
+     * no-op warning instead of a write.
+     */
+    override: z.boolean().optional(),
+    overrideReason: z.string().trim().max(500).optional(),
+  })
+  .refine((v) => !v.override || !!v.overrideReason, {
+    message: "An override reason is required to bypass an unmet requirement.",
+    path: ["overrideReason"],
+  })
+
+/**
+ * `warning` surfaces the unmet requirements for the current stage so the
+ * caller can show them and re-submit with `{ override: true, overrideReason }`.
+ * No actual write happens in that case — this is why `warning` and the
+ * legacy bare-success `{}` shape are both possible non-error returns. The
+ * checklist/"confirm override" UI itself is ST-7; for now callers that don't
+ * yet build that UI can treat `warning` as a no-op and surface it via a
+ * toast (see `stage-select.tsx`).
+ */
+export type UpdateProjectStageResult = {
+  error?: string
+  warning?: { requirements: StageRequirement[] }
+}
+
+/**
+ * Assembles the `ProjectPipelineState` needed to evaluate
+ * `getStageRequirements()` for one project's *current* stage, from the
+ * tables CR-001 ST-4 specifies: `projects` itself, `solar_surveys`,
+ * `quotes`, `invoices`, and `project_handover_evidence`. Thin DB glue, left
+ * untested per this repo's convention (see lib/pipeline/stages.ts's pure,
+ * fully-tested `getStageRequirements`/`decideStageAdvance` for the actual
+ * business logic).
+ */
+async function loadProjectPipelineState(
+  supabase: Awaited<ReturnType<typeof createSupabaseClient>>,
+  orgId: string,
+  projectId: string,
+  currentStage: ProjectPipelineState["stage"],
+  monthlyBillSatang: number | null,
+  installationStartDate: string | null
+): Promise<ProjectPipelineState> {
+  const [{ data: survey }, { count: sentQuoteCount }, { count: invoiceCount }, { count: handoverEvidenceCount }] =
+    await Promise.all([
+      supabase
+        .from("solar_surveys")
+        .select("id")
+        .eq("project_id", projectId)
+        .eq("org_id", orgId)
+        .eq("status", "completed")
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("quotes")
+        .select("id", { count: "exact", head: true })
+        .eq("project_id", projectId)
+        .eq("org_id", orgId)
+        .in("status", ["sent", "accepted", "converted"]),
+      supabase
+        .from("invoices")
+        .select("id", { count: "exact", head: true })
+        .eq("project_id", projectId)
+        .eq("org_id", orgId),
+      supabase
+        .from("project_handover_evidence")
+        .select("id", { count: "exact", head: true })
+        .eq("project_id", projectId)
+        .eq("org_id", orgId),
+    ])
+
+  return {
+    stage: currentStage,
+    monthlyBillSatang,
+    surveyCompleted: !!survey,
+    sentQuoteCount: sentQuoteCount ?? 0,
+    invoiceCount: invoiceCount ?? 0,
+    installationStarted: !!installationStartDate,
+    handoverEvidenceCount: handoverEvidenceCount ?? 0,
+  }
+}
 
 export async function updateProjectStage(
   input: z.input<typeof UpdateStageInput>
-): Promise<{ error?: string }> {
+): Promise<UpdateProjectStageResult> {
   const ctx = await requireOrgContext()
   const parsed = UpdateStageInput.safeParse(input)
-  if (!parsed.success) return { error: "Invalid input" }
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Invalid input" }
+  }
+  const { id, stage, override, overrideReason } = parsed.data
 
   const supabase = await createSupabaseClient()
-  // Capture the prior stage + name for the audit summary before we overwrite.
+  // Capture the prior stage + the signals needed to evaluate its
+  // requirements, before we consider overwriting anything.
   const { data: before } = await supabase
     .from("projects")
-    .select("name, stage")
-    .eq("id", parsed.data.id)
+    .select("name, stage, monthly_bill_satang, installation_start_date")
+    .eq("id", id)
     .eq("org_id", ctx.orgId)
     .maybeSingle()
 
+  if (!before) return { error: "Project not found" }
+
+  // No-op: caller re-selected the current stage. Nothing to gate or audit.
+  if (before.stage === stage) return {}
+
+  const state = await loadProjectPipelineState(
+    supabase,
+    ctx.orgId,
+    id,
+    before.stage,
+    before.monthly_bill_satang,
+    before.installation_start_date
+  )
+  const requirementsResult = getStageRequirements(state)
+  const decision = decideStageAdvance(
+    requirementsResult,
+    override ? { overrideReason: overrideReason ?? "" } : undefined
+  )
+
+  if (!decision.proceed) {
+    return { warning: { requirements: requirementsResult.requirements } }
+  }
+
+  // Overriding an unmet requirement is a deliberate bypass of an internal
+  // process gate (not just an ordinary stage move), so it's restricted to
+  // owner/admin via lib/permissions.ts's "project:stage_override" — see this
+  // subtask's report for the reasoning. Ordinary stage changes (no unmet
+  // requirement, or none being bypassed) stay open to any org member,
+  // unchanged from today.
+  if (decision.auditMeta.override) {
+    try {
+      requireCapability(ctx, "project:stage_override")
+    } catch {
+      return {
+        error: "Only owners and admins can override an unmet stage requirement.",
+      }
+    }
+  }
+
   const { error } = await supabase
     .from("projects")
-    .update({ stage: parsed.data.stage })
-    .eq("id", parsed.data.id)
+    .update({ stage })
+    .eq("id", id)
     .eq("org_id", ctx.orgId)
 
   if (error) return { error: error.message }
 
-  if (before && before.stage !== parsed.data.stage) {
-    await writeAudit(ctx, {
-      entity: "project",
-      entityId: parsed.data.id,
-      action: "stage_changed",
-      summary: `Moved project "${before.name}" from ${before.stage} → ${parsed.data.stage}`,
-      meta: { from: before.stage, to: parsed.data.stage },
-    })
-  }
+  await writeAudit(ctx, {
+    entity: "project",
+    entityId: id,
+    action: "stage_changed",
+    summary: `Moved project "${before.name}" from ${before.stage} → ${stage}`,
+    meta: { from: before.stage, to: stage, ...decision.auditMeta },
+  })
 
   revalidatePath("/projects")
-  revalidatePath(`/projects/${parsed.data.id}`)
+  revalidatePath(`/projects/${id}`)
   return {}
 }
 
