@@ -916,6 +916,57 @@ export type Database = {
         }
         Relationships: []
       }
+      project_documents: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          kind: string
+          org_id: string
+          project_id: string
+          stage: Database["public"]["Enums"]["project_stage"]
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          org_id: string
+          project_id: string
+          stage: Database["public"]["Enums"]["project_stage"]
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          org_id?: string
+          project_id?: string
+          stage?: Database["public"]["Enums"]["project_stage"]
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_documents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_handover_evidence: {
         Row: {
           created_at: string
