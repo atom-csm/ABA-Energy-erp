@@ -5,37 +5,13 @@ import { createClient } from "@/lib/supabase/server"
 import { requireOrgContext } from "@/lib/auth"
 import { PageHeader } from "@/components/page-header"
 import { EmptyState } from "@/components/empty-state"
-import { ProjectStageBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
 import type { Enums } from "@/lib/types/database"
-import { deadlineMeta } from "./_lib/dates"
+import { ProjectsPipeline, type PipelineProject } from "./_components/projects-pipeline"
 
 export const dynamic = "force-dynamic"
 
 type ProjectStage = Enums<"project_stage">
-
-// Order used to group the board; mirrors the pipeline lifecycle.
-const STAGE_ORDER: { value: ProjectStage; label: string }[] = [
-  { value: "electric_bill_collection", label: "Electric bill collection" },
-  { value: "site_survey", label: "Site survey" },
-  { value: "quotation_and_proposal", label: "Quotation & proposal" },
-  { value: "negotiation_and_followup", label: "Negotiation & follow-up" },
-  { value: "installation", label: "Installation" },
-  { value: "payment", label: "Payment" },
-  { value: "after_sales", label: "After-sales" },
-  { value: "archive", label: "Archive" },
-]
 
 export default async function ProjectsPage() {
   await requireOrgContext()
@@ -59,7 +35,7 @@ export default async function ProjectsPage() {
     handover_completed: boolean
     warranty_registered: boolean
     client: { name: string } | null
-  }>
+  }> as PipelineProject[]
 
   const newButton = (
     <Button render={<Link href="/projects/new" />}>
@@ -84,128 +60,7 @@ export default async function ProjectsPage() {
           action={newButton}
         />
       ) : (
-        <div className="space-y-5">
-          {STAGE_ORDER.map((group) => {
-            const groupRows = rows.filter((p) => p.stage === group.value)
-            if (groupRows.length === 0) return null
-            return (
-              <Card key={group.value}>
-                <CardHeader className="flex-row items-center justify-between gap-2">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <ProjectStageBadge stage={group.value} />
-                    <span className="text-muted-foreground text-sm font-normal">
-                      {groupRows.length}
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Project</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead>Deadline</TableHead>
-                        <TableHead>Install</TableHead>
-                        <TableHead>Owner</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {groupRows.map((p) => {
-                        const dl = deadlineMeta(p.deadline)
-                        return (
-                          <TableRow key={p.id} className="cursor-pointer">
-                            <TableCell className="font-medium">
-                              <Link
-                                href={`/projects/${p.id}`}
-                                className="hover:underline"
-                              >
-                                {p.name}
-                              </Link>
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">
-                              {p.client?.name ?? "—"}
-                            </TableCell>
-                            <TableCell>
-                              {dl ? (
-                                <span
-                                  className={cn(
-                                    "inline-flex items-center gap-1.5",
-                                    dl.tone === "danger" &&
-                                      "text-red-600 dark:text-red-400",
-                                    dl.tone === "warning" &&
-                                      "text-amber-600 dark:text-amber-400"
-                                  )}
-                                >
-                                  {dl.label}
-                                  {dl.note ? (
-                                    <Badge
-                                      variant="outline"
-                                      className={cn(
-                                        "text-xs",
-                                        dl.tone === "danger" &&
-                                          "border-transparent bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300",
-                                        dl.tone === "warning" &&
-                                          "border-transparent bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300"
-                                      )}
-                                    >
-                                      {dl.note}
-                                    </Badge>
-                                  ) : null}
-                                </span>
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <div className="space-y-1">
-                                <div className="text-sm">
-                                  {[p.installation_start_date, p.installation_end_date]
-                                    .filter(Boolean)
-                                    .join(" → ") || "—"}
-                                </div>
-                                <div className="flex flex-wrap gap-1">
-                                  <Badge
-                                    variant="outline"
-                                    className={cn(
-                                      p.deposit_received &&
-                                        "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300"
-                                    )}
-                                  >
-                                    {p.deposit_received ? "Deposit" : "No deposit"}
-                                  </Badge>
-                                  <Badge
-                                    variant="outline"
-                                    className={cn(
-                                      p.handover_completed &&
-                                        "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300"
-                                    )}
-                                  >
-                                    {p.handover_completed ? "Handover" : "Handover pending"}
-                                  </Badge>
-                                  {p.warranty_registered ? (
-                                    <Badge
-                                      variant="outline"
-                                      className="border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950 dark:text-violet-300"
-                                    >
-                                      Warranty
-                                    </Badge>
-                                  ) : null}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">
-                              {p.owner ?? "—"}
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+        <ProjectsPipeline projects={rows} />
       )}
     </div>
   )
