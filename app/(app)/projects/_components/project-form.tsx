@@ -25,35 +25,37 @@ import {
 } from "@/components/ui/select"
 import type { Enums } from "@/lib/types/database"
 
-type ProjectStatus = Enums<"project_status">
+type ProjectStage = Enums<"project_stage">
 
-const STATUS_OPTIONS: { value: ProjectStatus; label: string }[] = [
-  { value: "not_started", label: "Not started" },
-  { value: "in_progress", label: "In progress" },
-  { value: "review", label: "Review" },
-  { value: "delivered", label: "Delivered" },
-  { value: "support", label: "Support" },
-  { value: "paused", label: "Paused" },
-  { value: "cancelled", label: "Cancelled" },
+const STAGE_OPTIONS: { value: ProjectStage; label: string }[] = [
+  { value: "electric_bill_collection", label: "Electric bill collection" },
+  { value: "site_survey", label: "Site survey" },
+  { value: "quotation_and_proposal", label: "Quotation & proposal" },
+  { value: "negotiation_and_followup", label: "Negotiation & follow-up" },
+  { value: "installation", label: "Installation" },
+  { value: "payment", label: "Payment" },
+  { value: "after_sales", label: "After-sales" },
+  { value: "archive", label: "Archive" },
 ]
 
-const STATUS_LABEL = Object.fromEntries(
-  STATUS_OPTIONS.map((s) => [s.value, s.label])
-) as Record<ProjectStatus, string>
+const STAGE_LABEL = Object.fromEntries(
+  STAGE_OPTIONS.map((s) => [s.value, s.label])
+) as Record<ProjectStage, string>
 
 const NONE = "none"
 
 const FormSchema = z.object({
   name: z.string().min(1, "Project name is required"),
   clientId: z.string(),
-  status: z.enum([
-    "not_started",
-    "in_progress",
-    "review",
-    "delivered",
-    "support",
-    "paused",
-    "cancelled",
+  stage: z.enum([
+    "electric_bill_collection",
+    "site_survey",
+    "quotation_and_proposal",
+    "negotiation_and_followup",
+    "installation",
+    "payment",
+    "after_sales",
+    "archive",
   ]),
   deadline: z.string(),
   budgetBaht: z.coerce.number().min(0, "Budget cannot be negative"),
@@ -87,7 +89,7 @@ export function ProjectForm({
     defaultValues: {
       name: "",
       clientId: NONE,
-      status: "not_started",
+      stage: "electric_bill_collection",
       deadline: "",
       budgetBaht: 0,
       owner: "",
@@ -163,10 +165,10 @@ export function ProjectForm({
 
           <FormField
             control={form.control}
-            name="status"
+            name="stage"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Status</FormLabel>
+                <FormLabel>Stage</FormLabel>
                 <Select
                   value={field.value}
                   onValueChange={(v) => field.onChange(v)}
@@ -174,12 +176,12 @@ export function ProjectForm({
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue>
-                        {(v: ProjectStatus) => STATUS_LABEL[v]}
+                        {(v: ProjectStage) => STAGE_LABEL[v]}
                       </SelectValue>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {STATUS_OPTIONS.map((s) => (
+                    {STAGE_OPTIONS.map((s) => (
                       <SelectItem key={s.value} value={s.value}>
                         {s.label}
                       </SelectItem>

@@ -107,12 +107,12 @@ export type Database = {
           body: string | null
           client_id: string | null
           created_at: string
-          deal_id: string | null
           done: boolean
           due_date: string | null
           id: string
           org_id: string
           owner: string | null
+          project_id: string | null
           type: Database["public"]["Enums"]["activity_type"]
           updated_at: string
         }
@@ -120,12 +120,12 @@ export type Database = {
           body?: string | null
           client_id?: string | null
           created_at?: string
-          deal_id?: string | null
           done?: boolean
           due_date?: string | null
           id?: string
           org_id: string
           owner?: string | null
+          project_id?: string | null
           type?: Database["public"]["Enums"]["activity_type"]
           updated_at?: string
         }
@@ -133,12 +133,12 @@ export type Database = {
           body?: string | null
           client_id?: string | null
           created_at?: string
-          deal_id?: string | null
           done?: boolean
           due_date?: string | null
           id?: string
           org_id?: string
           owner?: string | null
+          project_id?: string | null
           type?: Database["public"]["Enums"]["activity_type"]
           updated_at?: string
         }
@@ -151,17 +151,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "activities_deal_id_fkey"
-            columns: ["deal_id"]
-            isOneToOne: false
-            referencedRelation: "deals"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "activities_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -468,96 +468,6 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      deals: {
-        Row: {
-          client_id: string
-          created_at: string
-          currency: string
-          estimated_system_size_kwp: number | null
-          expected_close_date: string | null
-          id: string
-          installation_target_date: string | null
-          monthly_bill_satang: number | null
-          next_follow_up_date: string | null
-          notes: string | null
-          org_id: string
-          owner: string | null
-          payback_years: number | null
-          province: string | null
-          roof_type: string | null
-          solar_notes: string | null
-          source: string | null
-          stage: Database["public"]["Enums"]["deal_stage"]
-          survey_date: string | null
-          title: string
-          updated_at: string
-          value_satang: number
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          currency?: string
-          estimated_system_size_kwp?: number | null
-          expected_close_date?: string | null
-          id?: string
-          installation_target_date?: string | null
-          monthly_bill_satang?: number | null
-          next_follow_up_date?: string | null
-          notes?: string | null
-          org_id: string
-          owner?: string | null
-          payback_years?: number | null
-          province?: string | null
-          roof_type?: string | null
-          solar_notes?: string | null
-          source?: string | null
-          stage?: Database["public"]["Enums"]["deal_stage"]
-          survey_date?: string | null
-          title: string
-          updated_at?: string
-          value_satang?: number
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          currency?: string
-          estimated_system_size_kwp?: number | null
-          expected_close_date?: string | null
-          id?: string
-          installation_target_date?: string | null
-          monthly_bill_satang?: number | null
-          next_follow_up_date?: string | null
-          notes?: string | null
-          org_id?: string
-          owner?: string | null
-          payback_years?: number | null
-          province?: string | null
-          roof_type?: string | null
-          solar_notes?: string | null
-          source?: string | null
-          stage?: Database["public"]["Enums"]["deal_stage"]
-          survey_date?: string | null
-          title?: string
-          updated_at?: string
-          value_satang?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "deals_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "deals_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1128,60 +1038,87 @@ export type Database = {
           budget_satang: number | null
           client_id: string | null
           created_at: string
+          currency: string
           deadline: string | null
-          deal_id: string | null
           deposit_received: boolean
+          expected_close_date: string | null
           handover_completed: boolean
           id: string
           installation_checklist: Json
           installation_crew: string | null
           installation_end_date: string | null
           installation_start_date: string | null
+          installation_target_date: string | null
+          monthly_bill_satang: number | null
           name: string
+          next_follow_up_date: string | null
+          notes: string | null
           org_id: string
           owner: string | null
-          status: Database["public"]["Enums"]["project_status"]
+          province: string | null
+          solar_notes: string | null
+          source: string | null
+          stage: Database["public"]["Enums"]["project_stage"]
           updated_at: string
+          value_satang: number
           warranty_registered: boolean
         }
         Insert: {
           budget_satang?: number | null
           client_id?: string | null
           created_at?: string
+          currency?: string
           deadline?: string | null
-          deal_id?: string | null
           deposit_received?: boolean
+          expected_close_date?: string | null
           handover_completed?: boolean
           id?: string
           installation_checklist?: Json
           installation_crew?: string | null
           installation_end_date?: string | null
           installation_start_date?: string | null
+          installation_target_date?: string | null
+          monthly_bill_satang?: number | null
           name: string
+          next_follow_up_date?: string | null
+          notes?: string | null
           org_id: string
           owner?: string | null
-          status?: Database["public"]["Enums"]["project_status"]
+          province?: string | null
+          solar_notes?: string | null
+          source?: string | null
+          stage?: Database["public"]["Enums"]["project_stage"]
           updated_at?: string
+          value_satang?: number
           warranty_registered?: boolean
         }
         Update: {
           budget_satang?: number | null
           client_id?: string | null
           created_at?: string
+          currency?: string
           deadline?: string | null
-          deal_id?: string | null
           deposit_received?: boolean
+          expected_close_date?: string | null
           handover_completed?: boolean
           id?: string
           installation_checklist?: Json
           installation_crew?: string | null
           installation_end_date?: string | null
           installation_start_date?: string | null
+          installation_target_date?: string | null
+          monthly_bill_satang?: number | null
           name?: string
+          next_follow_up_date?: string | null
+          notes?: string | null
           org_id?: string
           owner?: string | null
-          status?: Database["public"]["Enums"]["project_status"]
+          province?: string | null
+          solar_notes?: string | null
+          source?: string | null
+          stage?: Database["public"]["Enums"]["project_stage"]
           updated_at?: string
+          value_satang?: number
           warranty_registered?: boolean
         }
         Relationships: [
@@ -1190,13 +1127,6 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "projects_deal_id_fkey"
-            columns: ["deal_id"]
-            isOneToOne: false
-            referencedRelation: "deals"
             referencedColumns: ["id"]
           },
           {
@@ -1473,7 +1403,6 @@ export type Database = {
         Row: {
           completed_date: string | null
           created_at: string
-          deal_id: string | null
           id: string
           main_breaker_amp: number | null
           meter_phase: string | null
@@ -1493,7 +1422,6 @@ export type Database = {
         Insert: {
           completed_date?: string | null
           created_at?: string
-          deal_id?: string | null
           id?: string
           main_breaker_amp?: number | null
           meter_phase?: string | null
@@ -1513,7 +1441,6 @@ export type Database = {
         Update: {
           completed_date?: string | null
           created_at?: string
-          deal_id?: string | null
           id?: string
           main_breaker_amp?: number | null
           meter_phase?: string | null
@@ -1531,13 +1458,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "solar_surveys_deal_id_fkey"
-            columns: ["deal_id"]
-            isOneToOne: false
-            referencedRelation: "deals"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "solar_surveys_org_id_fkey"
             columns: ["org_id"]
@@ -1744,7 +1664,7 @@ export type Database = {
       accounting_provider: "flowaccount" | "peak" | "xero"
       accounting_sync_status: "pending" | "synced" | "error"
       activity_type: "note" | "call" | "email" | "meeting" | "follow_up"
-      ai_output_kind: "deal_summary" | "followup_draft" | "meeting_intake"
+      ai_output_kind: "project_summary" | "followup_draft" | "meeting_intake"
       cost_category:
         | "software"
         | "contractor"
@@ -1752,14 +1672,6 @@ export type Database = {
         | "marketing"
         | "salary"
         | "other"
-      deal_stage:
-        | "lead"
-        | "contacted"
-        | "discovery"
-        | "proposal"
-        | "negotiation"
-        | "won"
-        | "lost"
       invitation_status: "pending" | "accepted" | "revoked" | "expired"
       invoice_status:
         | "draft"
@@ -1776,14 +1688,15 @@ export type Database = {
         | "promptpay"
         | "cheque"
         | "other"
-      project_status:
-        | "not_started"
-        | "in_progress"
-        | "review"
-        | "delivered"
-        | "support"
-        | "paused"
-        | "cancelled"
+      project_stage:
+        | "electric_bill_collection"
+        | "site_survey"
+        | "quotation_and_proposal"
+        | "negotiation_and_followup"
+        | "installation"
+        | "payment"
+        | "after_sales"
+        | "archive"
       quote_status:
         | "draft"
         | "sent"
@@ -1928,7 +1841,7 @@ export const Constants = {
       accounting_provider: ["flowaccount", "peak", "xero"],
       accounting_sync_status: ["pending", "synced", "error"],
       activity_type: ["note", "call", "email", "meeting", "follow_up"],
-      ai_output_kind: ["deal_summary", "followup_draft", "meeting_intake"],
+      ai_output_kind: ["project_summary", "followup_draft", "meeting_intake"],
       cost_category: [
         "software",
         "contractor",
@@ -1936,15 +1849,6 @@ export const Constants = {
         "marketing",
         "salary",
         "other",
-      ],
-      deal_stage: [
-        "lead",
-        "contacted",
-        "discovery",
-        "proposal",
-        "negotiation",
-        "won",
-        "lost",
       ],
       invitation_status: ["pending", "accepted", "revoked", "expired"],
       invoice_status: [
@@ -1964,14 +1868,15 @@ export const Constants = {
         "cheque",
         "other",
       ],
-      project_status: [
-        "not_started",
-        "in_progress",
-        "review",
-        "delivered",
-        "support",
-        "paused",
-        "cancelled",
+      project_stage: [
+        "electric_bill_collection",
+        "site_survey",
+        "quotation_and_proposal",
+        "negotiation_and_followup",
+        "installation",
+        "payment",
+        "after_sales",
+        "archive",
       ],
       quote_status: [
         "draft",

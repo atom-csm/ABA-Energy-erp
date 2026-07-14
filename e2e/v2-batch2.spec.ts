@@ -74,16 +74,8 @@ test("AI features degrade gracefully when no OPENROUTER_API_KEY is set", async (
   page,
 }) => {
   test.setTimeout(90_000) // dev server compiles routes/actions lazily on first hit
-  const a = admin()
-  const { data: deal } = await a.from("deals").select("id").limit(1).single()
 
   await loginDemo(page)
-  await page.goto(`/deals/${deal!.id}`)
-  await page.getByRole("button", { name: /summarize deal/i }).click()
-  await expect(page.getByText(/not configured/i).first()).toBeVisible({
-    timeout: 20_000,
-  })
-
   await page.goto("/intake")
   await page
     .getByRole("textbox")

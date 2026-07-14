@@ -4,13 +4,13 @@ import type { Json } from "@/lib/types/database"
 
 /** One audit entry to append. The `summary` is the human sentence shown in the feed. */
 export type AuditEntry = {
-  /** What kind of thing changed, e.g. 'deal', 'invoice', 'payment', 'cost', 'settings'. */
+  /** What kind of thing changed, e.g. 'project', 'invoice', 'payment', 'cost', 'settings'. */
   entity: string
   /** The affected row's id, when there is one. */
   entityId?: string | null
   /** What happened, e.g. 'created', 'updated', 'deleted', 'stage_changed', 'payment_recorded'. */
   action: string
-  /** Short, human sentence, e.g. `Created deal "Acme website"`. */
+  /** Short, human sentence, e.g. `Created project "Acme website"`. */
   summary: string
   /** Optional structured context (old/new values, amounts, etc.). */
   meta?: Record<string, unknown>

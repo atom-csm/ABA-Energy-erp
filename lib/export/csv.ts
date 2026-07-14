@@ -20,7 +20,7 @@ const RECORD_SEP = "\r\n"
 
 /**
  * Leading characters that make Excel/Google Sheets evaluate a cell as a formula.
- * Client-controlled text (client names, deal titles, cost notes) flows into
+ * Client-controlled text (client names, project names, cost notes) flows into
  * exports, so an unguarded `=HYPERLINK(...)`/`=cmd|...` would execute on open.
  */
 const FORMULA_TRIGGERS = new Set(["=", "+", "-", "@", "\t", "\r"])

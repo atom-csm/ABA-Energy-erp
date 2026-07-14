@@ -32,20 +32,13 @@ test("invoices CSV exports amounts in baht, not satang", async ({ page }) => {
   expect(body).not.toContain("9000000")
 })
 
-test("deals CSV export downloads with a header", async ({ page }) => {
+test("projects board groups cards by pipeline stage", async ({ page }) => {
   await loginDemo(page)
-  const res = await page.request.get("/deals/export")
-  expect(res.status()).toBe(200)
-  expect(res.headers()["content-type"]).toContain("csv")
-  expect(await res.text()).toContain("Title")
-})
-
-test("deals board filters to a single stage via the URL", async ({ page }) => {
-  await loginDemo(page)
-  await page.goto("/deals?stage=won")
-  // When filtered, only the selected stage's column renders.
-  await expect(page.getByText("Won", { exact: true }).first()).toBeVisible()
-  await expect(page.getByText("Lead", { exact: true })).toHaveCount(0)
+  await page.goto("/projects")
+  // The seed spans multiple stages; at least the two most distinctive labels
+  // should render as separate stage-group headings.
+  await expect(page.getByText("Installation", { exact: true }).first()).toBeVisible()
+  await expect(page.getByText("Archive", { exact: true }).first()).toBeVisible()
 })
 
 test("signup enforces the password policy and gates submit", async ({ page }) => {
@@ -61,24 +54,24 @@ test("signup enforces the password policy and gates submit", async ({ page }) =>
   await expect(submit).toBeEnabled()
 })
 
-test("changing a deal stage writes a stage_changed audit entry shown in /audit", async ({
+test("changing a project stage writes a stage_changed audit entry shown in /audit", async ({
   page,
 }) => {
   const a = admin()
-  const { data: deal } = await a
-    .from("deals")
-    .select("id,title,stage")
-    .not("stage", "in", "(won,lost)")
+  const { data: project } = await a
+    .from("projects")
+    .select("id,name,stage")
+    .neq("stage", "archive")
     .limit(1)
     .single()
-  expect(deal).toBeTruthy()
+  expect(project).toBeTruthy()
 
   await loginDemo(page)
-  await page.goto(`/deals/${deal!.id}`)
+  await page.goto(`/projects/${project!.id}`)
 
   // Base UI Select (the stage changer) → open and pick a different stage.
   await page.getByRole("combobox").first().click()
-  const target = deal!.stage === "proposal" ? "Negotiation" : "Proposal"
+  const target = project!.stage === "site_survey" ? "Payment" : "Site survey"
   await page.getByRole("option", { name: target, exact: true }).click()
   await expect(page.getByText(/stage updated/i)).toBeVisible()
 
@@ -88,7 +81,7 @@ test("changing a deal stage writes a stage_changed audit entry shown in /audit",
       const { count } = await a
         .from("audit_log")
         .select("*", { count: "exact", head: true })
-        .eq("entity_id", deal!.id)
+        .eq("entity_id", project!.id)
         .eq("action", "stage_changed")
       return count ?? 0
     })
@@ -96,5 +89,5 @@ test("changing a deal stage writes a stage_changed audit entry shown in /audit",
 
   // And it renders in the activity feed.
   await page.goto("/audit")
-  await expect(page.getByText(/moved deal/i).first()).toBeVisible()
+  await expect(page.getByText(/moved project/i).first()).toBeVisible()
 })

@@ -49,10 +49,10 @@ describe("auditSentence", () => {
       auditSentence({
         actorEmail: "owner@studio.co",
         action: "created",
-        entity: "deal",
-        summary: 'Created deal "Acme website"',
+        entity: "project",
+        summary: 'Created project "Acme website"',
       })
-    ).toBe('owner@studio.co Created deal "Acme website"')
+    ).toBe('owner@studio.co Created project "Acme website"')
   })
 
   it("formats an update event", () => {
@@ -71,10 +71,10 @@ describe("auditSentence", () => {
       auditSentence({
         actorEmail: "owner@studio.co",
         action: "deleted",
-        entity: "deal",
-        summary: 'Deleted deal "Acme website"',
+        entity: "project",
+        summary: 'Deleted project "Acme website"',
       })
-    ).toBe('owner@studio.co Deleted deal "Acme website"')
+    ).toBe('owner@studio.co Deleted project "Acme website"')
   })
 
   it("formats a stage_changed event with an old → new transition summary", () => {
@@ -82,10 +82,10 @@ describe("auditSentence", () => {
       auditSentence({
         actorEmail: "owner@studio.co",
         action: "stage_changed",
-        entity: "deal",
-        summary: 'Moved deal "Acme" from proposal → won',
+        entity: "project",
+        summary: 'Moved project "Acme" from proposal → won',
       })
-    ).toBe('owner@studio.co Moved deal "Acme" from proposal → won')
+    ).toBe('owner@studio.co Moved project "Acme" from proposal → won')
   })
 
   it("formats a payment_recorded event", () => {
@@ -104,10 +104,10 @@ describe("auditSentence", () => {
       auditSentence({
         actorEmail: null,
         action: "created",
-        entity: "deal",
-        summary: 'Created deal "Acme"',
+        entity: "project",
+        summary: 'Created project "Acme"',
       })
-    ).toBe('System Created deal "Acme"')
+    ).toBe('System Created project "Acme"')
   })
 
   it("falls back to a generated sentence when no summary is supplied", () => {

@@ -4,7 +4,7 @@ import {
   ArrowLeft,
   Pencil,
   Users,
-  Handshake,
+  Briefcase,
   Activity as ActivityIcon,
   Mail,
   Phone,
@@ -16,7 +16,7 @@ import { requireOrgContext } from "@/lib/auth"
 import { can } from "@/lib/permissions"
 import { PageHeader } from "@/components/page-header"
 import { EmptyState } from "@/components/empty-state"
-import { DealStageBadge } from "@/components/status-badge"
+import { ProjectStageBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -51,15 +51,15 @@ export default async function ClientDetailPage({
   const canManagePortal = can(ctx.role, "settings:manage")
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ""
 
-  const [contactsRes, dealsRes, activitiesRes] = await Promise.all([
+  const [contactsRes, projectsRes, activitiesRes] = await Promise.all([
     supabase
       .from("contacts")
       .select("id, name, email, phone, role")
       .eq("client_id", id)
       .order("created_at", { ascending: true }),
     supabase
-      .from("deals")
-      .select("id, title, stage, value_satang, updated_at")
+      .from("projects")
+      .select("id, name, stage, value_satang, updated_at")
       .eq("client_id", id)
       .order("updated_at", { ascending: false }),
     supabase
@@ -71,7 +71,7 @@ export default async function ClientDetailPage({
   ])
 
   const contacts = contactsRes.data ?? []
-  const deals = dealsRes.data ?? []
+  const projects = projectsRes.data ?? []
   const activities = activitiesRes.data ?? []
 
   return (
@@ -195,36 +195,36 @@ export default async function ClientDetailPage({
         </CardContent>
       </Card>
 
-      {/* Deals (read-only) */}
+      {/* Projects (read-only) */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Handshake className="size-4" />
-            Deals
+            <Briefcase className="size-4" />
+            Projects
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {deals.length === 0 ? (
+          {projects.length === 0 ? (
             <EmptyState
-              icon={Handshake}
-              title="No deals yet"
-              description="Deals for this client show up here."
+              icon={Briefcase}
+              title="No projects yet"
+              description="Projects for this client show up here."
               className="border-0 p-6"
             />
           ) : (
             <ul className="divide-y">
-              {deals.map((deal) => (
+              {projects.map((project) => (
                 <li
-                  key={deal.id}
+                  key={project.id}
                   className="flex items-center justify-between gap-3 py-3"
                 >
                   <Link
-                    href={`/deals/${deal.id}`}
+                    href={`/projects/${project.id}`}
                     className="min-w-0 truncate font-medium hover:underline"
                   >
-                    {deal.title}
+                    {project.name}
                   </Link>
-                  <DealStageBadge stage={deal.stage} />
+                  <ProjectStageBadge stage={project.stage} />
                 </li>
               ))}
             </ul>

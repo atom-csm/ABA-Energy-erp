@@ -37,7 +37,7 @@ export function DeleteClientButton({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete {name}?</AlertDialogTitle>
           <AlertDialogDescription>
-            This permanently removes the client and its contacts. Deals and
+            This permanently removes the client and its contacts. Projects and
             activities linked to it are kept. This cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>

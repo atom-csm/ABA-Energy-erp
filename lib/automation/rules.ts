@@ -8,12 +8,12 @@
 
 import type { Enums } from "@/lib/types/database"
 
-/** A deal projected to just the fields the rule needs. */
-export type DealFollowUp = {
+/** A project projected to just the fields the rule needs. */
+export type ProjectFollowUp = {
   id: string
-  title: string
+  name: string
   next_follow_up_date: string | null
-  stage: Enums<"deal_stage">
+  stage: Enums<"project_stage">
 }
 
 /** An activity projected to just the fields the rule needs. `title` optional. */
@@ -27,14 +27,18 @@ export type ActivityFollowUp = {
 
 /** What the rule emits per due item; consumed by the dispatch layer. */
 export type ReminderSpec = {
-  entity: "deal" | "activity"
+  entity: "project" | "activity"
   entityId: string
   title: string
   dueDate: string
 }
 
-/** Deal stages that are closed and therefore never need a follow-up reminder. */
-const CLOSED_STAGES: ReadonlySet<Enums<"deal_stage">> = new Set(["won", "lost"])
+/**
+ * Project stages that are closed and therefore never need a follow-up
+ * reminder. `archive` is the one closed stage post-merge (it covers done/won
+ * *and* lost/dead projects — see docs/PROJECT_PIPELINE_REDESIGN.md).
+ */
+const CLOSED_STAGES: ReadonlySet<Enums<"project_stage">> = new Set(["archive"])
 
 /** True when an ISO date (YYYY-MM-DD) is today or earlier. Null → false. */
 function isDueOrOverdue(dateISO: string | null, todayISO: string): boolean {
@@ -55,26 +59,26 @@ function activityTitleFallback(type: Enums<"activity_type">): string {
 }
 
 /**
- * Given deals + activities and today's Bangkok date, return reminder specs for
- * every item that is due or overdue. Excludes won/lost deals, done activities,
- * and any item without a date. Order: deals first, then activities, each in
- * input order (callers may re-sort).
+ * Given projects + activities and today's Bangkok date, return reminder specs
+ * for every item that is due or overdue. Excludes archived projects, done
+ * activities, and any item without a date. Order: projects first, then
+ * activities, each in input order (callers may re-sort).
  */
 export function dueFollowUps(
-  deals: DealFollowUp[],
+  projects: ProjectFollowUp[],
   activities: ActivityFollowUp[],
   todayISO: string
 ): ReminderSpec[] {
   const specs: ReminderSpec[] = []
 
-  for (const deal of deals) {
-    if (CLOSED_STAGES.has(deal.stage)) continue
-    if (!isDueOrOverdue(deal.next_follow_up_date, todayISO)) continue
+  for (const project of projects) {
+    if (CLOSED_STAGES.has(project.stage)) continue
+    if (!isDueOrOverdue(project.next_follow_up_date, todayISO)) continue
     specs.push({
-      entity: "deal",
-      entityId: deal.id,
-      title: deal.title,
-      dueDate: deal.next_follow_up_date as string,
+      entity: "project",
+      entityId: project.id,
+      title: project.name,
+      dueDate: project.next_follow_up_date as string,
     })
   }
 

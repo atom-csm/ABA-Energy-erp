@@ -28,7 +28,7 @@ export default async function EditProjectPage({
 
   const { data: project } = await supabase
     .from("projects")
-    .select("id, name, client_id, status, deadline, budget_satang, owner, installation_start_date, installation_end_date, installation_crew, deposit_received, handover_completed, warranty_registered")
+    .select("id, name, client_id, stage, deadline, budget_satang, owner, installation_start_date, installation_end_date, installation_crew, deposit_received, handover_completed, warranty_registered")
     .eq("id", id)
     .maybeSingle()
 
@@ -43,7 +43,7 @@ export default async function EditProjectPage({
   const defaultValues: Partial<ProjectFormValues> = {
     name: project.name,
     clientId: project.client_id ?? "none",
-    status: project.status,
+    stage: project.stage,
     deadline: project.deadline ?? "",
     budgetBaht:
       project.budget_satang != null ? satangToBaht(project.budget_satang) : 0,

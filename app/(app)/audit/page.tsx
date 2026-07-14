@@ -42,7 +42,7 @@ export default async function AuditPage() {
         <EmptyState
           icon={ScrollText}
           title="No activity yet"
-          description="Changes to deals, invoices, payments, and settings will appear here."
+          description="Changes to projects, invoices, payments, and settings will appear here."
         />
       ) : (
         <Card>

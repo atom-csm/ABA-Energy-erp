@@ -54,13 +54,6 @@ export type DashboardData = {
   overdueFollowUps: FollowUp[]
 }
 
-const ACTIVE_PROJECT_STATUSES: Enums<"project_status">[] = [
-  "not_started",
-  "in_progress",
-  "review",
-  "support",
-]
-
 const OPEN_QUOTE_STATUSES: Enums<"quote_status">[] = [
   "draft",
   "sent",
@@ -74,7 +67,6 @@ export async function getDashboardData(): Promise<DashboardData> {
   const month = currentMonthKey()
 
   const [
-    dealsRes,
     invoicesRes,
     paymentsRes,
     costsRes,
@@ -85,13 +77,12 @@ export async function getDashboardData(): Promise<DashboardData> {
     quotesRes,
     timeEntriesRes,
   ] = await Promise.all([
-    supabase.from("deals").select("stage,value_satang"),
     supabase
       .from("invoices")
       .select("id,status,amount_satang,is_recurring,recurring_interval,due_date"),
     supabase.from("payments").select("invoice_id,amount_satang,paid_at"),
     supabase.from("costs").select("amount_satang,incurred_on"),
-    supabase.from("projects").select("status"),
+    supabase.from("projects").select("stage,value_satang"),
     supabase.from("activities").select("id,body,type,due_date,done"),
     supabase
       .from("org_settings")
@@ -112,7 +103,6 @@ export async function getDashboardData(): Promise<DashboardData> {
       .lt("work_date", nextMonthStart(month)),
   ])
 
-  const deals = dealsRes.data ?? []
   const invoices = invoicesRes.data ?? []
   const payments = paymentsRes.data ?? []
   const costs = costsRes.data ?? []
@@ -170,8 +160,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     monthlyBurnSatang,
     netBurnSatang: net,
     runwayMonths: runwayMonths(cashSatang, net),
-    pipelineSatang: pipelineValue(deals),
-    weightedPipelineSatang: weightedPipelineValue(deals),
+    pipelineSatang: pipelineValue(projects),
+    weightedPipelineSatang: weightedPipelineValue(projects),
     // Subscriptions are the source of truth for MRR on the dashboard.
     mrrSatang: subscriptionMrrSatang,
     invoiceMrrSatang: mrr(invoices),
@@ -184,9 +174,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     unpaidSatang: unpaidTotal(invoicesWithPaid),
     unpaidInvoiceCount: unpaidCount(invoicesWithPaid),
     overdueInvoiceCount,
-    activeProjectCount: projects.filter((p) =>
-      ACTIVE_PROJECT_STATUSES.includes(p.status)
-    ).length,
+    // "Active" = still moving through the pipeline (anything not archived).
+    activeProjectCount: projects.filter((p) => p.stage !== "archive").length,
     followUpsDueToday,
     overdueFollowUps,
   }

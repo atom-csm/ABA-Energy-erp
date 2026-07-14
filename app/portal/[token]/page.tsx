@@ -7,7 +7,7 @@ import {
   deriveInvoiceStatus,
   outstandingSatang,
 } from "@/lib/metrics/invoice-status"
-import { InvoiceStatusBadge, ProjectStatusBadge } from "@/components/status-badge"
+import { InvoiceStatusBadge, ProjectStageBadge } from "@/components/status-badge"
 import { QuoteStatusBadge } from "@/app/(app)/quotes/_components/quote-status-badge"
 import {
   Card,
@@ -90,7 +90,7 @@ export default async function ClientPortalPage({
       .order("created_at", { ascending: false }),
     supabase
       .from("projects")
-      .select("id, name, status")
+      .select("id, name, stage")
       .eq("client_id", client.id)
       .eq("org_id", client.org_id)
       .order("created_at", { ascending: false }),
@@ -325,7 +325,7 @@ export default async function ClientPortalPage({
                   className="flex items-center justify-between gap-3 py-3"
                 >
                   <span className="min-w-0 truncate font-medium">{p.name}</span>
-                  <ProjectStatusBadge status={p.status} />
+                  <ProjectStageBadge stage={p.stage} />
                 </li>
               ))}
             </ul>

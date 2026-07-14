@@ -26,14 +26,14 @@ import { todayISO } from "@/lib/dates"
 import { PageHeader } from "@/components/page-header"
 import { StatCard } from "@/components/stat-card"
 import { EmptyState } from "@/components/empty-state"
-import { ProjectStatusBadge, TaskStatusBadge } from "@/components/status-badge"
+import { ProjectStageBadge, TaskStatusBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import type { Enums } from "@/lib/types/database"
 import { deadlineMeta, formatDate } from "../_lib/dates"
-import { StatusSelect } from "../_components/status-select"
+import { StageSelect } from "../_components/stage-select"
 import { TaskToggle, MilestoneToggle } from "../_components/toggle-check"
 import { AddTaskForm, AiWorkBreakdownPanel } from "../_components/add-task-form"
 import { AddMilestoneForm } from "../_components/add-milestone-form"
@@ -76,7 +76,7 @@ export default async function ProjectDetailPage({
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, name, status, deadline, budget_satang, owner, client_id, installation_start_date, installation_end_date, installation_crew, deposit_received, handover_completed, warranty_registered, installation_checklist, client:clients(name)"
+      "id, name, stage, deadline, budget_satang, owner, client_id, installation_start_date, installation_end_date, installation_crew, deposit_received, handover_completed, warranty_registered, installation_checklist, client:clients(name)"
     )
     .eq("id", id)
     .maybeSingle()
@@ -84,7 +84,7 @@ export default async function ProjectDetailPage({
   if (!project) notFound()
 
   const p = project as typeof project & {
-    status: Enums<"project_status">
+    stage: Enums<"project_stage">
     client: { name: string } | null
   }
 
@@ -189,11 +189,11 @@ export default async function ProjectDetailPage({
         <CardContent className="space-y-5 pt-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <ProjectStatusBadge status={p.status} />
+              <ProjectStageBadge stage={p.stage} />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground text-sm">Change status</span>
-              <StatusSelect projectId={p.id} status={p.status} />
+              <span className="text-muted-foreground text-sm">Change stage</span>
+              <StageSelect projectId={p.id} stage={p.stage} />
             </div>
           </div>
           <Separator />

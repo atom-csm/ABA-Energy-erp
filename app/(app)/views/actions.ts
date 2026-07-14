@@ -8,12 +8,12 @@ import { requireOrgContext } from "@/lib/auth"
 
 /** Modules that can have saved views, mapped to the path we revalidate. */
 const MODULE_PATH: Record<string, string> = {
-  deals: "/deals",
+  projects: "/projects",
   finance: "/finance",
   clients: "/clients",
 }
 
-const MODULES = ["deals", "finance", "clients"] as const
+const MODULES = ["projects", "finance", "clients"] as const
 
 /**
  * Filter config persisted with a saved view. Kept to the known, URL-driven

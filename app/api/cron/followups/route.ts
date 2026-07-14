@@ -3,15 +3,15 @@ import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { verifyWebhookSecret } from "@/lib/webhooks/verify"
 import { todayISO } from "@/lib/dates"
-import { dueFollowUps, type DealFollowUp, type ActivityFollowUp } from "@/lib/automation/rules"
+import { dueFollowUps, type ProjectFollowUp, type ActivityFollowUp } from "@/lib/automation/rules"
 import { dispatchReminders } from "@/lib/automation/dispatch"
 
-// Cron scan: turns due/overdue CRM follow-ups into `reminders` rows and
-// `outbound_events` for n8n / Hermes to consume. A scheduler (n8n / Vercel Cron)
-// POSTs this on a timer (e.g. daily 09:00 Asia/Bangkok). There is NO user
-// session here, so it authenticates via the `X-Cron-Secret` header and uses a
-// service-role client that bypasses RLS — every query is scoped by org_id and
-// grouped per org before dispatch.
+// Cron scan: turns due/overdue project + activity follow-ups into `reminders`
+// rows and `outbound_events` for n8n / Hermes to consume. A scheduler (n8n /
+// Vercel Cron) POSTs this on a timer (e.g. daily 09:00 Asia/Bangkok). There is
+// NO user session here, so it authenticates via the `X-Cron-Secret` header and
+// uses a service-role client that bypasses RLS — every query is scoped by
+// org_id and grouped per org before dispatch.
 //
 // NOTE: `/api/cron` must be a public prefix at the middleware level (it carries
 // no auth cookie). See lib/supabase/middleware.ts `PUBLIC_PREFIXES`.
@@ -29,17 +29,17 @@ async function runScan(): Promise<ScanCounts> {
   const supabase = createAdminClient()
   const today = todayISO()
 
-  // Pull only candidate rows: open deals with a follow-up on/before today, and
-  // not-done activities due on/before today. The rule re-checks these, but
-  // filtering in SQL keeps the scan cheap as data grows.
-  const [{ data: deals, error: dealsError }, { data: activities, error: actsError }] =
+  // Pull only candidate rows: open (non-archived) projects with a follow-up
+  // on/before today, and not-done activities due on/before today. The rule
+  // re-checks these, but filtering in SQL keeps the scan cheap as data grows.
+  const [{ data: projects, error: projectsError }, { data: activities, error: actsError }] =
     await Promise.all([
       supabase
-        .from("deals")
-        .select("id, org_id, title, next_follow_up_date, stage")
+        .from("projects")
+        .select("id, org_id, name, next_follow_up_date, stage")
         .not("next_follow_up_date", "is", null)
         .lte("next_follow_up_date", today)
-        .not("stage", "in", "(won,lost)"),
+        .neq("stage", "archive"),
       supabase
         .from("activities")
         .select("id, org_id, title:body, due_date, done, type")
@@ -48,21 +48,21 @@ async function runScan(): Promise<ScanCounts> {
         .lte("due_date", today),
     ])
 
-  if (dealsError) throw new Error(`scan deals: ${dealsError.message}`)
+  if (projectsError) throw new Error(`scan projects: ${projectsError.message}`)
   if (actsError) throw new Error(`scan activities: ${actsError.message}`)
 
   // Group candidates by org so each org gets its own dispatch (single-org MVP,
   // but this keeps the boundary correct for multi-org later).
-  const dealsByOrg = new Map<string, DealFollowUp[]>()
-  for (const d of deals ?? []) {
-    const list = dealsByOrg.get(d.org_id) ?? []
+  const projectsByOrg = new Map<string, ProjectFollowUp[]>()
+  for (const p of projects ?? []) {
+    const list = projectsByOrg.get(p.org_id) ?? []
     list.push({
-      id: d.id,
-      title: d.title,
-      next_follow_up_date: d.next_follow_up_date,
-      stage: d.stage,
+      id: p.id,
+      name: p.name,
+      next_follow_up_date: p.next_follow_up_date,
+      stage: p.stage,
     })
-    dealsByOrg.set(d.org_id, list)
+    projectsByOrg.set(p.org_id, list)
   }
 
   const actsByOrg = new Map<string, ActivityFollowUp[]>()
@@ -79,7 +79,7 @@ async function runScan(): Promise<ScanCounts> {
     actsByOrg.set(a.org_id, list)
   }
 
-  const orgIds = new Set<string>([...dealsByOrg.keys(), ...actsByOrg.keys()])
+  const orgIds = new Set<string>([...projectsByOrg.keys(), ...actsByOrg.keys()])
 
   let remindersUpserted = 0
   let eventsQueued = 0
@@ -87,7 +87,7 @@ async function runScan(): Promise<ScanCounts> {
 
   for (const orgId of orgIds) {
     const specs = dueFollowUps(
-      dealsByOrg.get(orgId) ?? [],
+      projectsByOrg.get(orgId) ?? [],
       actsByOrg.get(orgId) ?? [],
       today
     )

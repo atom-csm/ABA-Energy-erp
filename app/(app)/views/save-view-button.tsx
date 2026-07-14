@@ -30,7 +30,7 @@ export function SaveViewButton({
   module,
   config,
 }: {
-  module: "deals" | "finance" | "clients"
+  module: "projects" | "finance" | "clients"
   config: ViewConfig
 }) {
   const [open, setOpen] = useState(false)
@@ -78,7 +78,7 @@ export function SaveViewButton({
           <Input
             id="saved-view-name"
             value={name}
-            placeholder="e.g. Hot deals"
+            placeholder="e.g. Active installs"
             autoFocus
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {

@@ -36,7 +36,6 @@ const STATUSES = [
 const Schema = z.object({
   title: z.string().min(1, "Survey title is required"),
   status: z.enum(["scheduled", "completed", "needs_engineer", "blocked", "cancelled"]),
-  dealId: z.string().optional(),
   projectId: z.string().optional(),
   scheduledDate: z.string().optional(),
   completedDate: z.string().optional(),
@@ -55,13 +54,11 @@ export type Option = { id: string; label: string }
 
 export function SurveyForm({
   action,
-  deals,
   projects,
   defaultValues,
   submitLabel = "Save survey",
 }: {
   action: (values: SurveyFormValues) => Promise<{ error?: string }>
-  deals: Option[]
   projects: Option[]
   defaultValues?: Partial<SurveyFormValues>
   submitLabel?: string
@@ -71,7 +68,6 @@ export function SurveyForm({
     defaultValues: {
       title: "",
       status: "scheduled",
-      dealId: NONE,
       projectId: NONE,
       scheduledDate: "",
       completedDate: "",
@@ -105,14 +101,9 @@ export function SurveyForm({
           )} />
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2">
-          <FormField control={form.control} name="dealId" render={({ field }) => (
-            <FormItem><FormLabel>Deal</FormLabel><Select value={field.value || NONE} onValueChange={(v)=>field.onChange(v ?? NONE)}><FormControl><SelectTrigger className="w-full"><SelectValue placeholder="No deal" /></SelectTrigger></FormControl><SelectContent><SelectItem value={NONE}>No deal</SelectItem>{deals.map((d)=><SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
-          )} />
-          <FormField control={form.control} name="projectId" render={({ field }) => (
-            <FormItem><FormLabel>Project</FormLabel><Select value={field.value || NONE} onValueChange={(v)=>field.onChange(v ?? NONE)}><FormControl><SelectTrigger className="w-full"><SelectValue placeholder="No project" /></SelectTrigger></FormControl><SelectContent><SelectItem value={NONE}>No project</SelectItem>{projects.map((p)=><SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
-          )} />
-        </div>
+        <FormField control={form.control} name="projectId" render={({ field }) => (
+          <FormItem><FormLabel>Project</FormLabel><Select value={field.value || NONE} onValueChange={(v)=>field.onChange(v ?? NONE)}><FormControl><SelectTrigger className="w-full"><SelectValue placeholder="No project" /></SelectTrigger></FormControl><SelectContent><SelectItem value={NONE}>No project</SelectItem>{projects.map((p)=><SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+        )} />
 
         <div className="grid gap-5 sm:grid-cols-2">
           <FormField control={form.control} name="scheduledDate" render={({ field }) => (<FormItem><FormLabel>Scheduled date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />

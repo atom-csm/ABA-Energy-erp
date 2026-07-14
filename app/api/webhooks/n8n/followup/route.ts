@@ -7,7 +7,7 @@ import { verifyWebhookSecret } from "@/lib/webhooks/verify"
 //
 // In production, an n8n scheduled workflow calls this each morning. n8n would
 // then fan out reminders (Slack/email) for CRM follow-ups whose
-// `next_follow_up_date` (deals) or `due_date` (activities) is today.
+// `next_follow_up_date` (projects) or `due_date` (activities) is today.
 //
 // This is a session-less placeholder: it only authenticates the caller and
 // acknowledges the payload. It does NOT read org data — without a user session

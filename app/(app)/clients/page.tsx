@@ -61,7 +61,7 @@ export default async function ClientsPage({
           <EmptyState
             icon={Users}
             title="No clients yet"
-            description="Add your first client to start tracking contacts, deals, and work."
+            description="Add your first client to start tracking contacts, projects, and work."
             action={
               <Button render={<Link href="/clients/new" />}>
                 <Plus />

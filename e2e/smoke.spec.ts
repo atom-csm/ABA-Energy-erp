@@ -20,7 +20,7 @@ test("can navigate to the core modules from the sidebar", async ({ page }) => {
   await page.getByRole("button", { name: /use demo account/i }).click()
   await page.waitForURL("**/dashboard")
 
-  for (const name of ["Clients", "Deals", "Projects", "Finance", "Templates"]) {
+  for (const name of ["Clients", "Projects", "Finance", "Templates"]) {
     await page.getByRole("link", { name, exact: true }).first().click()
     await expect(page.getByRole("heading", { name })).toBeVisible()
   }

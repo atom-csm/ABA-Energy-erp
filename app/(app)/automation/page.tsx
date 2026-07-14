@@ -96,7 +96,7 @@ export default async function AutomationPage() {
         <EmptyState
           icon={Workflow}
           title="No automation activity yet"
-          description="When a deal or activity follow-up comes due, the cron scan creates a reminder here and queues an outbound event for n8n. Trigger POST /api/cron/followups to populate it."
+          description="When a project or activity follow-up comes due, the cron scan creates a reminder here and queues an outbound event for n8n. Trigger POST /api/cron/followups to populate it."
         />
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">

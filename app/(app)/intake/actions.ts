@@ -14,7 +14,7 @@ import { meetingIntakePrompt } from "@/lib/ai/prompts"
 import { parseActionItems, type ActionItem } from "@/lib/ai/parse"
 
 /**
- * Result of a meeting intake. Discriminated union mirroring the deal AI actions:
+ * Result of a meeting intake. Discriminated union mirroring other AI actions:
  *  - `{ notConfigured: true }` → no API key; page shows a friendly notice.
  *  - `{ content, items }` → summary text plus parsed action items.
  *  - `{ error }` → a real failure worth surfacing.

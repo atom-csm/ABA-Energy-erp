@@ -24,24 +24,15 @@ function Pill({ label, tone }: { label: string; tone: Tone }) {
   )
 }
 
-const DEAL_STAGE: Record<Enums<"deal_stage">, { label: string; tone: Tone }> = {
-  lead: { label: "Lead", tone: "neutral" },
-  contacted: { label: "Contacted", tone: "info" },
-  discovery: { label: "Discovery", tone: "info" },
-  proposal: { label: "Proposal", tone: "progress" },
-  negotiation: { label: "Negotiation", tone: "warning" },
-  won: { label: "Won", tone: "success" },
-  lost: { label: "Lost", tone: "danger" },
-}
-
-const PROJECT_STATUS: Record<Enums<"project_status">, { label: string; tone: Tone }> = {
-  not_started: { label: "Not started", tone: "neutral" },
-  in_progress: { label: "In progress", tone: "progress" },
-  review: { label: "Review", tone: "info" },
-  delivered: { label: "Delivered", tone: "success" },
-  support: { label: "Support", tone: "info" },
-  paused: { label: "Paused", tone: "warning" },
-  cancelled: { label: "Cancelled", tone: "danger" },
+const PROJECT_STAGE: Record<Enums<"project_stage">, { label: string; tone: Tone }> = {
+  electric_bill_collection: { label: "Electric bill collection", tone: "neutral" },
+  site_survey: { label: "Site survey", tone: "info" },
+  quotation_and_proposal: { label: "Quotation & proposal", tone: "progress" },
+  negotiation_and_followup: { label: "Negotiation & follow-up", tone: "warning" },
+  installation: { label: "Installation", tone: "progress" },
+  payment: { label: "Payment", tone: "warning" },
+  after_sales: { label: "After-sales", tone: "info" },
+  archive: { label: "Archive", tone: "success" },
 }
 
 const INVOICE_STATUS: Record<Enums<"invoice_status">, { label: string; tone: Tone }> = {
@@ -59,13 +50,8 @@ const TASK_STATUS: Record<Enums<"task_status">, { label: string; tone: Tone }> =
   done: { label: "Done", tone: "success" },
 }
 
-export function DealStageBadge({ stage }: { stage: Enums<"deal_stage"> }) {
-  const { label, tone } = DEAL_STAGE[stage]
-  return <Pill label={label} tone={tone} />
-}
-
-export function ProjectStatusBadge({ status }: { status: Enums<"project_status"> }) {
-  const { label, tone } = PROJECT_STATUS[status]
+export function ProjectStageBadge({ stage }: { stage: Enums<"project_stage"> }) {
+  const { label, tone } = PROJECT_STAGE[stage]
   return <Pill label={label} tone={tone} />
 }
 

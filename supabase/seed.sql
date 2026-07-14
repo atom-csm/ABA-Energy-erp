@@ -73,65 +73,98 @@ insert into contacts (org_id, client_id, name, email, phone, role) values
   ('a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000005','Khun Ploy','ploy@example.com','02-555-0501','Co-founder')
 on conflict do nothing;
 
--- ── CRM: deals (mix of stages) ──────────────────────────────────────────────
-insert into deals (id, org_id, client_id, title, stage, value_satang, monthly_bill_satang, estimated_system_size_kwp, roof_type, province, survey_date, installation_target_date, payback_years, solar_notes, expected_close_date, next_follow_up_date, source, notes, owner) values
-  ('d0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','Solar Rooftop 20.8 kWp — Kranuan',          'won',        18000000, 1650000, 20.80, 'metal sheet', 'Khon Kaen', current_date - 28, current_date + 10, 4.70, 'Surveyed showroom roof; proposal should emphasize self-consumption and after-sale monitoring.', current_date - 20, null,               'Referral','Deposit received. Moving to installation planning.','b0000000-0000-0000-0000-000000000001'),
-  ('d0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','Solar Rooftop 41.6 kWp — Khon Kaen',    'won',        25000000, 4200000, 41.60, 'metal sheet', 'Khon Kaen', current_date - 18, current_date + 14, 3.90, 'High daytime load; include clean-energy dashboard pilot as optional add-on.', current_date - 10, null,               'LINE OA','Approved. Site survey and installation schedule next week.','b0000000-0000-0000-0000-000000000001'),
-  ('d0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','Factory Solar Survey + Proposal',      'won',        15000000, 2800000, 30.00, 'factory roof', 'Khon Kaen', current_date - 12, current_date + 25, 4.20, 'Factory wants revised layout and ROI sensitivity before signing.', current_date - 35, null,               'Webinar','Survey completed. Preparing revised proposal.','b0000000-0000-0000-0000-000000000002'),
-  ('d0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','Home Solar Lease-to-Own Proposal', 'proposal',   22000000, 650000, 8.50, 'tile roof', 'Khon Kaen', current_date + 2, null, 5.10, 'Lease-to-own candidate; verify roof structure and financing terms.', current_date + 14, current_date,       'Cold outreach','Proposal sent. Follow up on roof layout and payment terms today.','b0000000-0000-0000-0000-000000000001'),
-  ('d0000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000005','Clean Energy Dashboard Pilot',       'negotiation',32000000, 1900000, 25.00, 'flat roof', 'Khon Kaen', current_date - 5, current_date + 35, 4.80, 'Potential Solar Mining pilot; needs LOI and MRV-readiness report scope.', current_date + 7,  current_date - 2,   'Referral','Negotiating monitoring scope and pilot terms. Follow-up overdue!','b0000000-0000-0000-0000-000000000003'),
-  ('d0000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','Battery / EV Charger Add-on',                 'discovery',  12000000, 2800000, 30.00, 'factory roof', 'Khon Kaen', null, null, null, 'Discovery only; size after load profile review.', current_date + 30, current_date + 3,   'Webinar','Exploring battery and EV charger add-on sizing.','b0000000-0000-0000-0000-000000000002'),
-  ('d0000000-0000-0000-0000-000000000007','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','After-sale Monitoring Package',     'lead',        8000000, 4200000, 41.60, 'metal sheet', 'Khon Kaen', null, null, null, 'Existing customer; qualify monitoring subscription and service SLA.', current_date + 45, current_date + 5,   'LINE OA','New after-sale monitoring upsell from existing client.','b0000000-0000-0000-0000-000000000001'),
-  ('d0000000-0000-0000-0000-000000000008','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','Solar Quote (lost)',          'lost',        9000000, 700000, 7.00, 'tile roof', 'Khon Kaen', current_date - 25, null, 5.60, 'Lost on price; keep for competitor intel and future follow-up.', current_date - 5,  null,               'Cold outreach','Lost to lower-price installer.','b0000000-0000-0000-0000-000000000001')
-on conflict (id) do nothing;
-
--- ── CRM: activities / follow-ups ────────────────────────────────────────────
-insert into activities (org_id, client_id, deal_id, type, due_date, done, body, owner) values
-  ('a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','d0000000-0000-0000-0000-000000000004','follow_up', current_date,     false,'Call Khun Wachira re: proposal feedback.','b0000000-0000-0000-0000-000000000001'),
-  ('a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000005','d0000000-0000-0000-0000-000000000005','call',      current_date - 2, false,'Overdue: confirm scope + budget with GreenLeaf.','b0000000-0000-0000-0000-000000000003'),
-  ('a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','d0000000-0000-0000-0000-000000000006','meeting',   current_date + 3, false,'Discovery call for AI tutor add-on.','b0000000-0000-0000-0000-000000000002'),
-  ('a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001',null,                                   'note',      null,             true, 'Sent thank-you note after kickoff.','b0000000-0000-0000-0000-000000000001'),
-  ('a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','d0000000-0000-0000-0000-000000000007','follow_up', current_date + 5, false,'Send loyalty campaign one-pager.','b0000000-0000-0000-0000-000000000001')
-on conflict do nothing;
-
--- ── Projects (from won deals) ───────────────────────────────────────────────
+-- ── Projects (one row per customer journey — merges the old deals+projects) ─
+-- Stages: electric_bill_collection, site_survey, quotation_and_proposal,
+-- negotiation_and_followup, installation, payment, after_sales, archive.
 insert into projects (
-  id, org_id, deal_id, client_id, name, status, deadline, budget_satang,
+  id, org_id, client_id, name, stage, value_satang, currency,
+  expected_close_date, next_follow_up_date, source, notes, owner,
+  deadline, budget_satang,
   installation_start_date, installation_end_date, installation_crew,
-  deposit_received, handover_completed, warranty_registered, installation_checklist,
-  owner
+  deposit_received, handover_completed, warranty_registered, installation_checklist
 ) values
   (
-    'e0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','Solar Install — Kranuan Showroom','in_progress', current_date + 12, 12000000,
+    'e0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','Solar Rooftop 20.8 kWp — Kranuan Showroom','installation',18000000,'THB',
+    current_date - 20, null, 'Referral','Deposit received. Installing per schedule; emphasize self-consumption and after-sale monitoring.','b0000000-0000-0000-0000-000000000001',
+    current_date + 12, 12000000,
     current_date + 3, current_date + 6, 'Team A / Khon Kaen electrician partner',
     true, false, false,
-    '{"survey_confirmed":true,"equipment_ready":true,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb,
-    'b0000000-0000-0000-0000-000000000002'
+    '{"survey_confirmed":true,"equipment_ready":true,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
   ),
   (
-    'e0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000002','c0000000-0000-0000-0000-000000000002','Solar Install — Khon Kaen Site','not_started', current_date + 30, 16000000,
+    'e0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','Solar Rooftop 41.6 kWp — Khon Kaen Cold Storage','payment',25000000,'THB',
+    current_date - 10, null, 'LINE OA','Approved. Awaiting deposit before installation scheduling.','b0000000-0000-0000-0000-000000000001',
+    current_date + 30, 16000000,
     current_date + 14, current_date + 18, 'Team B / Cold storage safety crew',
     false, false, false,
-    '{"survey_confirmed":true,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb,
-    'b0000000-0000-0000-0000-000000000003'
+    '{"survey_confirmed":true,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
   ),
   (
-    'e0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000003','c0000000-0000-0000-0000-000000000003','Survey + Proposal — Food Processing','support', current_date - 10, 10000000,
+    'e0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','Factory Solar — Food Processing','after_sales',15000000,'THB',
+    current_date - 35, null, 'Webinar','Installed, handed over, and under warranty/monitoring support.','b0000000-0000-0000-0000-000000000002',
+    current_date - 10, 10000000,
     current_date - 20, current_date - 18, 'Service / monitoring team',
     true, true, true,
-    '{"survey_confirmed":true,"equipment_ready":true,"safety_briefed":true,"installed":true,"tested":true,"handover_signed":true}'::jsonb,
-    'b0000000-0000-0000-0000-000000000002'
+    '{"survey_confirmed":true,"equipment_ready":true,"safety_briefed":true,"installed":true,"tested":true,"handover_signed":true}'::jsonb
   ),
   (
-    'e0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001',null,'c0000000-0000-0000-0000-000000000005','Internal: Solar Mining Pilot','review', current_date + 5, 5000000,
+    'e0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000005','Internal: Solar Mining Pilot','site_survey',0,'THB',
+    null, null, 'Internal','Internal engineering pilot; scoping site requirements before any customer commitment.','b0000000-0000-0000-0000-000000000001',
+    current_date + 5, 5000000,
     null, null, 'Ava + ABA engineering review',
     false, false, false,
-    '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb,
-    'b0000000-0000-0000-0000-000000000001'
+    '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
+  ),
+  (
+    'e0000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','Home Solar Lease-to-Own Proposal','quotation_and_proposal',22000000,'THB',
+    current_date + 14, current_date, 'Cold outreach','Proposal sent. Follow up on roof layout and payment terms today.','b0000000-0000-0000-0000-000000000001',
+    null, null,
+    null, null, null,
+    false, false, false,
+    '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
+  ),
+  (
+    'e0000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000005','Clean Energy Dashboard Pilot','negotiation_and_followup',32000000,'THB',
+    current_date + 7, current_date - 2, 'Referral','Negotiating monitoring scope and pilot terms. Follow-up overdue!','b0000000-0000-0000-0000-000000000003',
+    null, null,
+    null, null, null,
+    false, false, false,
+    '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
+  ),
+  (
+    'e0000000-0000-0000-0000-000000000007','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','Battery / EV Charger Add-on','site_survey',12000000,'THB',
+    current_date + 30, current_date + 3, 'Webinar','Exploring battery and EV charger add-on sizing; needs load profile review.','b0000000-0000-0000-0000-000000000002',
+    null, null,
+    null, null, null,
+    false, false, false,
+    '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
+  ),
+  (
+    'e0000000-0000-0000-0000-000000000008','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','After-sale Monitoring Package','electric_bill_collection',8000000,'THB',
+    current_date + 45, current_date + 5, 'LINE OA','New after-sale monitoring upsell from existing client; qualifying scope.','b0000000-0000-0000-0000-000000000001',
+    null, null,
+    null, null, null,
+    false, false, false,
+    '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
+  ),
+  (
+    'e0000000-0000-0000-0000-000000000009','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','Solar Quote (lost)','archive',9000000,'THB',
+    current_date - 5, null, 'Cold outreach','Lost to lower-price installer. Kept for competitor intel and future follow-up.','b0000000-0000-0000-0000-000000000001',
+    null, null,
+    null, null, null,
+    false, false, false,
+    '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
   )
 on conflict (id) do update set
   name = excluded.name,
-  status = excluded.status,
+  stage = excluded.stage,
+  value_satang = excluded.value_satang,
+  currency = excluded.currency,
+  expected_close_date = excluded.expected_close_date,
+  next_follow_up_date = excluded.next_follow_up_date,
+  source = excluded.source,
+  notes = excluded.notes,
+  owner = excluded.owner,
   deadline = excluded.deadline,
   budget_satang = excluded.budget_satang,
   installation_start_date = excluded.installation_start_date,
@@ -140,17 +173,25 @@ on conflict (id) do update set
   deposit_received = excluded.deposit_received,
   handover_completed = excluded.handover_completed,
   warranty_registered = excluded.warranty_registered,
-  installation_checklist = excluded.installation_checklist,
-  owner = excluded.owner;
+  installation_checklist = excluded.installation_checklist;
+
+-- ── CRM: activities / follow-ups ────────────────────────────────────────────
+insert into activities (org_id, client_id, project_id, type, due_date, done, body, owner) values
+  ('a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','e0000000-0000-0000-0000-000000000005','follow_up', current_date,     false,'Call Khun Wachira re: proposal feedback.','b0000000-0000-0000-0000-000000000001'),
+  ('a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000005','e0000000-0000-0000-0000-000000000006','call',      current_date - 2, false,'Overdue: confirm scope + budget with GreenLeaf.','b0000000-0000-0000-0000-000000000003'),
+  ('a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','e0000000-0000-0000-0000-000000000007','meeting',   current_date + 3, false,'Discovery call for AI tutor add-on.','b0000000-0000-0000-0000-000000000002'),
+  ('a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001',null,                                   'note',      null,             true, 'Sent thank-you note after kickoff.','b0000000-0000-0000-0000-000000000001'),
+  ('a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','e0000000-0000-0000-0000-000000000008','follow_up', current_date + 5, false,'Send loyalty campaign one-pager.','b0000000-0000-0000-0000-000000000001')
+on conflict do nothing;
 
 -- ── Solar surveys (demo: site data feeding quote/project decisions) ─────────
 insert into solar_surveys (
-  id, org_id, deal_id, project_id, title, status, scheduled_date, completed_date,
+  id, org_id, project_id, title, status, scheduled_date, completed_date,
   roof_type, roof_area_sqm, meter_phase, main_breaker_amp,
   shading_notes, structural_notes, photo_folder_url, result_summary
 ) values
   (
-    '70000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','Kranuan showroom roof survey','completed', current_date - 28, current_date - 28,
+    '70000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000001','Kranuan showroom roof survey','completed', current_date - 28, current_date - 28,
     'metal sheet', 168.00, '3-phase', 100,
     'Minor morning shade from signage; layout keeps inverter string away from shaded edge.',
     'Roof frame visually acceptable; final structure sign-off required before installation.',
@@ -158,7 +199,7 @@ insert into solar_surveys (
     'Fit for ~20.8 kWp rooftop package. Proposal should emphasize self-consumption and after-sale monitoring.'
   ),
   (
-    '70000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000002','e0000000-0000-0000-0000-000000000002','Khon Kaen cold storage survey','needs_engineer', current_date - 18, current_date - 17,
+    '70000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000002','Khon Kaen cold storage survey','needs_engineer', current_date - 18, current_date - 17,
     'metal sheet', 320.00, '3-phase', 250,
     'Open roof area with limited shade; verify cable routing around cold-room compressor area.',
     'Engineer to confirm roof loading and maintenance walkway before final BOQ.',
@@ -166,7 +207,7 @@ insert into solar_surveys (
     'Potential ~41.6 kWp system. Add monitoring dashboard as optional package after engineering sign-off.'
   ),
   (
-    '70000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','d0000000-0000-0000-0000-000000000004',null,'Home solar lease-to-own pre-survey','scheduled', current_date + 2, null,
+    '70000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','e0000000-0000-0000-0000-000000000005','Home solar lease-to-own pre-survey','scheduled', current_date + 2, null,
     'tile roof', null, '1-phase', 50,
     'Need drone/photo check for afternoon shade from neighboring building.',
     'Pending attic/roof access approval from homeowner.',
@@ -174,7 +215,6 @@ insert into solar_surveys (
     'Confirm roof structure, usable area, and finance assumptions before final lease-to-own proposal.'
   )
 on conflict (id) do update set
-  deal_id = excluded.deal_id,
   project_id = excluded.project_id,
   title = excluded.title,
   status = excluded.status,
@@ -246,7 +286,7 @@ on conflict (id) do nothing;
 
 insert into automation_templates (org_id, category_id, name, description, internal_value_satang, price_satang, reusable_notes, implementation_checklist, tags) values
   ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000001','Solar Rooftop 20.8 kWp — Kranuan','Standard rooftop-solar package with survey, proposal, installation handoff, and monitoring-ready documentation.', 18000000, 25000000, 'Reusable survey → quote → project checklist. Swap panel/inverter models and assumptions per site.', '["Confirm survey result","Prepare BOQ and proposal assumptions","Schedule installation crew","Collect deposit","Register warranty and handover pack"]'::jsonb, array['solar','survey','proposal','installation']),
-  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000002','Solar Lead Follow-up Cadence','Auto-creates follow-up tasks and reminders when a solar lead stage changes.', 12000000, 18000000, 'Webhook from CRM -> reminders. Map Lead→Survey→Proposal→Deposit cadences.', '["Expose deal webhook","Build follow-up schedule","Configure reminder channel","Map stage -> cadence"]'::jsonb, array['solar','crm','follow-up']),
+  ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000002','Solar Lead Follow-up Cadence','Auto-creates follow-up tasks and reminders when a solar lead stage changes.', 12000000, 18000000, 'Webhook from CRM -> reminders. Map Lead→Survey→Proposal→Deposit cadences.', '["Expose project webhook","Build follow-up schedule","Configure reminder channel","Map stage -> cadence"]'::jsonb, array['solar','crm','follow-up']),
   ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000002','Deposit / Final Payment Reminder','Watches solar invoice due dates and nudges clients before/after due.', 9000000, 15000000, 'Cron + invoices table -> templated reminders at -3/0/+3/+7 days.', '["Connect invoice source","Set reminder schedule","Write message templates","Add escalation to owner"]'::jsonb, array['finance','deposit','invoice','reminder']),
   ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000001','Site Survey Summary Workflow','Turns survey photos/notes into a structured engineering summary and customer-ready follow-up.', 8000000, 12000000, 'Survey notes -> AI summary -> Drive/Lark task. Great for reducing survey-to-proposal delay.', '["Collect survey notes","Summarize constraints","Extract engineering actions","Post to project"]'::jsonb, array['ai','survey','summary']),
   ('a0000000-0000-0000-0000-000000000001','11110000-0000-0000-0000-000000000003','After-sale Monitoring Onboarding','Onboards customers after handover: warranty registration, monitoring access, and referral ask.', 15000000, 20000000, 'Handover checklist -> warranty record -> monitoring invite -> referral follow-up.', '["Register warranty","Create monitoring access","Send handover guide","Schedule after-sale check-in"]'::jsonb, array['after-sale','handover','monitoring'])

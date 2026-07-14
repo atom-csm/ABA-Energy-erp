@@ -17,7 +17,6 @@ const optionalNumber = z.coerce.number().min(0).optional().transform((v) => (Num
 const SurveyInput = z.object({
   title: z.string().trim().min(1, "Survey title is required"),
   status: z.enum(STATUSES),
-  dealId: optionalId,
   projectId: optionalId,
   scheduledDate: optionalDate,
   completedDate: optionalDate,
@@ -38,7 +37,6 @@ function toDb(d: z.output<typeof SurveyInput>, orgId: string) {
     org_id: orgId,
     title: d.title,
     status: d.status,
-    deal_id: d.dealId,
     project_id: d.projectId,
     scheduled_date: d.scheduledDate,
     completed_date: d.completedDate,

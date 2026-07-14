@@ -14,7 +14,7 @@ export default async function SurveysPage() {
   const supabase = await createClient()
   const { data: surveys } = await supabase
     .from("solar_surveys")
-    .select("id,title,status,scheduled_date,completed_date,roof_type,roof_area_sqm,meter_phase,deal:deals(title),project:projects(name)")
+    .select("id,title,status,scheduled_date,completed_date,roof_type,roof_area_sqm,meter_phase,project:projects(name)")
     .order("scheduled_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
 
@@ -46,7 +46,7 @@ export default async function SurveysPage() {
                     <TableCell>{s.status.replaceAll("_", " ")}</TableCell>
                     <TableCell>{s.scheduled_date ?? "—"}{s.completed_date ? ` → ${s.completed_date}` : ""}</TableCell>
                     <TableCell>{[s.roof_type, s.roof_area_sqm ? `${s.roof_area_sqm} sqm` : null, s.meter_phase].filter(Boolean).join(" · ") || "—"}</TableCell>
-                    <TableCell>{s.deal?.title ?? s.project?.name ?? "—"}</TableCell>
+                    <TableCell>{s.project?.name ?? "—"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

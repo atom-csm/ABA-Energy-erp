@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Users,
-  Handshake,
   FileText,
   ClipboardCheck,
   FolderKanban,
@@ -32,7 +31,6 @@ export type NavItem = {
 export const NAV_ITEMS: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Clients", href: "/clients", icon: Users },
-  { title: "Deals", href: "/deals", icon: Handshake },
   { title: "Surveys", href: "/surveys", icon: ClipboardCheck },
   { title: "Quotes", href: "/quotes", icon: FileText },
   { title: "Projects", href: "/projects", icon: FolderKanban },

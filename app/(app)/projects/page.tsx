@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server"
 import { requireOrgContext } from "@/lib/auth"
 import { PageHeader } from "@/components/page-header"
 import { EmptyState } from "@/components/empty-state"
-import { ProjectStatusBadge } from "@/components/status-badge"
+import { ProjectStageBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -23,17 +23,18 @@ import { deadlineMeta } from "./_lib/dates"
 
 export const dynamic = "force-dynamic"
 
-type ProjectStatus = Enums<"project_status">
+type ProjectStage = Enums<"project_stage">
 
-// Order used to group the board; mirrors the lifecycle.
-const STATUS_ORDER: { value: ProjectStatus; label: string }[] = [
-  { value: "in_progress", label: "In progress" },
-  { value: "review", label: "Review" },
-  { value: "not_started", label: "Not started" },
-  { value: "support", label: "Support" },
-  { value: "paused", label: "Paused" },
-  { value: "delivered", label: "Delivered" },
-  { value: "cancelled", label: "Cancelled" },
+// Order used to group the board; mirrors the pipeline lifecycle.
+const STAGE_ORDER: { value: ProjectStage; label: string }[] = [
+  { value: "electric_bill_collection", label: "Electric bill collection" },
+  { value: "site_survey", label: "Site survey" },
+  { value: "quotation_and_proposal", label: "Quotation & proposal" },
+  { value: "negotiation_and_followup", label: "Negotiation & follow-up" },
+  { value: "installation", label: "Installation" },
+  { value: "payment", label: "Payment" },
+  { value: "after_sales", label: "After-sales" },
+  { value: "archive", label: "Archive" },
 ]
 
 export default async function ProjectsPage() {
@@ -42,14 +43,14 @@ export default async function ProjectsPage() {
 
   const { data: projects } = await supabase
     .from("projects")
-    .select("id, name, status, deadline, owner, installation_start_date, installation_end_date, deposit_received, handover_completed, warranty_registered, client:clients(name)")
+    .select("id, name, stage, deadline, owner, installation_start_date, installation_end_date, deposit_received, handover_completed, warranty_registered, client:clients(name)")
     .order("deadline", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
 
   const rows = (projects ?? []) as Array<{
     id: string
     name: string
-    status: ProjectStatus
+    stage: ProjectStage
     deadline: string | null
     owner: string | null
     installation_start_date: string | null
@@ -70,7 +71,7 @@ export default async function ProjectsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Projects"
-        description="Delivery work across every client, grouped by status."
+        description="Every customer journey, grouped by pipeline stage."
       >
         {newButton}
       </PageHeader>
@@ -84,14 +85,14 @@ export default async function ProjectsPage() {
         />
       ) : (
         <div className="space-y-5">
-          {STATUS_ORDER.map((group) => {
-            const groupRows = rows.filter((p) => p.status === group.value)
+          {STAGE_ORDER.map((group) => {
+            const groupRows = rows.filter((p) => p.stage === group.value)
             if (groupRows.length === 0) return null
             return (
               <Card key={group.value}>
                 <CardHeader className="flex-row items-center justify-between gap-2">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <ProjectStatusBadge status={group.value} />
+                    <ProjectStageBadge stage={group.value} />
                     <span className="text-muted-foreground text-sm font-normal">
                       {groupRows.length}
                     </span>

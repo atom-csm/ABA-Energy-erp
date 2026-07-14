@@ -38,10 +38,10 @@ const THAI_OUTPUT =
   "is Thai, respond in natural, polite Thai (สุภาพ) suitable for Thai SME business."
 
 // ---------------------------------------------------------------------------
-// Deal summary
+// Project summary
 // ---------------------------------------------------------------------------
 
-export function dealSummaryPrompt(input: {
+export function projectSummaryPrompt(input: {
   title: string
   stage: string
   valueBaht: number
@@ -52,15 +52,15 @@ export function dealSummaryPrompt(input: {
 
   const system =
     "You are a concise sales assistant for a Thai SME. Summarize the state of a " +
-    "sales deal for a busy founder: where it stands, momentum, risks, and the " +
+    "solar project for a busy founder: where it stands, momentum, risks, and the " +
     "single most useful next step. Keep it under ~120 words. Be factual — do not " +
     "invent details not present in the context. " +
     THAI_OUTPUT
 
   const prompt = [
-    "Summarize this deal.",
+    "Summarize this project.",
     "",
-    `Deal title: ${title}`,
+    `Project name: ${title}`,
     `Client: ${client ?? "(unknown)"}`,
     `Stage: ${stage}`,
     `Value (THB): ${valueBaht.toLocaleString("en-US")}`,
@@ -93,14 +93,14 @@ export function followupDraftPrompt(input: {
 
   const system =
     "You are a sales assistant for a Thai SME. Draft a short follow-up message " +
-    "the founder can send to move this deal forward. " +
+    "the founder can send to move this project forward. " +
     `${TONE_INSTRUCTION[tone]} ` +
     "Reference the most recent context, propose a clear next step, and keep it " +
     "ready to send (no placeholders like [name] unless the name is unknown). " +
     THAI_OUTPUT
 
   const prompt = [
-    `Draft a follow-up message for the deal "${title}".`,
+    `Draft a follow-up message for the project "${title}".`,
     `Client: ${client ?? "(unknown)"}`,
     `Desired tone: ${tone}`,
     "",

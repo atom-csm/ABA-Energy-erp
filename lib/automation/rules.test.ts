@@ -2,21 +2,20 @@ import { describe, it, expect } from "vitest"
 
 import {
   dueFollowUps,
-  type DealFollowUp,
+  type ProjectFollowUp,
   type ActivityFollowUp,
 } from "@/lib/automation/rules"
 
 const TODAY = "2026-06-30"
 
-// Deals: open stages with a follow-up date on/before today should produce specs;
-// future, won, lost, or null-date deals must be excluded.
-const deals: DealFollowUp[] = [
-  { id: "deal-today", title: "Due today deal", next_follow_up_date: TODAY, stage: "proposal" },
-  { id: "deal-overdue", title: "Overdue deal", next_follow_up_date: "2026-06-28", stage: "negotiation" },
-  { id: "deal-future", title: "Future deal", next_follow_up_date: "2026-07-05", stage: "lead" },
-  { id: "deal-won", title: "Won deal", next_follow_up_date: TODAY, stage: "won" },
-  { id: "deal-lost", title: "Lost deal", next_follow_up_date: "2026-06-01", stage: "lost" },
-  { id: "deal-null", title: "No follow-up date", next_follow_up_date: null, stage: "discovery" },
+// Projects: open stages with a follow-up date on/before today should produce
+// specs; future or archived or null-date projects must be excluded.
+const projects: ProjectFollowUp[] = [
+  { id: "proj-today", name: "Due today project", next_follow_up_date: TODAY, stage: "quotation_and_proposal" },
+  { id: "proj-overdue", name: "Overdue project", next_follow_up_date: "2026-06-28", stage: "negotiation_and_followup" },
+  { id: "proj-future", name: "Future project", next_follow_up_date: "2026-07-05", stage: "electric_bill_collection" },
+  { id: "proj-archived", name: "Archived project", next_follow_up_date: TODAY, stage: "archive" },
+  { id: "proj-null", name: "No follow-up date", next_follow_up_date: null, stage: "site_survey" },
 ]
 
 // Activities: not-done with a due date on/before today produce specs; future,
@@ -34,11 +33,11 @@ describe("dueFollowUps", () => {
     expect(dueFollowUps([], [], TODAY)).toEqual([])
   })
 
-  it("includes deals due today and overdue, excluding future/won/lost/null", () => {
-    const specs = dueFollowUps(deals, [], TODAY)
+  it("includes projects due today and overdue, excluding future/archived/null", () => {
+    const specs = dueFollowUps(projects, [], TODAY)
     const ids = specs.map((s) => s.entityId).sort()
-    expect(ids).toEqual(["deal-overdue", "deal-today"])
-    expect(specs.every((s) => s.entity === "deal")).toBe(true)
+    expect(ids).toEqual(["proj-overdue", "proj-today"])
+    expect(specs.every((s) => s.entity === "project")).toBe(true)
   })
 
   it("includes activities due today and overdue, excluding future/done/null", () => {
@@ -57,15 +56,15 @@ describe("dueFollowUps", () => {
     expect(specs[0]!.entityId).toBe("act-call")
   })
 
-  it("combines deals and activities and carries through title + dueDate", () => {
-    const specs = dueFollowUps(deals, activities, TODAY)
+  it("combines projects and activities and carries through title + dueDate", () => {
+    const specs = dueFollowUps(projects, activities, TODAY)
     expect(specs).toHaveLength(4)
 
-    const today = specs.find((s) => s.entityId === "deal-today")
+    const today = specs.find((s) => s.entityId === "proj-today")
     expect(today).toEqual({
-      entity: "deal",
-      entityId: "deal-today",
-      title: "Due today deal",
+      entity: "project",
+      entityId: "proj-today",
+      title: "Due today project",
       dueDate: TODAY,
     })
 
@@ -89,8 +88,8 @@ describe("dueFollowUps", () => {
   })
 
   it("treats a follow-up dated exactly today as due (boundary)", () => {
-    const boundary: DealFollowUp[] = [
-      { id: "d", title: "Boundary", next_follow_up_date: TODAY, stage: "contacted" },
+    const boundary: ProjectFollowUp[] = [
+      { id: "p", name: "Boundary", next_follow_up_date: TODAY, stage: "site_survey" },
     ]
     expect(dueFollowUps(boundary, [], TODAY)).toHaveLength(1)
   })

@@ -18,19 +18,16 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export default async function SurveyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
-  const [surveyRes, dealsRes, projectsRes] = await Promise.all([
-    supabase.from("solar_surveys").select("*, deal:deals(title), project:projects(name)").eq("id", id).maybeSingle(),
-    supabase.from("deals").select("id,title").order("created_at", { ascending: false }),
+  const [surveyRes, projectsRes] = await Promise.all([
+    supabase.from("solar_surveys").select("*, project:projects(name)").eq("id", id).maybeSingle(),
     supabase.from("projects").select("id,name").order("created_at", { ascending: false }),
   ])
   const survey = surveyRes.data
   if (!survey) notFound()
-  const deals: Option[] = (dealsRes.data ?? []).map((d) => ({ id: d.id, label: d.title }))
   const projects: Option[] = (projectsRes.data ?? []).map((p) => ({ id: p.id, label: p.name }))
   const defaultValues: Partial<SurveyFormValues> = {
     title: survey.title,
     status: survey.status as SurveyFormValues["status"],
-    dealId: survey.deal_id ?? "none",
     projectId: survey.project_id ?? "none",
     scheduledDate: survey.scheduled_date ?? "",
     completedDate: survey.completed_date ?? "",
@@ -51,7 +48,7 @@ export default async function SurveyDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="space-y-6">
-      <PageHeader title={survey.title} description={survey.deal?.title ?? survey.project?.name ?? "Solar survey"}>
+      <PageHeader title={survey.title} description={survey.project?.name ?? "Solar survey"}>
         <Button variant="outline" render={<Link href="/surveys" />}><ArrowLeft /> Back</Button>
       </PageHeader>
       <div className="grid gap-6 lg:grid-cols-3">
@@ -68,7 +65,7 @@ export default async function SurveyDetailPage({ params }: { params: Promise<{ i
         </Card>
         <Card className="lg:col-span-2">
           <CardHeader><CardTitle className="text-base">Edit survey</CardTitle></CardHeader>
-          <CardContent><SurveyForm deals={deals} projects={projects} defaultValues={defaultValues} action={action} submitLabel="Save survey" /></CardContent>
+          <CardContent><SurveyForm projects={projects} defaultValues={defaultValues} action={action} submitLabel="Save survey" /></CardContent>
         </Card>
       </div>
     </div>

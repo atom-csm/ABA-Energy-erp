@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest"
 
 import {
-  dealSummaryPrompt,
+  projectSummaryPrompt,
   followupDraftPrompt,
   meetingIntakePrompt,
   type ActivityLike,
@@ -12,11 +12,11 @@ const activities: ActivityLike[] = [
   { type: "follow_up", body: "Send proposal", due_date: "2026-07-04", done: false },
 ]
 
-describe("dealSummaryPrompt", () => {
+describe("projectSummaryPrompt", () => {
   it("includes the title, client, stage, and value", () => {
-    const { system, prompt } = dealSummaryPrompt({
+    const { system, prompt } = projectSummaryPrompt({
       title: "Website revamp",
-      stage: "proposal",
+      stage: "quotation_and_proposal",
       valueBaht: 250000,
       client: "Acme Co",
       activities,
@@ -24,7 +24,7 @@ describe("dealSummaryPrompt", () => {
     expect(system).toMatch(/summar/i)
     expect(prompt).toContain("Website revamp")
     expect(prompt).toContain("Acme Co")
-    expect(prompt).toContain("proposal")
+    expect(prompt).toContain("quotation_and_proposal")
     // Value rendered with thousands separators.
     expect(prompt).toContain("250,000")
     // Activity bodies flow into the prompt.
@@ -32,9 +32,9 @@ describe("dealSummaryPrompt", () => {
   })
 
   it("handles empty activities without a dangling label", () => {
-    const { prompt } = dealSummaryPrompt({
+    const { prompt } = projectSummaryPrompt({
       title: "New lead",
-      stage: "lead",
+      stage: "electric_bill_collection",
       valueBaht: 0,
       client: null,
       activities: [],

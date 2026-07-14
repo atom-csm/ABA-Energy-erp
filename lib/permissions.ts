@@ -14,7 +14,6 @@ export type Capability =
   | "team:manage" // invite / revoke teammates
   | "accounting:manage" // connect/disconnect accounting, sync
   | "client:delete"
-  | "deal:delete"
   | "template:manage" // create/edit/delete automation templates
   | "quote:convert" // convert a quote into an invoice
   | "quote:delete"
@@ -35,7 +34,6 @@ export const CAPABILITY_ROLES: Record<Capability, Role[]> = {
   "team:manage": ALL_STAFF,
   "accounting:manage": ALL_STAFF,
   "client:delete": ALL_STAFF,
-  "deal:delete": ALL_STAFF,
   "template:manage": ALL_STAFF,
   "quote:convert": ALL_STAFF,
   "quote:delete": ALL_STAFF,

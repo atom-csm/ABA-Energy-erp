@@ -7,6 +7,7 @@ import { z } from "zod"
 import { createClient as createSupabaseClient } from "@/lib/supabase/server"
 import { requireOrgContext } from "@/lib/auth"
 import { bahtToSatang } from "@/lib/money"
+import { writeAudit } from "@/lib/audit"
 import { Constants } from "@/lib/types/database"
 import {
   generateText,
@@ -14,7 +15,7 @@ import {
   AINotConfiguredError,
 } from "@/lib/ai/client"
 
-const PROJECT_STATUS = Constants.public.Enums.project_status
+const PROJECT_STAGE = Constants.public.Enums.project_stage
 const TASK_STATUS = Constants.public.Enums.task_status
 
 /** Optional text field: trims; empty string becomes undefined. */
@@ -39,11 +40,10 @@ const optionalDate = z
 const ProjectInput = z.object({
   name: z.string().trim().min(1, "Project name is required"),
   clientId: optionalId,
-  status: z.enum(PROJECT_STATUS),
+  stage: z.enum(PROJECT_STAGE),
   deadline: optionalDate,
   budgetBaht: z.coerce.number().min(0, "Budget cannot be negative").optional(),
   owner: optionalText,
-  dealId: optionalId,
   installationStartDate: optionalDate,
   installationEndDate: optionalDate,
   installationCrew: optionalText,
@@ -63,11 +63,10 @@ export async function createProject(
   const {
     name,
     clientId,
-    status,
+    stage,
     deadline,
     budgetBaht,
     owner,
-    dealId,
     installationStartDate,
     installationEndDate,
     installationCrew,
@@ -83,12 +82,11 @@ export async function createProject(
       org_id: ctx.orgId,
       name,
       client_id: clientId,
-      status,
+      stage,
       deadline,
       budget_satang:
         budgetBaht !== undefined ? bahtToSatang(budgetBaht) : null,
       owner: owner ?? null,
-      deal_id: dealId,
       installation_start_date: installationStartDate,
       installation_end_date: installationEndDate,
       installation_crew: installationCrew ?? null,
@@ -121,7 +119,7 @@ export async function updateProject(
     id,
     name,
     clientId,
-    status,
+    stage,
     deadline,
     budgetBaht,
     owner,
@@ -139,7 +137,7 @@ export async function updateProject(
     .update({
       name,
       client_id: clientId,
-      status,
+      stage,
       deadline,
       budget_satang:
         budgetBaht !== undefined ? bahtToSatang(budgetBaht) : null,
@@ -161,26 +159,44 @@ export async function updateProject(
   redirect(`/projects/${id}`)
 }
 
-const UpdateStatusInput = z.object({
+const UpdateStageInput = z.object({
   id: z.string().min(1),
-  status: z.enum(PROJECT_STATUS),
+  stage: z.enum(PROJECT_STAGE),
 })
 
-export async function updateProjectStatus(
-  input: z.input<typeof UpdateStatusInput>
+export async function updateProjectStage(
+  input: z.input<typeof UpdateStageInput>
 ): Promise<{ error?: string }> {
   const ctx = await requireOrgContext()
-  const parsed = UpdateStatusInput.safeParse(input)
+  const parsed = UpdateStageInput.safeParse(input)
   if (!parsed.success) return { error: "Invalid input" }
 
   const supabase = await createSupabaseClient()
+  // Capture the prior stage + name for the audit summary before we overwrite.
+  const { data: before } = await supabase
+    .from("projects")
+    .select("name, stage")
+    .eq("id", parsed.data.id)
+    .eq("org_id", ctx.orgId)
+    .maybeSingle()
+
   const { error } = await supabase
     .from("projects")
-    .update({ status: parsed.data.status })
+    .update({ stage: parsed.data.stage })
     .eq("id", parsed.data.id)
     .eq("org_id", ctx.orgId)
 
   if (error) return { error: error.message }
+
+  if (before && before.stage !== parsed.data.stage) {
+    await writeAudit(ctx, {
+      entity: "project",
+      entityId: parsed.data.id,
+      action: "stage_changed",
+      summary: `Moved project "${before.name}" from ${before.stage} → ${parsed.data.stage}`,
+      meta: { from: before.stage, to: parsed.data.stage },
+    })
+  }
 
   revalidatePath("/projects")
   revalidatePath(`/projects/${parsed.data.id}`)
