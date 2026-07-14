@@ -208,8 +208,14 @@ export type UpdateProjectStageResult = {
  * untested per this repo's convention (see lib/pipeline/stages.ts's pure,
  * fully-tested `getStageRequirements`/`decideStageAdvance` for the actual
  * business logic).
+ *
+ * Exported (CR-001 ST-7) so the project detail page can call it too, to
+ * render the live "what's needed to move forward" checklist — the same
+ * assembly `updateProjectStage` uses to *gate* the stage change is reused
+ * here to *display* it, rather than a third re-implementation of these five
+ * queries.
  */
-async function loadProjectPipelineState(
+export async function loadProjectPipelineState(
   supabase: Awaited<ReturnType<typeof createSupabaseClient>>,
   orgId: string,
   projectId: string,

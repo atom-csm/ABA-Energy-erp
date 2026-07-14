@@ -15,13 +15,28 @@ import type { Option } from "../_components/form-fields"
 
 export const dynamic = "force-dynamic"
 
-export default async function NewQuotePage() {
+export default async function NewQuotePage({
+  searchParams,
+}: {
+  // `?projectId=` — the project detail page's "+ New quote" button (CR-001
+  // ST-7), matching the `?clientId=` prefill convention already used by
+  // `/projects/new`.
+  searchParams: Promise<{ projectId?: string }>
+}) {
   await requireOrgContext()
+  const { projectId } = await searchParams
   const supabase = await createClient()
 
-  const [clientsRes, projectsRes] = await Promise.all([
+  const [clientsRes, projectsRes, prefillProjectRes] = await Promise.all([
     supabase.from("clients").select("id, name").order("name"),
     supabase.from("projects").select("id, name").order("name"),
+    projectId
+      ? supabase
+          .from("projects")
+          .select("id, client_id")
+          .eq("id", projectId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
   ])
 
   const clients: Option[] = (clientsRes.data ?? []).map((c) => ({
@@ -33,9 +48,15 @@ export default async function NewQuotePage() {
     label: p.name,
   }))
 
+  // Best-effort: also prefill the client if the prefilled project has one,
+  // so linking a quote from a project page doesn't require re-picking its
+  // client. Falls back to blank (still pickable) if the project or its
+  // client isn't found.
+  const prefillClientId = prefillProjectRes.data?.client_id ?? ""
+
   const defaultValues: QuoteFormValues = {
-    client_id: "",
-    project_id: "",
+    client_id: prefillClientId,
+    project_id: projectId ?? "",
     number: "",
     issue_date: todayISO(),
     valid_until: "",

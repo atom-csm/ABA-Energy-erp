@@ -11,6 +11,9 @@ import {
   Building2,
   Clock,
   FileSignature,
+  History,
+  Camera,
+  FileText,
 } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/server"
@@ -32,13 +35,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import type { Enums } from "@/lib/types/database"
+import { getStageRequirements } from "@/lib/pipeline/stages"
 import { deadlineMeta, formatDate } from "../_lib/dates"
 import { StageSelect } from "../_components/stage-select"
+import { StageProgressHeader } from "../_components/stage-progress-header"
+import { StageChecklist } from "../_components/stage-checklist"
+import { StageTimeline } from "../_components/stage-timeline"
+import { StageMediaSection } from "../_components/stage-media-section"
+import { QuotesSection, type ProjectQuote } from "../_components/quotes-section"
 import { TaskToggle, MilestoneToggle } from "../_components/toggle-check"
 import { AddTaskForm, AiWorkBreakdownPanel } from "../_components/add-task-form"
 import { AddMilestoneForm } from "../_components/add-milestone-form"
 import { LogTimeForm } from "@/app/(app)/timesheets/_components/log-time-form"
 import { HandoverEvidenceSection } from "../_components/handover-evidence-section"
+import { loadProjectPipelineState } from "../actions"
+import { listDocuments } from "../documents-actions"
 
 export const dynamic = "force-dynamic"
 
@@ -69,14 +80,14 @@ export default async function ProjectDetailPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  await requireOrgContext()
+  const ctx = await requireOrgContext()
   const { id } = await params
   const supabase = await createClient()
 
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, name, stage, deadline, budget_satang, owner, client_id, installation_start_date, installation_end_date, installation_crew, deposit_received, handover_completed, warranty_registered, installation_checklist, client:clients(name)"
+      "id, name, stage, deadline, budget_satang, owner, client_id, monthly_bill_satang, installation_start_date, installation_end_date, installation_crew, deposit_received, handover_completed, warranty_registered, installation_checklist, client:clients(name)"
     )
     .eq("id", id)
     .maybeSingle()
@@ -95,6 +106,8 @@ export default async function ProjectDetailPage({
     { data: costsData },
     { data: timeData },
     { data: handoverData },
+    { data: quotesData },
+    { documents: allDocuments },
   ] = await Promise.all([
     supabase
       .from("project_tasks")
@@ -125,7 +138,33 @@ export default async function ProjectDetailPage({
       .select("id, kind, note, evidence_url, signed_by, signed_at, created_by, created_at")
       .eq("project_id", id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("quotes")
+      .select("id, number, status, total_satang, issue_date")
+      .eq("project_id", id)
+      .order("issue_date", { ascending: false }),
+    // No stage filter — the stage timeline (below) groups every stage's
+    // documents itself; the current-stage media section filters this same
+    // set down to `p.stage` rather than issuing a second query.
+    listDocuments(id),
   ])
+
+  const quotes = (quotesData ?? []) as ProjectQuote[]
+  const documents = allDocuments ?? []
+  const currentStageDocuments = documents.filter((d) => d.stage === p.stage)
+
+  // Same assembly `updateProjectStage` uses to gate a stage change (ST-4),
+  // reused here to *display* the live "what's needed to move forward"
+  // checklist for the project's current stage.
+  const pipelineState = await loadProjectPipelineState(
+    supabase,
+    ctx.orgId,
+    id,
+    p.stage,
+    p.monthly_bill_satang,
+    p.installation_start_date
+  )
+  const stageRequirements = getStageRequirements(pipelineState)
 
   const tasks = (tasksData ?? []) as Array<{
     id: string
@@ -188,13 +227,20 @@ export default async function ProjectDetailPage({
       <Card>
         <CardContent className="space-y-5 pt-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <ProjectStageBadge stage={p.stage} />
+              <StageProgressHeader stage={p.stage} />
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground text-sm">Change stage</span>
               <StageSelect projectId={p.id} stage={p.stage} />
             </div>
+          </div>
+          <div className="rounded-md border bg-muted/30 p-3">
+            <p className="text-muted-foreground mb-2 text-xs font-medium">
+              To move forward
+            </p>
+            <StageChecklist requirements={stageRequirements.requirements} />
           </div>
           <Separator />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -414,6 +460,52 @@ export default async function ProjectDetailPage({
         </CardHeader>
         <CardContent>
           <HandoverEvidenceSection projectId={p.id} items={handover} />
+        </CardContent>
+      </Card>
+
+      {/* Quotes tied to this project */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileText className="size-4" /> Quotes
+            <span className="text-muted-foreground text-sm font-normal">
+              {quotes.length}
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <QuotesSection projectId={p.id} quotes={quotes} />
+        </CardContent>
+      </Card>
+
+      {/* Media for the current stage */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Camera className="size-4" /> Photos & files — current stage
+            <span className="text-muted-foreground text-sm font-normal">
+              <ProjectStageBadge stage={p.stage} />
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StageMediaSection
+            projectId={p.id}
+            stage={p.stage}
+            initialDocuments={currentStageDocuments}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Stage timeline — browse what was uploaded at every stage */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <History className="size-4" /> Stage timeline
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StageTimeline documents={documents} currentStage={p.stage} />
         </CardContent>
       </Card>
     </div>
