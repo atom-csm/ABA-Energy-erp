@@ -164,8 +164,15 @@ primary place to create/view them.
 
 ## "Everything revolves around Project" — what that means concretely
 
-- Nav: remove `Deals` and `Surveys` entirely from `components/nav.ts`.
-  `Projects` is the first thing after Dashboard.
+- Nav: remove `Deals` entirely from `components/nav.ts`. **Revised during
+  implementation**: `Surveys` stays as its own nav item/module, not folded
+  away. `solar_surveys` holds structured site-survey data (roof type/area,
+  meter phase, breaker amp, shading/structural notes) that isn't evidence
+  photos — ST-3/ST-7's stage timeline covers the "photos from the survey"
+  need, but doesn't replace the structured-data form. Quotes also stays
+  separate for the same reason (it's a real module with its own line items
+  and PDF generation, not just project evidence), though ST-7 does surface
+  a project's quotes directly on its detail page.
 - Dashboard's pipeline metric (`lib/metrics/pipeline.ts`, currently reads
   `deals`) is rebuilt to read `projects.stage` instead.
 - `clients/[id]/page.tsx`'s deal list becomes a project list.
