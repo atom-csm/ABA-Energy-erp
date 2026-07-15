@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { notFound } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/server"
@@ -6,7 +7,7 @@ import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { createSurvey } from "../actions"
-import { SurveyForm, type Option } from "../_components/survey-form"
+import { SurveyForm, type SurveyFormValues } from "../_components/survey-form"
 
 export const dynamic = "force-dynamic"
 
@@ -16,23 +17,34 @@ export default async function NewSurveyPage({
   searchParams: Promise<{ projectId?: string }>
 }) {
   const { projectId } = await searchParams
-  const supabase = await createClient()
-  const { data: projectsData } = await supabase
-    .from("projects")
-    .select("id,name")
-    .order("created_at", { ascending: false })
+  if (!projectId) notFound()
 
-  const projects: Option[] = (projectsData ?? []).map((p) => ({ id: p.id, label: p.name }))
-  const defaultValues = {
-    projectId: projectId ?? "none",
+  const supabase = await createClient()
+  const { data: project } = await supabase
+    .from("projects")
+    .select("id, name")
+    .eq("id", projectId)
+    .maybeSingle()
+
+  if (!project) notFound()
+
+  async function action(values: SurveyFormValues) {
+    "use server"
+    return createSurvey(projectId as string, values)
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader title="New survey" description="Create a site-survey checklist for a solar opportunity.">
-        <Button variant="outline" render={<Link href="/surveys" />}><ArrowLeft /> Back</Button>
+      <PageHeader title="New survey" description={`Site-survey checklist for ${project.name}`}>
+        <Button variant="outline" render={<Link href={`/projects/${projectId}`} />}>
+          <ArrowLeft /> Back
+        </Button>
       </PageHeader>
-      <Card className="max-w-3xl"><CardContent><SurveyForm projects={projects} defaultValues={defaultValues} action={createSurvey} submitLabel="Create survey" /></CardContent></Card>
+      <Card className="max-w-3xl">
+        <CardContent>
+          <SurveyForm action={action} submitLabel="Create survey" />
+        </CardContent>
+      </Card>
     </div>
   )
 }

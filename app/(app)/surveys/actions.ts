@@ -9,7 +9,6 @@ import { createClient as createSupabaseClient } from "@/lib/supabase/server"
 
 const STATUSES = ["scheduled", "completed", "needs_engineer", "blocked", "cancelled"] as const
 
-const optionalId = z.string().optional().transform((v) => (v && v !== "none" ? v : null))
 const optionalDate = z.string().optional().transform((v) => (v ? v : null))
 const optionalText = z.string().trim().optional().transform((v) => (v ? v : null))
 const optionalNumber = z.coerce.number().min(0).optional().transform((v) => (Number.isFinite(v) ? v : null))
@@ -17,7 +16,6 @@ const optionalNumber = z.coerce.number().min(0).optional().transform((v) => (Num
 const SurveyInput = z.object({
   title: z.string().trim().min(1, "Survey title is required"),
   status: z.enum(STATUSES),
-  projectId: optionalId,
   scheduledDate: optionalDate,
   completedDate: optionalDate,
   roofType: optionalText,
@@ -32,12 +30,12 @@ const SurveyInput = z.object({
 
 export type SurveyInput = z.input<typeof SurveyInput>
 
-function toDb(d: z.output<typeof SurveyInput>, orgId: string) {
+function toDb(d: z.output<typeof SurveyInput>, orgId: string, projectId: string) {
   return {
     org_id: orgId,
+    project_id: projectId,
     title: d.title,
     status: d.status,
-    project_id: d.projectId,
     scheduled_date: d.scheduledDate,
     completed_date: d.completedDate,
     roof_type: d.roofType,
@@ -51,7 +49,10 @@ function toDb(d: z.output<typeof SurveyInput>, orgId: string) {
   }
 }
 
-export async function createSurvey(input: SurveyInput): Promise<{ error?: string }> {
+export async function createSurvey(
+  projectId: string,
+  input: SurveyInput
+): Promise<{ error?: string }> {
   const ctx = await requireOrgContext()
   const parsed = SurveyInput.safeParse(input)
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid survey" }
@@ -59,16 +60,20 @@ export async function createSurvey(input: SurveyInput): Promise<{ error?: string
   const supabase = await createSupabaseClient()
   const { data, error } = await supabase
     .from("solar_surveys")
-    .insert(toDb(parsed.data, ctx.orgId))
+    .insert(toDb(parsed.data, ctx.orgId, projectId))
     .select("id")
     .single()
 
   if (error) return { error: error.message }
-  revalidatePath("/surveys")
+  revalidatePath(`/projects/${projectId}`)
   redirect(`/surveys/${data.id}`)
 }
 
-export async function updateSurvey(id: string, input: SurveyInput): Promise<{ error?: string }> {
+export async function updateSurvey(
+  id: string,
+  projectId: string,
+  input: SurveyInput
+): Promise<{ error?: string }> {
   const ctx = await requireOrgContext()
   const parsed = SurveyInput.safeParse(input)
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid survey" }
@@ -76,12 +81,12 @@ export async function updateSurvey(id: string, input: SurveyInput): Promise<{ er
   const supabase = await createSupabaseClient()
   const { error } = await supabase
     .from("solar_surveys")
-    .update(toDb(parsed.data, ctx.orgId))
+    .update(toDb(parsed.data, ctx.orgId, projectId))
     .eq("id", id)
     .eq("org_id", ctx.orgId)
 
   if (error) return { error: error.message }
-  revalidatePath("/surveys")
+  revalidatePath(`/projects/${projectId}`)
   revalidatePath(`/surveys/${id}`)
   redirect(`/surveys/${id}`)
 }

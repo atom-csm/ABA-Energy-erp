@@ -79,14 +79,14 @@ on conflict do nothing;
 insert into projects (
   id, org_id, client_id, name, stage, value_satang, currency,
   expected_close_date, next_follow_up_date, source, notes, owner,
-  deadline, budget_satang,
+  deadline,
   installation_start_date, installation_end_date, installation_crew,
   deposit_received, handover_completed, warranty_registered, installation_checklist
 ) values
   (
     'e0000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000001','Solar Rooftop 20.8 kWp — Kranuan Showroom','installation',18000000,'THB',
     current_date - 20, null, 'Referral','Deposit received. Installing per schedule; emphasize self-consumption and after-sale monitoring.','b0000000-0000-0000-0000-000000000001',
-    current_date + 12, 12000000,
+    current_date + 12,
     current_date + 3, current_date + 6, 'Team A / Khon Kaen electrician partner',
     true, false, false,
     '{"survey_confirmed":true,"equipment_ready":true,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
@@ -94,7 +94,7 @@ insert into projects (
   (
     'e0000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','Solar Rooftop 41.6 kWp — Khon Kaen Cold Storage','payment',25000000,'THB',
     current_date - 10, null, 'LINE OA','Approved. Awaiting deposit before installation scheduling.','b0000000-0000-0000-0000-000000000001',
-    current_date + 30, 16000000,
+    current_date + 30,
     current_date + 14, current_date + 18, 'Team B / Cold storage safety crew',
     false, false, false,
     '{"survey_confirmed":true,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
@@ -102,7 +102,7 @@ insert into projects (
   (
     'e0000000-0000-0000-0000-000000000003','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','Factory Solar — Food Processing','after_sales',15000000,'THB',
     current_date - 35, null, 'Webinar','Installed, handed over, and under warranty/monitoring support.','b0000000-0000-0000-0000-000000000002',
-    current_date - 10, 10000000,
+    current_date - 10,
     current_date - 20, current_date - 18, 'Service / monitoring team',
     true, true, true,
     '{"survey_confirmed":true,"equipment_ready":true,"safety_briefed":true,"installed":true,"tested":true,"handover_signed":true}'::jsonb
@@ -110,7 +110,7 @@ insert into projects (
   (
     'e0000000-0000-0000-0000-000000000004','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000005','Internal: Solar Mining Pilot','site_survey',0,'THB',
     null, null, 'Internal','Internal engineering pilot; scoping site requirements before any customer commitment.','b0000000-0000-0000-0000-000000000001',
-    current_date + 5, 5000000,
+    current_date + 5,
     null, null, 'Ava + ABA engineering review',
     false, false, false,
     '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
@@ -118,7 +118,7 @@ insert into projects (
   (
     'e0000000-0000-0000-0000-000000000005','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','Home Solar Lease-to-Own Proposal','quotation_and_proposal',22000000,'THB',
     current_date + 14, current_date, 'Cold outreach','Proposal sent. Follow up on roof layout and payment terms today.','b0000000-0000-0000-0000-000000000001',
-    null, null,
+    null,
     null, null, null,
     false, false, false,
     '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
@@ -126,7 +126,7 @@ insert into projects (
   (
     'e0000000-0000-0000-0000-000000000006','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000005','Clean Energy Dashboard Pilot','negotiation_and_followup',32000000,'THB',
     current_date + 7, current_date - 2, 'Referral','Negotiating monitoring scope and pilot terms. Follow-up overdue!','b0000000-0000-0000-0000-000000000003',
-    null, null,
+    null,
     null, null, null,
     false, false, false,
     '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
@@ -134,7 +134,7 @@ insert into projects (
   (
     'e0000000-0000-0000-0000-000000000007','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','Battery / EV Charger Add-on','site_survey',12000000,'THB',
     current_date + 30, current_date + 3, 'Webinar','Exploring battery and EV charger add-on sizing; needs load profile review.','b0000000-0000-0000-0000-000000000002',
-    null, null,
+    null,
     null, null, null,
     false, false, false,
     '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
@@ -142,7 +142,7 @@ insert into projects (
   (
     'e0000000-0000-0000-0000-000000000008','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002','After-sale Monitoring Package','electric_bill_collection',8000000,'THB',
     current_date + 45, current_date + 5, 'LINE OA','New after-sale monitoring upsell from existing client; qualifying scope.','b0000000-0000-0000-0000-000000000001',
-    null, null,
+    null,
     null, null, null,
     false, false, false,
     '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
@@ -150,7 +150,7 @@ insert into projects (
   (
     'e0000000-0000-0000-0000-000000000009','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000004','Solar Quote (lost)','archive',9000000,'THB',
     current_date - 5, null, 'Cold outreach','Lost to lower-price installer. Kept for competitor intel and future follow-up.','b0000000-0000-0000-0000-000000000001',
-    null, null,
+    null,
     null, null, null,
     false, false, false,
     '{"survey_confirmed":false,"equipment_ready":false,"safety_briefed":false,"installed":false,"tested":false,"handover_signed":false}'::jsonb
@@ -166,7 +166,6 @@ on conflict (id) do update set
   notes = excluded.notes,
   owner = excluded.owner,
   deadline = excluded.deadline,
-  budget_satang = excluded.budget_satang,
   installation_start_date = excluded.installation_start_date,
   installation_end_date = excluded.installation_end_date,
   installation_crew = excluded.installation_crew,

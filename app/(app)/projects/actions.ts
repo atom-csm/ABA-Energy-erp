@@ -6,7 +6,6 @@ import { z } from "zod"
 
 import { createClient as createSupabaseClient } from "@/lib/supabase/server"
 import { requireOrgContext, requireCapability } from "@/lib/auth"
-import { bahtToSatang } from "@/lib/money"
 import { writeAudit } from "@/lib/audit"
 import { Constants } from "@/lib/types/database"
 import {
@@ -48,7 +47,6 @@ const ProjectInput = z.object({
   clientId: optionalId,
   stage: z.enum(PROJECT_STAGE),
   deadline: optionalDate,
-  budgetBaht: z.coerce.number().min(0, "Budget cannot be negative").optional(),
   owner: optionalText,
   installationStartDate: optionalDate,
   installationEndDate: optionalDate,
@@ -71,7 +69,6 @@ export async function createProject(
     clientId,
     stage,
     deadline,
-    budgetBaht,
     owner,
     installationStartDate,
     installationEndDate,
@@ -90,8 +87,6 @@ export async function createProject(
       client_id: clientId,
       stage,
       deadline,
-      budget_satang:
-        budgetBaht !== undefined ? bahtToSatang(budgetBaht) : null,
       owner: owner ?? null,
       installation_start_date: installationStartDate,
       installation_end_date: installationEndDate,
@@ -127,7 +122,6 @@ export async function updateProject(
     clientId,
     stage,
     deadline,
-    budgetBaht,
     owner,
     installationStartDate,
     installationEndDate,
@@ -145,8 +139,6 @@ export async function updateProject(
       client_id: clientId,
       stage,
       deadline,
-      budget_satang:
-        budgetBaht !== undefined ? bahtToSatang(budgetBaht) : null,
       owner: owner ?? null,
       installation_start_date: installationStartDate,
       installation_end_date: installationEndDate,

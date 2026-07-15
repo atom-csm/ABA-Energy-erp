@@ -164,15 +164,15 @@ primary place to create/view them.
 
 ## "Everything revolves around Project" — what that means concretely
 
-- Nav: remove `Deals` entirely from `components/nav.ts`. **Revised during
-  implementation**: `Surveys` stays as its own nav item/module, not folded
-  away. `solar_surveys` holds structured site-survey data (roof type/area,
-  meter phase, breaker amp, shading/structural notes) that isn't evidence
-  photos — ST-3/ST-7's stage timeline covers the "photos from the survey"
-  need, but doesn't replace the structured-data form. Quotes also stays
-  separate for the same reason (it's a real module with its own line items
-  and PDF generation, not just project evidence), though ST-7 does surface
-  a project's quotes directly on its detail page.
+- Nav: remove `Deals` entirely from `components/nav.ts`. **Revised again on
+  2026-07-15, after CR-001 shipped**: `Surveys` is folded into the Projects
+  page after all — every survey now requires a `project_id` (see the
+  `survey_project_required_and_drop_budget` migration) and is created/viewed
+  from a project's detail page (`SurveysSection`, mirroring `QuotesSection`),
+  not from its own top-level nav item or list page. `Quotes` still stays
+  separate — it's a real module with its own line items and PDF generation,
+  not just project evidence — though ST-7 already surfaces a project's
+  quotes directly on its detail page, same as surveys now do.
 - Dashboard's pipeline metric (`lib/metrics/pipeline.ts`, currently reads
   `deals`) is rebuilt to read `projects.stage` instead.
 - `clients/[id]/page.tsx`'s deal list becomes a project list.
@@ -185,3 +185,27 @@ primary place to create/view them.
 See the Notion change request (linked from project memory) for the ordered
 subtask breakdown, acceptance criteria per subtask, and TDD expectations —
 that's the actual execution plan; this document stays the design record.
+
+## Post-completion refinement (2026-07-15)
+
+Shortly after CR-001 shipped, direct follow-up feedback tightened the design
+further:
+
+- **Nav order**: `Projects` moved to the second slot (right after
+  `Dashboard`) and `Calendar` moved to the third slot (right after
+  `Projects`) in `components/nav.ts` — these are now the two most-used
+  screens day to day.
+- **Surveys folded into Projects** (see above) — no more standalone
+  `/surveys` list or nav item; `solar_surveys.project_id` is now `NOT NULL`.
+- **Pricing comes from quotations, not a typed field**. `projects
+  .budget_satang` — a single hand-entered number — is dropped entirely.
+  `lib/pipeline/quote-value.ts`'s `selectHeadlineQuote()` picks the most
+  meaningful quote (accepted > converted > sent > draft > expired/declined,
+  ties broken by latest issue date) and the project detail page shows that
+  next to the Quotes section heading instead.
+- **Project detail page is a 1:2 two-column layout** below the stage/
+  checklist header: the left column is read-only "Project info" (client,
+  deadline, owner, install window, crew, deposit, handover/warranty) — no
+  interactive sections — and the right column (surveys, quotes, media,
+  tasks, milestones, time, handover evidence, stage timeline) holds
+  everything actionable.

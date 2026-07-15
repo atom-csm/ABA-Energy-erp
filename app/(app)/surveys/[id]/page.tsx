@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { updateSurvey } from "../actions"
-import { SurveyForm, type Option, type SurveyFormValues } from "../_components/survey-form"
+import { SurveyForm, type SurveyFormValues } from "../_components/survey-form"
 
 export const dynamic = "force-dynamic"
 
@@ -18,17 +18,18 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export default async function SurveyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
-  const [surveyRes, projectsRes] = await Promise.all([
-    supabase.from("solar_surveys").select("*, project:projects(name)").eq("id", id).maybeSingle(),
-    supabase.from("projects").select("id,name").order("created_at", { ascending: false }),
-  ])
-  const survey = surveyRes.data
+  const { data: survey } = await supabase
+    .from("solar_surveys")
+    .select("*, project:projects(name)")
+    .eq("id", id)
+    .maybeSingle()
+
   if (!survey) notFound()
-  const projects: Option[] = (projectsRes.data ?? []).map((p) => ({ id: p.id, label: p.name }))
+  const projectId = survey.project_id
+
   const defaultValues: Partial<SurveyFormValues> = {
     title: survey.title,
     status: survey.status as SurveyFormValues["status"],
-    projectId: survey.project_id ?? "none",
     scheduledDate: survey.scheduled_date ?? "",
     completedDate: survey.completed_date ?? "",
     roofType: survey.roof_type ?? "",
@@ -43,13 +44,13 @@ export default async function SurveyDetailPage({ params }: { params: Promise<{ i
 
   async function action(values: SurveyFormValues) {
     "use server"
-    return updateSurvey(id, values)
+    return updateSurvey(id, projectId, values)
   }
 
   return (
     <div className="space-y-6">
       <PageHeader title={survey.title} description={survey.project?.name ?? "Solar survey"}>
-        <Button variant="outline" render={<Link href="/surveys" />}><ArrowLeft /> Back</Button>
+        <Button variant="outline" render={<Link href={`/projects/${survey.project_id}`} />}><ArrowLeft /> Back to project</Button>
       </PageHeader>
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-1">
@@ -65,7 +66,7 @@ export default async function SurveyDetailPage({ params }: { params: Promise<{ i
         </Card>
         <Card className="lg:col-span-2">
           <CardHeader><CardTitle className="text-base">Edit survey</CardTitle></CardHeader>
-          <CardContent><SurveyForm projects={projects} defaultValues={defaultValues} action={action} submitLabel="Save survey" /></CardContent>
+          <CardContent><SurveyForm defaultValues={defaultValues} action={action} submitLabel="Save survey" /></CardContent>
         </Card>
       </div>
     </div>

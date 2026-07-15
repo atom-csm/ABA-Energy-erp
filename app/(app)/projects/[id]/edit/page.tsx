@@ -4,7 +4,6 @@ import { ArrowLeft } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/server"
 import { requireOrgContext } from "@/lib/auth"
-import { satangToBaht } from "@/lib/money"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,7 +27,7 @@ export default async function EditProjectPage({
 
   const { data: project } = await supabase
     .from("projects")
-    .select("id, name, client_id, stage, deadline, budget_satang, owner, installation_start_date, installation_end_date, installation_crew, deposit_received, handover_completed, warranty_registered")
+    .select("id, name, client_id, stage, deadline, owner, installation_start_date, installation_end_date, installation_crew, deposit_received, handover_completed, warranty_registered")
     .eq("id", id)
     .maybeSingle()
 
@@ -45,8 +44,6 @@ export default async function EditProjectPage({
     clientId: project.client_id ?? "none",
     stage: project.stage,
     deadline: project.deadline ?? "",
-    budgetBaht:
-      project.budget_satang != null ? satangToBaht(project.budget_satang) : 0,
     owner: project.owner ?? "",
     installationStartDate: project.installation_start_date ?? "",
     installationEndDate: project.installation_end_date ?? "",

@@ -115,6 +115,19 @@ test.describe("Project detail — pipeline (CR-001 ST-7)", () => {
     await expect(page.getByText(PROJECT_NAME)).toBeVisible()
   })
 
+  test("surveys section links '+ New survey' with a ?projectId= prefill (surveys folded into Projects)", async ({
+    page,
+  }) => {
+    await loginDemo(page)
+    await page.goto(`/projects/${PROJECT_ID}`)
+
+    const newSurveyLink = page.getByRole("link", { name: /new survey/i })
+    await expect(newSurveyLink).toHaveAttribute(
+      "href",
+      `/surveys/new?projectId=${PROJECT_ID}`
+    )
+  })
+
   test("media section renders the upload control for the project's current stage", async ({
     page,
   }) => {

@@ -1086,7 +1086,6 @@ export type Database = {
       }
       projects: {
         Row: {
-          budget_satang: number | null
           client_id: string | null
           created_at: string
           currency: string
@@ -1115,7 +1114,6 @@ export type Database = {
           warranty_registered: boolean
         }
         Insert: {
-          budget_satang?: number | null
           client_id?: string | null
           created_at?: string
           currency?: string
@@ -1144,7 +1142,6 @@ export type Database = {
           warranty_registered?: boolean
         }
         Update: {
-          budget_satang?: number | null
           client_id?: string | null
           created_at?: string
           currency?: string
@@ -1459,7 +1456,7 @@ export type Database = {
           meter_phase: string | null
           org_id: string
           photo_folder_url: string | null
-          project_id: string | null
+          project_id: string
           result_summary: string | null
           roof_area_sqm: number | null
           roof_type: string | null
@@ -1478,7 +1475,7 @@ export type Database = {
           meter_phase?: string | null
           org_id: string
           photo_folder_url?: string | null
-          project_id?: string | null
+          project_id: string
           result_summary?: string | null
           roof_area_sqm?: number | null
           roof_type?: string | null

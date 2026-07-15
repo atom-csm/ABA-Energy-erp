@@ -11,7 +11,6 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -58,7 +57,6 @@ const FormSchema = z.object({
     "archive",
   ]),
   deadline: z.string(),
-  budgetBaht: z.coerce.number().min(0, "Budget cannot be negative"),
   owner: z.string(),
   installationStartDate: z.string(),
   installationEndDate: z.string(),
@@ -91,7 +89,6 @@ export function ProjectForm({
       clientId: NONE,
       stage: "electric_bill_collection",
       deadline: "",
-      budgetBaht: 0,
       owner: "",
       installationStartDate: "",
       installationEndDate: "",
@@ -127,7 +124,7 @@ export function ProjectForm({
           )}
         />
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-3">
           <FormField
             control={form.control}
             name="clientId"
@@ -207,30 +204,6 @@ export function ProjectForm({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="budgetBaht"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Budget (THB)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    inputMode="decimal"
-                    name={field.name}
-                    ref={field.ref}
-                    onBlur={field.onBlur}
-                    value={(field.value as number | string | undefined) ?? ""}
-                    onChange={field.onChange}
-                  />
-                </FormControl>
-                <FormDescription>Total project budget in baht.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
 
         <FormField
