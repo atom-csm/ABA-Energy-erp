@@ -374,3 +374,47 @@ insert into subscriptions (id, org_id, client_id, project_id, name, amount_satan
   ('80000000-0000-0000-0000-000000000001','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000003','e0000000-0000-0000-0000-000000000003','Lanna EdTech — monthly support', 3500000, 'monthly','active', date_trunc('month', current_date)::date, current_date + 27, date_trunc('month', current_date)::date, true, 'Monthly support retainer'),
   ('80000000-0000-0000-0000-000000000002','a0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002',null,                                   'Krua Thai — automation retainer', 4000000, 'monthly','active', current_date, current_date + 30, null, true, 'Monthly automation retainer')
 on conflict (id) do nothing;
+
+-- ── CR-002: Parts catalog seeded from the reference BOQ (5 kW on-grid) ──────
+-- Identity fields only — no selling prices, no supplier prices (Max enters
+-- real pricing through the UI). Categories mirror the BOQ sections A–G.
+insert into parts (org_id, sku, name, brand_model, category, unit, phase_compat, remark) values
+  -- A. Main equipment — PV modules & inverter
+  ('a0000000-0000-0000-0000-000000000001','PV-LONGI-650',  'PV Module (N-type, Tier-1)',                    'Longi Hi-MO X10 (650W)',                                'pv_modules_inverter','pc',  'both',    '8 × 650W = 5.2 kWp DC'),
+  ('a0000000-0000-0000-0000-000000000001','INV-HW-5K-1P',  'On-Grid Inverter — 1-phase',                    'Huawei SUN2000-5K-LB0',                                 'pv_modules_inverter','set', '1_phase', 'Built-in DC switch / AFCI / SPD'),
+  ('a0000000-0000-0000-0000-000000000001','MON-HW-DONGLE', 'Smart Dongle (monitoring)',                     'Huawei SDongleA WLAN-FE',                               'pv_modules_inverter','pc',  'both',    'FusionSolar app'),
+  ('a0000000-0000-0000-0000-000000000001','SEN-HW-DTSU666','Smart Power Sensor 1-phase',                    'Huawei DTSU666-H',                                      'pv_modules_inverter','pc',  '1_phase', 'Export / anti-reverse meter'),
+  ('a0000000-0000-0000-0000-000000000001','OPT-HW-600W',   'Huawei Smart PV Optimizer',                     'Huawei SUN2000-600W-P',                                 'pv_modules_inverter','pc',  '1_phase', 'Optional'),
+  -- B. Mounting structure — select ONE kit per roof type
+  ('a0000000-0000-0000-0000-000000000001','MNT-METAL',     'Mounting Kit — Metal Sheet roof',               'AL rail + mid/end clamp + L-foot + splice + SUS bolt',  'mounting_structure', 'set', 'both',    'เลือกตามหลังคา'),
+  ('a0000000-0000-0000-0000-000000000001','MNT-TILE',      'Mounting Kit — Tile roof (CPAC/Monier)',        'Adjustable roof hook + rail + clamps',                  'mounting_structure', 'set', 'both',    'เลือกตามหลังคา'),
+  ('a0000000-0000-0000-0000-000000000001','MNT-FLAT',      'Mounting Kit — Concrete / Flat roof',           'Tilt-up triangle 10–15° + rail + chem anchor',          'mounting_structure', 'set', 'both',    'เลือกตามหลังคา'),
+  -- C. DC side
+  ('a0000000-0000-0000-0000-000000000001','CAB-DC4-RED',   'Solar DC Cable PV1-F 4mm² (TÜV) — Red',         'UV-rated solar cable',                                  'dc_side',            'm',   'both',    null),
+  ('a0000000-0000-0000-0000-000000000001','CAB-DC4-BLK',   'Solar DC Cable PV1-F 4mm² (TÜV) — Black',       'UV-rated solar cable',                                  'dc_side',            'm',   'both',    null),
+  ('a0000000-0000-0000-0000-000000000001','CON-MC4',       'MC4 Connector (pair)',                          'Stäubli-compatible, 1500V',                             'dc_side',            'pair','both',    null),
+  ('a0000000-0000-0000-0000-000000000001','BOX-DC-COMB',   'DC Combiner / Isolator Box',                    'DC isolator 1000V + DC SPD Type 2 + fuse',              'dc_side',            'set', 'both',    'Array DC protection'),
+  -- D. AC side
+  ('a0000000-0000-0000-0000-000000000001','BRK-MCB-2P32',  'AC Breaker MCB 2P 32A',                         'CHINT NXB-63 2P 40A AC230V Type C',                     'ac_side',            'pc',  '1_phase', 'Inverter AC output'),
+  ('a0000000-0000-0000-0000-000000000001','CAB-AC-1P',     'AC Cable set (1-phase)',                        'THW 6mm² (L,N) + 6mm² G, ~10m / Yazaki',                'ac_side',            'set', '1_phase', 'Inverter → MDB'),
+  ('a0000000-0000-0000-0000-000000000001','SPD-AC-T2',     'AC Surge Protector (SPD Type 2)',               'At MDB / consumer unit',                                'ac_side',            'pc',  'both',    'Recommended'),
+  -- E. Earthing / grounding
+  ('a0000000-0000-0000-0000-000000000001','GND-ROD',       'Ground Rod, copper-bonded 5/8" × 2.4m',         null,                                                    'earthing_grounding', 'pc',  'both',    'รวม Ground Pit'),
+  ('a0000000-0000-0000-0000-000000000001','GND-WIRE-10',   'Ground Wire THW-G 10mm² (green/yellow)',        'Yazaki',                                                'earthing_grounding', 'm',   'both',    null),
+  ('a0000000-0000-0000-0000-000000000001','GND-CLAMP',     'Ground Rod Clamp / connector',                  null,                                                    'earthing_grounding', 'pc',  'both',    null),
+  ('a0000000-0000-0000-0000-000000000001','GND-LUG',       'Equipotential bonding lug',                     'Module frame & rail grounding',                         'earthing_grounding', 'pc',  'both',    null),
+  -- F. Conduit / BOS / misc
+  ('a0000000-0000-0000-0000-000000000001','CND-EMT-34',    'EMT Conduit 3/4" (มอก.) + fittings',            null,                                                    'conduit_bos_misc',   'm',   'both',    'AC/DC routing — เลือกตามสเปคท่อ'),
+  ('a0000000-0000-0000-0000-000000000001','CND-IMC-34',    'IMC Conduit 3/4" (มอก.) + fittings',            null,                                                    'conduit_bos_misc',   'm',   'both',    'AC/DC routing — เลือกตามสเปคท่อ'),
+  ('a0000000-0000-0000-0000-000000000001','CND-FLEX',      'Flexible / EMT conduit (exposed runs)',         null,                                                    'conduit_bos_misc',   'm',   'both',    'เลือกตามสเปคท่อ'),
+  ('a0000000-0000-0000-0000-000000000001','CND-TRAY',      'Cable tray / wireway',                          'If required',                                           'conduit_bos_misc',   'm',   'both',    'Optional'),
+  ('a0000000-0000-0000-0000-000000000001','MISC-TIES',     'Cable ties (UV), clips, JB, PV warning labels', 'Dual-supply signage',                                   'conduit_bos_misc',   'lot', 'both',    null),
+  ('a0000000-0000-0000-0000-000000000001','MISC-CONS',     'Consumables (lugs, terminals, tape, screws)',   null,                                                    'conduit_bos_misc',   'lot', 'both',    null),
+  -- G. Labor & services
+  ('a0000000-0000-0000-0000-000000000001','LAB-INSTALL',   'Installation labor',                            '1 skilled + 2 helpers × ~3 days',                       'labor_services',     'lot', 'both',    null),
+  ('a0000000-0000-0000-0000-000000000001','SVC-ENG-PE',    'Engineering: SLD + PE (กว.) stamp + drawings',  null,                                                    'labor_services',     'lot', 'both',    'Required for PEA'),
+  ('a0000000-0000-0000-0000-000000000001','SVC-PEA-FILE',  'PEA net-metering / parallel-connection filing', 'เอกสารขนานไฟ กฟภ.',                                     'labor_services',     'lot', 'both',    null),
+  ('a0000000-0000-0000-0000-000000000001','SVC-TEST',      'Testing & Commissioning',                       'Insulation, earth, IV curve, function',                 'labor_services',     'lot', 'both',    null),
+  ('a0000000-0000-0000-0000-000000000001','SVC-TRANSPORT', 'Transport / logistics',                         null,                                                    'labor_services',     'lot', 'both',    null),
+  ('a0000000-0000-0000-0000-000000000001','SVC-LIFT',      'Lifting / scaffolding / safety',                '2-storey if applicable',                                'labor_services',     'lot', 'both',    'Optional per site')
+on conflict (org_id, sku) do nothing;
