@@ -172,7 +172,13 @@ export default async function QuoteDetailPage({
               variant="outline"
               render={<a href={`/quotes/${quote.id}/pdf`} target="_blank" rel="noreferrer" />}
             >
-              <Download /> Download PDF
+              <Download /> PDF
+            </Button>
+            <Button
+              variant="outline"
+              render={<a href={`/quotes/${quote.id}/docx`} />}
+            >
+              <Download /> Word
             </Button>
             <EmailQuoteButton quoteId={quote.id} />
             <SaveAsTemplateButton quoteId={quote.id} />
