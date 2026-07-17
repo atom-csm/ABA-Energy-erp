@@ -17,6 +17,7 @@ export type Capability =
   | "template:manage" // create/edit/delete automation templates
   | "quote:convert" // convert a quote into an invoice
   | "quote:delete"
+  | "part:delete" // delete parts, suppliers, and supplier prices from the catalog
   | "invoice:delete"
   | "cost:delete"
   | "subscription:manage" // generate-now / delete a subscription
@@ -38,6 +39,7 @@ export const CAPABILITY_ROLES: Record<Capability, Role[]> = {
   "template:manage": ALL_STAFF,
   "quote:convert": ALL_STAFF,
   "quote:delete": ALL_STAFF,
+  "part:delete": ALL_STAFF,
   "invoice:delete": ALL_STAFF,
   "cost:delete": ALL_STAFF,
   "subscription:manage": ALL_STAFF,
