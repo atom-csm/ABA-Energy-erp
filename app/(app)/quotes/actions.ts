@@ -12,6 +12,7 @@ import {
   subtotalSatang,
   documentTotalSatang,
 } from "@/lib/metrics/line-items"
+import { applyAdjustment } from "@/lib/quotes/pricing"
 import { writeAudit } from "@/lib/audit"
 import { todayISO } from "@/lib/dates"
 import { nextDocumentNumber } from "@/lib/documents/numbering"
@@ -65,13 +66,16 @@ async function recomputeQuoteTotals(
 
   const { data: items, error: itemsErr } = await supabase
     .from("quote_items")
-    .select("amount_satang")
+    .select("amount_satang, parent_item_id")
     .eq("quote_id", quoteId)
     .eq("org_id", orgId)
 
   if (itemsErr) return itemsErr.message
 
-  const subtotal = subtotalSatang(items ?? [])
+  // Bundle children are excluded — the parent's amount is authoritative.
+  const subtotal = subtotalSatang(
+    (items ?? []).filter((it) => it.parent_item_id === null)
+  )
   const total = documentTotalSatang(subtotal, quote.discount_satang)
 
   const { error: updErr } = await supabase
@@ -385,6 +389,240 @@ export async function deleteQuoteItem(
   if (recomputeErr) return { error: recomputeErr }
 
   revalidatePath(`/quotes/${item.quote_id}`)
+  return {}
+}
+
+// ---------------------------------------------------------------------------
+// Catalog lines & bundles (CR-002 ST-4)
+// ---------------------------------------------------------------------------
+
+/** Shared "quote exists and isn't converted" guard for item mutations. */
+async function requireEditableQuote(
+  supabase: Awaited<ReturnType<typeof createSupabaseClient>>,
+  orgId: string,
+  quoteId: string
+): Promise<string | null> {
+  const { data: quote, error } = await supabase
+    .from("quotes")
+    .select("status")
+    .eq("id", quoteId)
+    .eq("org_id", orgId)
+    .maybeSingle()
+
+  if (error) return error.message
+  if (!quote) return "Quote not found"
+  if (quote.status === "converted") return "This quote is converted and locked"
+  return null
+}
+
+const AddPartQuoteItem = z.object({
+  quote_id: z.string().uuid(),
+  part_id: z.string().uuid(),
+  supplier_price_id: optionalId,
+  parent_item_id: optionalId,
+  quantity: z.coerce.number().positive("Quantity must be greater than 0"),
+  adjustmentPct: z.coerce.number().min(-100).max(1000).optional(),
+})
+
+/**
+ * Add a line from the parts catalog. The part's default selling price is
+ * snapshotted as the base, the optional % adjustment computes the actual
+ * unit price, and the chosen supplier's ex-VAT cost is snapshotted for GP%.
+ * Everything is resolved server-side so the client can't fabricate a cost.
+ */
+export async function addPartQuoteItem(
+  input: z.input<typeof AddPartQuoteItem>
+): Promise<{ error?: string }> {
+  const ctx = await requireOrgContext()
+  const parsed = AddPartQuoteItem.safeParse(input)
+  if (!parsed.success) return { error: "Invalid input" }
+  const d = parsed.data
+
+  const supabase = await createSupabaseClient()
+
+  const lockErr = await requireEditableQuote(supabase, ctx.orgId, d.quote_id)
+  if (lockErr) return { error: lockErr }
+
+  const { data: part, error: partErr } = await supabase
+    .from("parts")
+    .select(
+      "id, name, brand_model, unit, default_selling_price_satang, part_supplier_prices(id, unit_cost_ex_vat_satang, is_preferred)"
+    )
+    .eq("id", d.part_id)
+    .eq("org_id", ctx.orgId)
+    .maybeSingle()
+
+  if (partErr) return { error: partErr.message }
+  if (!part) return { error: "Part not found" }
+
+  // Supplier cost snapshot: the requested price row, else the preferred one,
+  // else the only/first one, else no cost (GP% just won't show).
+  const prices = part.part_supplier_prices
+  const chosen = d.supplier_price_id
+    ? prices.find((p) => p.id === d.supplier_price_id)
+    : (prices.find((p) => p.is_preferred) ?? prices[0])
+  if (d.supplier_price_id && !chosen) {
+    return { error: "Supplier price not found for this part" }
+  }
+
+  // One level deep: a child's parent must be a top-level line on this quote.
+  if (d.parent_item_id) {
+    const { data: parentItem, error: parentItemErr } = await supabase
+      .from("quote_items")
+      .select("id, quote_id, parent_item_id")
+      .eq("id", d.parent_item_id)
+      .eq("org_id", ctx.orgId)
+      .maybeSingle()
+    if (parentItemErr) return { error: parentItemErr.message }
+    if (!parentItem || parentItem.quote_id !== d.quote_id) {
+      return { error: "Bundle not found on this quote" }
+    }
+    if (parentItem.parent_item_id !== null) {
+      return { error: "Bundles can only be one level deep" }
+    }
+  }
+
+  const base = part.default_selling_price_satang ?? 0
+  const adjustmentPct = d.adjustmentPct ?? null
+  const unitPriceSatang = applyAdjustment(base, adjustmentPct)
+
+  const { count } = await supabase
+    .from("quote_items")
+    .select("id", { count: "exact", head: true })
+    .eq("quote_id", d.quote_id)
+    .eq("org_id", ctx.orgId)
+
+  const { error } = await supabase.from("quote_items").insert({
+    org_id: ctx.orgId,
+    quote_id: d.quote_id,
+    description: part.brand_model ? `${part.name} — ${part.brand_model}` : part.name,
+    quantity: d.quantity,
+    unit: part.unit,
+    unit_price_satang: unitPriceSatang,
+    amount_satang: lineAmountSatang(d.quantity, unitPriceSatang),
+    position: count ?? 0,
+    part_id: part.id,
+    part_supplier_price_id: chosen?.id ?? null,
+    unit_cost_satang: chosen?.unit_cost_ex_vat_satang ?? null,
+    base_unit_price_satang: base,
+    adjustment_pct: adjustmentPct,
+    parent_item_id: d.parent_item_id,
+  })
+
+  if (error) return { error: error.message }
+
+  const recomputeErr = await recomputeQuoteTotals(supabase, ctx.orgId, d.quote_id)
+  if (recomputeErr) return { error: recomputeErr }
+
+  revalidatePath(`/quotes/${d.quote_id}`)
+  return {}
+}
+
+const AddBundleItem = z.object({
+  quote_id: z.string().uuid(),
+  description: z.string().trim().min(1, "Description is required"),
+  unitPriceBaht: z.coerce.number().min(0),
+})
+
+/**
+ * Add a bundle parent line — the one priced row the customer sees (e.g.
+ * "Solar Rooftop System — Huawei 5.2 kW 1-phase"), with catalog parts added
+ * under it as unpriced component lines.
+ */
+export async function addBundleItem(
+  input: z.input<typeof AddBundleItem>
+): Promise<{ error?: string }> {
+  const ctx = await requireOrgContext()
+  const parsed = AddBundleItem.safeParse(input)
+  if (!parsed.success) return { error: "Invalid input" }
+  const d = parsed.data
+
+  const supabase = await createSupabaseClient()
+
+  const lockErr = await requireEditableQuote(supabase, ctx.orgId, d.quote_id)
+  if (lockErr) return { error: lockErr }
+
+  const { count } = await supabase
+    .from("quote_items")
+    .select("id", { count: "exact", head: true })
+    .eq("quote_id", d.quote_id)
+    .eq("org_id", ctx.orgId)
+
+  const unitPriceSatang = bahtToSatang(d.unitPriceBaht)
+  const { error } = await supabase.from("quote_items").insert({
+    org_id: ctx.orgId,
+    quote_id: d.quote_id,
+    description: d.description,
+    quantity: 1,
+    unit: "ชุด",
+    unit_price_satang: unitPriceSatang,
+    amount_satang: unitPriceSatang,
+    position: count ?? 0,
+  })
+
+  if (error) return { error: error.message }
+
+  const recomputeErr = await recomputeQuoteTotals(supabase, ctx.orgId, d.quote_id)
+  if (recomputeErr) return { error: recomputeErr }
+
+  revalidatePath(`/quotes/${d.quote_id}`)
+  return {}
+}
+
+/**
+ * Set a bundle parent's price to the sum of its children's amounts (each
+ * child's qty × its catalog-derived unit price) — the "sum children, then
+ * adjust by hand if needed" helper.
+ */
+export async function setBundlePriceFromChildren(
+  itemId: string
+): Promise<{ error?: string }> {
+  const ctx = await requireOrgContext()
+
+  const supabase = await createSupabaseClient()
+
+  const { data: parent, error: findErr } = await supabase
+    .from("quote_items")
+    .select("id, quote_id, parent_item_id")
+    .eq("id", itemId)
+    .eq("org_id", ctx.orgId)
+    .maybeSingle()
+
+  if (findErr) return { error: findErr.message }
+  if (!parent) return { error: "Line item not found" }
+  if (parent.parent_item_id !== null) return { error: "Not a bundle line" }
+
+  const lockErr = await requireEditableQuote(supabase, ctx.orgId, parent.quote_id)
+  if (lockErr) return { error: lockErr }
+
+  const { data: children, error: childErr } = await supabase
+    .from("quote_items")
+    .select("amount_satang")
+    .eq("parent_item_id", parent.id)
+    .eq("org_id", ctx.orgId)
+
+  if (childErr) return { error: childErr.message }
+  if (!children || children.length === 0) {
+    return { error: "This bundle has no component lines yet" }
+  }
+
+  const total = children.reduce((acc, c) => acc + c.amount_satang, 0)
+  const { error } = await supabase
+    .from("quote_items")
+    .update({ unit_price_satang: total, amount_satang: total })
+    .eq("id", parent.id)
+    .eq("org_id", ctx.orgId)
+
+  if (error) return { error: error.message }
+
+  const recomputeErr = await recomputeQuoteTotals(
+    supabase,
+    ctx.orgId,
+    parent.quote_id
+  )
+  if (recomputeErr) return { error: recomputeErr }
+
+  revalidatePath(`/quotes/${parent.quote_id}`)
   return {}
 }
 
