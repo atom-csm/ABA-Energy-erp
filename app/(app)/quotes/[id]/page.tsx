@@ -38,6 +38,10 @@ import { DeleteQuoteItemButton } from "../_components/delete-quote-item-button"
 import { QuoteStatusControls } from "../_components/quote-status-controls"
 import { QuoteStatusBadge } from "../_components/quote-status-badge"
 import { EmailQuoteButton } from "../_components/email-quote-button"
+import {
+  DuplicateQuoteButton,
+  SaveAsTemplateButton,
+} from "../_components/duplicate-buttons"
 import type { Option } from "../_components/form-fields"
 
 export const dynamic = "force-dynamic"
@@ -65,7 +69,7 @@ export default async function QuoteDetailPage({
       supabase
         .from("quotes")
         .select(
-          "id, number, status, issue_date, valid_until, subtotal_satang, discount_satang, total_satang, system_size_kwp, panel_model, inverter_model, battery_option, warranty_years, payback_years, proposal_assumptions, included_scope, excluded_scope, notes, client_id, project_id, converted_invoice_id, clients(name), projects(name)"
+          "id, number, status, issue_date, valid_until, subtotal_satang, discount_satang, total_satang, system_size_kwp, panel_model, inverter_model, battery_option, warranty_years, payback_years, proposal_assumptions, included_scope, excluded_scope, notes, client_id, project_id, converted_invoice_id, is_template, clients(name), projects(name)"
         )
         .eq("id", id)
         .maybeSingle(),
@@ -158,16 +162,27 @@ export default async function QuoteDetailPage({
     <div className="space-y-6">
       <PageHeader
         title={quote.number}
-        description={quote.clients?.name ?? "Quote"}
+        description={
+          quote.is_template ? "Quote template" : (quote.clients?.name ?? "Quote")
+        }
       >
+        {quote.is_template ? null : (
+          <>
+            <Button
+              variant="outline"
+              render={<a href={`/quotes/${quote.id}/pdf`} target="_blank" rel="noreferrer" />}
+            >
+              <Download /> Download PDF
+            </Button>
+            <EmailQuoteButton quoteId={quote.id} />
+            <SaveAsTemplateButton quoteId={quote.id} />
+          </>
+        )}
+        <DuplicateQuoteButton quoteId={quote.id} />
         <Button
           variant="outline"
-          render={<a href={`/quotes/${quote.id}/pdf`} target="_blank" rel="noreferrer" />}
+          render={<Link href={quote.is_template ? "/quotes/templates" : "/quotes"} />}
         >
-          <Download /> Download PDF
-        </Button>
-        <EmailQuoteButton quoteId={quote.id} />
-        <Button variant="outline" render={<Link href="/quotes" />}>
           <ArrowLeft /> Back
         </Button>
       </PageHeader>
@@ -219,12 +234,16 @@ export default async function QuoteDetailPage({
             </>
           ) : null}
 
-          <Separator />
-          <QuoteStatusControls
-            quoteId={quote.id}
-            status={quote.status}
-            canConvert={canConvert}
-          />
+          {quote.is_template ? null : (
+            <>
+              <Separator />
+              <QuoteStatusControls
+                quoteId={quote.id}
+                status={quote.status}
+                canConvert={canConvert}
+              />
+            </>
+          )}
         </CardContent>
       </Card>
 

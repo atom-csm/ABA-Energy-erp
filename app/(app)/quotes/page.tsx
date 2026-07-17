@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FileText, FilePlus2 } from "lucide-react"
+import { FileText, FilePlus2, BookMarked } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/server"
 import { requireOrgContext } from "@/lib/auth"
@@ -32,6 +32,7 @@ export default async function QuotesPage() {
     .select(
       "id, number, status, total_satang, valid_until, issue_date, system_size_kwp, panel_model, payback_years, clients(name)"
     )
+    .eq("is_template", false)
     .order("issue_date", { ascending: false })
 
   const quotes = data ?? []
@@ -42,6 +43,9 @@ export default async function QuotesPage() {
         title="Quotes"
         description="Draft proposals, track acceptance, and convert to invoices."
       >
+        <Button variant="outline" render={<Link href="/quotes/templates" />}>
+          <BookMarked /> Templates
+        </Button>
         <Button render={<Link href="/quotes/new" />}>
           <FilePlus2 /> New quote
         </Button>

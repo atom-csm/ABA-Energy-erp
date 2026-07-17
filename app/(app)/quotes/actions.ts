@@ -627,6 +627,220 @@ export async function setBundlePriceFromChildren(
 }
 
 // ---------------------------------------------------------------------------
+// Duplicate & templates (CR-002 ST-5)
+// ---------------------------------------------------------------------------
+
+/**
+ * Copy a quote (or template) into a new draft: fresh auto number, today's
+ * issue date, items copied 1:1 including part refs, cost snapshots, %
+ * adjustments, and bundle structure (parents first, then children remapped).
+ * Templates are numbered TPL-… so they don't consume real QUO numbers.
+ */
+async function copyQuote(
+  supabase: Awaited<ReturnType<typeof createSupabaseClient>>,
+  ctx: { orgId: string; userId: string },
+  sourceId: string,
+  opts: {
+    isTemplate: boolean
+    clientId: string | null
+    projectId: string | null
+  }
+): Promise<{ error?: string; id?: string }> {
+  const { data: source, error: srcErr } = await supabase
+    .from("quotes")
+    .select(
+      "discount_satang, subtotal_satang, total_satang, notes, terms, vat_mode, deposit_pct, system_size_kwp, panel_model, inverter_model, battery_option, warranty_years, payback_years, proposal_assumptions, included_scope, excluded_scope"
+    )
+    .eq("id", sourceId)
+    .eq("org_id", ctx.orgId)
+    .maybeSingle()
+
+  if (srcErr) return { error: srcErr.message }
+  if (!source) return { error: "Quote not found" }
+
+  const { data: items, error: itemsErr } = await supabase
+    .from("quote_items")
+    .select(
+      "id, description, quantity, unit, unit_price_satang, amount_satang, position, parent_item_id, part_id, part_supplier_price_id, unit_cost_satang, base_unit_price_satang, adjustment_pct"
+    )
+    .eq("quote_id", sourceId)
+    .eq("org_id", ctx.orgId)
+    .order("position", { ascending: true })
+
+  if (itemsErr) return { error: itemsErr.message }
+
+  const year = Number(todayISO().slice(0, 4))
+  const prefix = opts.isTemplate ? "TPL" : "QUO"
+  const { data: existing } = await supabase
+    .from("quotes")
+    .select("number")
+    .eq("org_id", ctx.orgId)
+  const number = nextDocumentNumber(
+    prefix,
+    (existing ?? []).map((r) => r.number),
+    year
+  )
+
+  const { data: created, error: insErr } = await supabase
+    .from("quotes")
+    .insert({
+      org_id: ctx.orgId,
+      client_id: opts.clientId,
+      project_id: opts.projectId,
+      number,
+      status: "draft",
+      issue_date: todayISO(),
+      valid_until: null,
+      is_template: opts.isTemplate,
+      owner: ctx.userId,
+      discount_satang: source.discount_satang,
+      subtotal_satang: source.subtotal_satang,
+      total_satang: source.total_satang,
+      notes: source.notes,
+      terms: source.terms,
+      vat_mode: source.vat_mode,
+      deposit_pct: source.deposit_pct,
+      system_size_kwp: source.system_size_kwp,
+      panel_model: source.panel_model,
+      inverter_model: source.inverter_model,
+      battery_option: source.battery_option,
+      warranty_years: source.warranty_years,
+      payback_years: source.payback_years,
+      proposal_assumptions: source.proposal_assumptions,
+      included_scope: source.included_scope,
+      excluded_scope: source.excluded_scope,
+    })
+    .select("id")
+    .single()
+
+  if (insErr) return { error: insErr.message }
+
+  const allItems = items ?? []
+  const parents = allItems.filter((it) => it.parent_item_id === null)
+  const children = allItems.filter((it) => it.parent_item_id !== null)
+
+  const itemPayload = (it: (typeof allItems)[number]) => ({
+    org_id: ctx.orgId,
+    quote_id: created.id,
+    description: it.description,
+    quantity: it.quantity,
+    unit: it.unit,
+    unit_price_satang: it.unit_price_satang,
+    amount_satang: it.amount_satang,
+    position: it.position,
+    part_id: it.part_id,
+    part_supplier_price_id: it.part_supplier_price_id,
+    unit_cost_satang: it.unit_cost_satang,
+    base_unit_price_satang: it.base_unit_price_satang,
+    adjustment_pct: it.adjustment_pct,
+  })
+
+  // Insert parents one-by-one: positions can collide after deletes, so the
+  // old→new id mapping has to come from each insert directly.
+  const idMap = new Map<string, string>()
+  for (const parent of parents) {
+    const { data: inserted, error: parErr } = await supabase
+      .from("quote_items")
+      .insert(itemPayload(parent))
+      .select("id")
+      .single()
+
+    if (parErr) return { error: parErr.message }
+    idMap.set(parent.id, inserted.id)
+  }
+
+  if (children.length > 0) {
+    const { error: childErr } = await supabase.from("quote_items").insert(
+      children.map((it) => ({
+        ...itemPayload(it),
+        parent_item_id: idMap.get(it.parent_item_id as string) ?? null,
+      }))
+    )
+    if (childErr) return { error: childErr.message }
+  }
+
+  return { id: created.id }
+}
+
+export async function duplicateQuote(id: string): Promise<{ error?: string }> {
+  const ctx = await requireOrgContext()
+  const supabase = await createSupabaseClient()
+
+  const { data: source } = await supabase
+    .from("quotes")
+    .select("client_id, project_id, is_template")
+    .eq("id", id)
+    .eq("org_id", ctx.orgId)
+    .maybeSingle()
+  if (!source) return { error: "Quote not found" }
+
+  const res = await copyQuote(supabase, ctx, id, {
+    isTemplate: false,
+    clientId: source.client_id,
+    projectId: source.project_id,
+  })
+  if (res.error || !res.id) return { error: res.error ?? "Copy failed" }
+
+  revalidatePath("/quotes")
+  redirect(`/quotes/${res.id}`)
+}
+
+export async function saveQuoteAsTemplate(
+  id: string
+): Promise<{ error?: string }> {
+  const ctx = await requireOrgContext()
+  const supabase = await createSupabaseClient()
+
+  const res = await copyQuote(supabase, ctx, id, {
+    isTemplate: true,
+    clientId: null,
+    projectId: null,
+  })
+  if (res.error || !res.id) return { error: res.error ?? "Copy failed" }
+
+  revalidatePath("/quotes")
+  revalidatePath("/quotes/templates")
+  redirect(`/quotes/${res.id}`)
+}
+
+const CreateFromTemplate = z.object({
+  template_id: z.string().uuid(),
+  client_id: z.string().min(1, "Client is required"),
+  project_id: optionalId,
+})
+
+export async function createQuoteFromTemplate(
+  input: z.input<typeof CreateFromTemplate>
+): Promise<{ error?: string }> {
+  const ctx = await requireOrgContext()
+  const parsed = CreateFromTemplate.safeParse(input)
+  if (!parsed.success) return { error: "Invalid input" }
+  const d = parsed.data
+
+  const supabase = await createSupabaseClient()
+
+  const { data: template } = await supabase
+    .from("quotes")
+    .select("id, is_template")
+    .eq("id", d.template_id)
+    .eq("org_id", ctx.orgId)
+    .maybeSingle()
+  if (!template || !template.is_template) {
+    return { error: "Template not found" }
+  }
+
+  const res = await copyQuote(supabase, ctx, d.template_id, {
+    isTemplate: false,
+    clientId: d.client_id,
+    projectId: d.project_id,
+  })
+  if (res.error || !res.id) return { error: res.error ?? "Copy failed" }
+
+  revalidatePath("/quotes")
+  redirect(`/quotes/${res.id}`)
+}
+
+// ---------------------------------------------------------------------------
 // Status
 // ---------------------------------------------------------------------------
 
