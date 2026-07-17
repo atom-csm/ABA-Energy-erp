@@ -88,7 +88,7 @@ export default async function QuoteDetailPage({
   }))
 
   const defaultValues: QuoteFormValues = {
-    client_id: quote.client_id,
+    client_id: quote.client_id ?? "",
     project_id: quote.project_id ?? "",
     number: quote.number,
     issue_date: quote.issue_date ?? "",

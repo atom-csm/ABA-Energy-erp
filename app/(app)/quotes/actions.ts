@@ -462,6 +462,9 @@ export async function convertQuoteToInvoice(
   if (quote.converted_invoice_id) {
     return { error: "This quote has already been converted." }
   }
+  if (!quote.client_id) {
+    return { error: "This quote has no client, so it can't be converted." }
+  }
 
   const today = todayISO()
   const invoiceNumber = `INV-${quote.number}`

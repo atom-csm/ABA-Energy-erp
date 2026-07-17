@@ -35,6 +35,9 @@ export async function sendQuoteEmail(
     .maybeSingle()
 
   if (!quote) return { error: "Quote not found" }
+  if (!quote.client_id) {
+    return { error: "This quote has no client, so there is no one to email." }
+  }
 
   const { data: contact } = await supabase
     .from("contacts")

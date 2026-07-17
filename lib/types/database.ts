@@ -838,6 +838,126 @@ export type Database = {
           },
         ]
       }
+      part_supplier_prices: {
+        Row: {
+          created_at: string
+          effective_date: string
+          id: string
+          is_preferred: boolean
+          notes: string | null
+          org_id: string
+          part_id: string
+          supplier_id: string
+          unit_cost_ex_vat_satang: number
+          unit_cost_inc_vat_satang: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          effective_date?: string
+          id?: string
+          is_preferred?: boolean
+          notes?: string | null
+          org_id: string
+          part_id: string
+          supplier_id: string
+          unit_cost_ex_vat_satang: number
+          unit_cost_inc_vat_satang: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          effective_date?: string
+          id?: string
+          is_preferred?: boolean
+          notes?: string | null
+          org_id?: string
+          part_id?: string
+          supplier_id?: string
+          unit_cost_ex_vat_satang?: number
+          unit_cost_inc_vat_satang?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "part_supplier_prices_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "part_supplier_prices_part_id_fkey"
+            columns: ["part_id"]
+            isOneToOne: false
+            referencedRelation: "parts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "part_supplier_prices_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parts: {
+        Row: {
+          brand_model: string | null
+          category: Database["public"]["Enums"]["part_category"]
+          created_at: string
+          default_selling_price_satang: number | null
+          id: string
+          is_active: boolean
+          name: string
+          org_id: string
+          phase_compat: string | null
+          remark: string | null
+          sku: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          brand_model?: string | null
+          category?: Database["public"]["Enums"]["part_category"]
+          created_at?: string
+          default_selling_price_satang?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          org_id: string
+          phase_compat?: string | null
+          remark?: string | null
+          sku: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          brand_model?: string | null
+          category?: Database["public"]["Enums"]["part_category"]
+          created_at?: string
+          default_selling_price_satang?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          org_id?: string
+          phase_compat?: string | null
+          remark?: string | null
+          sku?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_satang: number
@@ -1188,38 +1308,59 @@ export type Database = {
       }
       quote_items: {
         Row: {
+          adjustment_pct: number | null
           amount_satang: number
+          base_unit_price_satang: number | null
           created_at: string
           description: string
           id: string
           org_id: string
+          parent_item_id: string | null
+          part_id: string | null
+          part_supplier_price_id: string | null
           position: number
           quantity: number
           quote_id: string
+          unit: string | null
+          unit_cost_satang: number | null
           unit_price_satang: number
           updated_at: string
         }
         Insert: {
+          adjustment_pct?: number | null
           amount_satang?: number
+          base_unit_price_satang?: number | null
           created_at?: string
           description: string
           id?: string
           org_id: string
+          parent_item_id?: string | null
+          part_id?: string | null
+          part_supplier_price_id?: string | null
           position?: number
           quantity?: number
           quote_id: string
+          unit?: string | null
+          unit_cost_satang?: number | null
           unit_price_satang?: number
           updated_at?: string
         }
         Update: {
+          adjustment_pct?: number | null
           amount_satang?: number
+          base_unit_price_satang?: number | null
           created_at?: string
           description?: string
           id?: string
           org_id?: string
+          parent_item_id?: string | null
+          part_id?: string | null
+          part_supplier_price_id?: string | null
           position?: number
           quantity?: number
           quote_id?: string
+          unit?: string | null
+          unit_cost_satang?: number | null
           unit_price_satang?: number
           updated_at?: string
         }
@@ -1229,6 +1370,27 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_items_parent_item_id_fkey"
+            columns: ["parent_item_id"]
+            isOneToOne: false
+            referencedRelation: "quote_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_items_part_id_fkey"
+            columns: ["part_id"]
+            isOneToOne: false
+            referencedRelation: "parts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_items_part_supplier_price_id_fkey"
+            columns: ["part_supplier_price_id"]
+            isOneToOne: false
+            referencedRelation: "part_supplier_prices"
             referencedColumns: ["id"]
           },
           {
@@ -1243,14 +1405,16 @@ export type Database = {
       quotes: {
         Row: {
           battery_option: string | null
-          client_id: string
+          client_id: string | null
           converted_invoice_id: string | null
           created_at: string
+          deposit_pct: number
           discount_satang: number
           excluded_scope: string | null
           id: string
           included_scope: string | null
           inverter_model: string | null
+          is_template: boolean
           issue_date: string
           notes: string | null
           number: string
@@ -1263,21 +1427,25 @@ export type Database = {
           status: Database["public"]["Enums"]["quote_status"]
           subtotal_satang: number
           system_size_kwp: number | null
+          terms: string | null
           total_satang: number
           updated_at: string
           valid_until: string | null
+          vat_mode: Database["public"]["Enums"]["quote_vat_mode"]
           warranty_years: number | null
         }
         Insert: {
           battery_option?: string | null
-          client_id: string
+          client_id?: string | null
           converted_invoice_id?: string | null
           created_at?: string
+          deposit_pct?: number
           discount_satang?: number
           excluded_scope?: string | null
           id?: string
           included_scope?: string | null
           inverter_model?: string | null
+          is_template?: boolean
           issue_date?: string
           notes?: string | null
           number: string
@@ -1290,21 +1458,25 @@ export type Database = {
           status?: Database["public"]["Enums"]["quote_status"]
           subtotal_satang?: number
           system_size_kwp?: number | null
+          terms?: string | null
           total_satang?: number
           updated_at?: string
           valid_until?: string | null
+          vat_mode?: Database["public"]["Enums"]["quote_vat_mode"]
           warranty_years?: number | null
         }
         Update: {
           battery_option?: string | null
-          client_id?: string
+          client_id?: string | null
           converted_invoice_id?: string | null
           created_at?: string
+          deposit_pct?: number
           discount_satang?: number
           excluded_scope?: string | null
           id?: string
           included_scope?: string | null
           inverter_model?: string | null
+          is_template?: boolean
           issue_date?: string
           notes?: string | null
           number?: string
@@ -1317,9 +1489,11 @@ export type Database = {
           status?: Database["public"]["Enums"]["quote_status"]
           subtotal_satang?: number
           system_size_kwp?: number | null
+          terms?: string | null
           total_satang?: number
           updated_at?: string
           valid_until?: string | null
+          vat_mode?: Database["public"]["Enums"]["quote_vat_mode"]
           warranty_years?: number | null
         }
         Relationships: [
@@ -1598,6 +1772,50 @@ export type Database = {
           },
         ]
       }
+      suppliers: {
+        Row: {
+          contact_name: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          org_id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          org_id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          org_id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       template_categories: {
         Row: {
           created_at: string
@@ -1729,6 +1947,15 @@ export type Database = {
         | "overdue"
         | "cancelled"
       outbound_status: "queued" | "delivered" | "failed"
+      part_category:
+        | "pv_modules_inverter"
+        | "mounting_structure"
+        | "dc_side"
+        | "ac_side"
+        | "earthing_grounding"
+        | "conduit_bos_misc"
+        | "labor_services"
+        | "other"
       payment_method:
         | "transfer"
         | "cash"
@@ -1752,6 +1979,7 @@ export type Database = {
         | "declined"
         | "expired"
         | "converted"
+      quote_vat_mode: "none" | "add_7"
       recurring_interval: "weekly" | "monthly" | "quarterly" | "yearly"
       reminder_channel: "line" | "email" | "inapp"
       reminder_status: "pending" | "sent" | "cancelled"
@@ -1908,6 +2136,16 @@ export const Constants = {
         "cancelled",
       ],
       outbound_status: ["queued", "delivered", "failed"],
+      part_category: [
+        "pv_modules_inverter",
+        "mounting_structure",
+        "dc_side",
+        "ac_side",
+        "earthing_grounding",
+        "conduit_bos_misc",
+        "labor_services",
+        "other",
+      ],
       payment_method: [
         "transfer",
         "cash",
@@ -1934,6 +2172,7 @@ export const Constants = {
         "expired",
         "converted",
       ],
+      quote_vat_mode: ["none", "add_7"],
       recurring_interval: ["weekly", "monthly", "quarterly", "yearly"],
       reminder_channel: ["line", "email", "inapp"],
       reminder_status: ["pending", "sent", "cancelled"],
