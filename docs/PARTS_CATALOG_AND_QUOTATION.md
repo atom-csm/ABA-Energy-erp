@@ -1,11 +1,15 @@
 # Change: Parts Pricing Catalog + Quotation-from-Parts (CR-002)
 
-Status: **decided — awaiting go-ahead, not yet implemented**. Nothing in this
-document has been built. Based on the reference BOQ
-(`6-7-69_BOQ_5kW_OnGrid_Solar_บ้านยาภานุช+optimizer.xlsx`) Max shared, which
-lays out exactly the shape of data this needs. Max reviewed the draft on
-2026-07-17 and resolved the two blocking questions (see "Decisions" below);
-the remaining points proceed on the flagged defaults.
+Status: **IMPLEMENTED — all 8 subtasks shipped to `dev` on 2026-07-17**
+(ST-1 `9aef247`, ST-3 `627d2eb`, ST-2 `64f71ca`, ST-8 `487d305`, ST-4
+`232c61b`, ST-5 `3c550d9`, ST-6 `7e36cf3`, ST-7 `6ae2473`). Based on the
+reference BOQ (`6-7-69_BOQ_5kW_OnGrid_Solar_บ้านยาภานุช+optimizer.xlsx`) and
+the real sent quotation TSD11026164. One implementation deviation: the DOCX
+export is generated programmatically with the `docx` library instead of
+porting the legacy docxtpl binary template — same fields and layout, no
+binary-template placeholder surgery. Company header/signer details for
+documents live as a constant in `lib/documents/thai-quote.ts`
+(`COMPANY_PROFILE`) pending an org-branding settings screen.
 
 ## Why
 
